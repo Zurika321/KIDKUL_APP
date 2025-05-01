@@ -11,7 +11,7 @@ import 'package:provider/provider.dart'; // 📦 Quản lý trạng thái (Provi
 import 'package:Kulbot/provider/provider.dart';
 // Thư viện tiện ích khác
 import 'package:carousel_slider/carousel_slider.dart'; // Tạo carousel/slider cuộn ngang
-import 'package:path_provider/path_provider.dart'; // Lấy đường dẫn thư mục nội bộ (dùng để lưu file local)
+// import 'package:path_provider/path_provider.dart'; // Lấy đường dẫn thư mục nội bộ (dùng để lưu file local)
 import 'package:wakelock/wakelock.dart'; // Giữ màn hình luôn bật (không tắt khi không hoạt động)
 
 //get Widget Build - lấy widget build
@@ -188,9 +188,12 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color.fromARGB(255, 200, 200, 200),
+        backgroundColor: isDarkMode
+            ? Color.fromARGB(255, 85, 85, 85)
+            : Color.fromARGB(255, 215, 215, 215),
         selectedItemColor: Color.fromARGB(255, 67, 224, 255),
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor:
+            isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
         items: buttonConfigs
             .map((btn) =>
                 BottomNavigationBarItem(icon: Icon(btn.icon), label: btn.title))
@@ -203,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
       List<Widget> items, List<ButtonHomeScreenConfig> configs) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double availableHeight = constraints.maxHeight;
+        // final double availableHeight = constraints.maxHeight;
         return Center(
           child: CarouselSlider.builder(
             carouselController: _carouselController,

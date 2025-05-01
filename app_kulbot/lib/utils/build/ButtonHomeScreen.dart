@@ -46,7 +46,7 @@ class ButtonHomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(20),
-                // Box shadow cái này thì chắc không cần vì làm ở bên trang home rồi
+                // Box shadow cái này thì chắc không cần vì làm ở bên trang home rồi, tiện hơn cho việc hiển thị thay đổi icon
                 // boxShadow: [
                 //   BoxShadow(
                 //     color: Colors.grey.shade400,

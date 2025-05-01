@@ -9,6 +9,9 @@ import 'dart:async';
 import 'package:showcaseview/showcaseview.dart';
 import '../service/bluetooth_service.dart';
 import 'scanQR_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:Kulbot/provider/provider.dart';
+import 'package:Kulbot/l10n/l10n.dart';
 
 // GlobalKey _one = GlobalKey();
 // GlobalKey _two = GlobalKey();
@@ -44,6 +47,7 @@ class _ControlWidgetState extends State<ControlWidget> {
   late GlobalKey _six;
   late GlobalKey _seven;
   late GlobalKey _eight;
+  late GlobalKey _nine;
 
   late String _moveForwardCommand;
   late String _moveFLeftCommand;
@@ -89,6 +93,7 @@ class _ControlWidgetState extends State<ControlWidget> {
     _six = GlobalKey();
     _seven = GlobalKey();
     _eight = GlobalKey();
+    _nine = GlobalKey();
     _loadSettings();
 
     SystemChrome.setPreferredOrientations([
@@ -195,6 +200,9 @@ class _ControlWidgetState extends State<ControlWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<LocaleProvider>(context);
+    var locale = provider.locale ?? Locale('en');
+
     return ShowCaseWidget(
       builder: (context) => Scaffold(
         // backgroundColor: isDarkMode
@@ -239,12 +247,43 @@ class _ControlWidgetState extends State<ControlWidget> {
                     _six,
                     _seven,
                     _eight,
+                    _nine,
                   ]);
                 },
               ),
             ),
             Showcase(
               key: _two,
+              description: "Đây là nút chọn ngôn ngữ",
+              child: DropdownButton(
+                value: locale,
+                icon: Container(width: 12),
+                items: L10n.all.map(
+                  (locale) {
+                    final flag = L10n.getflag(locale.languageCode);
+
+                    return DropdownMenuItem(
+                      child: Center(
+                        child: Text(
+                          flag,
+                          style: TextStyle(fontSize: 32),
+                        ),
+                      ),
+                      value: locale,
+                      onTap: () {
+                        final provider =
+                            Provider.of<LocaleProvider>(context, listen: false);
+                        provider.setLocale(locale);
+                        _stopListening();
+                      },
+                    );
+                  },
+                ).toList(),
+                onChanged: (_) {},
+              ),
+            ),
+            Showcase(
+              key: _three,
               description: 'Đây là nút quét mã QR để điều khiển robot',
               child: IconButton(
                 icon: Icon(Icons.qr_code_scanner_outlined,
@@ -253,7 +292,7 @@ class _ControlWidgetState extends State<ControlWidget> {
               ),
             ),
             Showcase(
-              key: _three,
+              key: _four,
               description: 'Bật / tắt Bluetooth và kết nối robot',
               child: IconButton(
                 icon: Icon(
@@ -276,7 +315,7 @@ class _ControlWidgetState extends State<ControlWidget> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Showcase(
-          key: _four,
+          key: _five,
           description: 'Điều khiển robot bằng giọng nói',
           child: AvatarGlow(
             animate: _isListening,
@@ -285,7 +324,7 @@ class _ControlWidgetState extends State<ControlWidget> {
             repeat: true,
             child: FloatingActionButton(
               backgroundColor: Colors.cyanAccent,
-              onPressed: _listenVoiceToText,
+              onPressed: () => _listenVoiceToText(),
               child: Icon(_isListening ? Icons.mic : Icons.mic_none,
                   color: Colors.black),
             ),
@@ -298,7 +337,7 @@ class _ControlWidgetState extends State<ControlWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Showcase(
-                  key: _five,
+                  key: _six,
                   description: 'Bật đèn robot',
                   child: GestureDetector(
                     onTap: () {
@@ -319,7 +358,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                   ),
                 ),
                 Showcase(
-                  key: _six,
+                  key: _seven,
                   description: 'Bật kèn robot',
                   child: GestureDetector(
                     onTapDown: (_) {
@@ -350,7 +389,7 @@ class _ControlWidgetState extends State<ControlWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Showcase(
-                  key: _seven,
+                  key: _eight,
                   description: 'Joystick điều khiển robot lên/xuống',
                   child: Container(
                     width: 200,
@@ -395,7 +434,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                   ),
                 ),
                 Showcase(
-                  key: _eight,
+                  key: _nine,
                   description: 'Joystick điều khiển robot trái/phải',
                   child: Container(
                     width: 200,
@@ -464,7 +503,24 @@ class _ControlWidgetState extends State<ControlWidget> {
     }
   }
 
+  String _getSpeechLocale(String languageCode) {
+    switch (languageCode) {
+      case 'vi':
+        return 'vi_VN';
+      case 'en':
+      default:
+        return 'en_US';
+    }
+  }
+
+  String _previousText = "";
+  Timer? _debounce;
+
   void _listenVoiceToText() async {
+    final provider = Provider.of<LocaleProvider>(context, listen: false);
+    final locale = provider.locale ?? Locale('en');
+    String languageCode = locale.languageCode;
+
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) => print('onStatus: $val'),
@@ -472,20 +528,57 @@ class _ControlWidgetState extends State<ControlWidget> {
       );
 
       if (available) {
+        _previousText = "";
+        voicetotext = "";
+
         setState(() => _isListening = true);
+        await checkLocales();
+
         _speech.listen(
-          onResult: (val) => setState(() {
-            voicetotext = val.recognizedWords;
-            moveMotor();
-          }),
+          localeId: _getSpeechLocale(languageCode),
+          onResult: (val) {
+            print('🟢 Speech raw: ${val.recognizedWords}');
+
+            _debounce?.cancel();
+
+            // Khởi tạo lại timer — chỉ xử lý sau khi im lặng ~1 giây
+            _debounce = Timer(Duration(milliseconds: 500), () {
+              String newPart =
+                  val.recognizedWords.substring(_previousText.length).trim();
+
+              if (newPart.isNotEmpty) {
+                setState(() {
+                  voicetotext = newPart;
+                });
+                moveMotor();
+              }
+
+              _previousText = val.recognizedWords;
+            });
+          },
         );
       } else {
-        print("Không thể khởi tạo mic. Có thể bị từ chối quyền.");
+        print("Không thể khởi tạo mic.");
       }
     } else {
-      setState(() => _isListening = false);
+      _stopListening();
+    }
+  }
+
+  void _stopListening() {
+    if (_isListening) {
       _speech.stop();
-      if (voicetotext.isNotEmpty) moveMotor();
+      setState(() {
+        _isListening = false;
+        voicetotext = "...";
+      });
+    }
+  }
+
+  Future<void> checkLocales() async {
+    var locales = await _speech.locales();
+    for (var locale in locales) {
+      print('${locale.localeId} - ${locale.name}');
     }
   }
 
@@ -509,9 +602,6 @@ class _ControlWidgetState extends State<ControlWidget> {
     } else {
       print("Không nhận diện được lệnh thoại: $voicetotext");
     }
-    setState(() {
-      voicetotext = "";
-    });
   }
 
   void handleHorizontalJoystickMove(details) {

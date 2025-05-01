@@ -69,7 +69,8 @@ class Kulbot extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      home: const SplashState(),
+      home:
+          const SplashState(), //hiển thị khi vừa bật ứng dụng - show when just turn on the app
     );
   }
 }
@@ -95,7 +96,7 @@ class _SplashStaKulbotate extends State<SplashState> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
-    ]);
+    ]); //giữ màn hình nằm ngang - keep screen in landscape mode
   }
 
   @override
@@ -122,6 +123,11 @@ class _SplashStaKulbotate extends State<SplashState> {
               const CircularProgressIndicator(
                 color: Colors.white,
               )
+            // const LinearProgressIndicator(
+            //   color: Colors.white,
+            //   backgroundColor: Colors.white30,
+            //   minHeight: 6,
+            // ),
           ],
         ),
       ),
