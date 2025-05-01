@@ -1,0 +1,15 @@
+{
+  "commentpages______________": "Có '_' là comment và biến bên dưới là tên các trang",
+  "home": "Trang chủ",
+  "setting": "Cài đặt",
+  "carControl": "điều khiển robot xe",
+  "programming": "Lập trình",
+  "iot": "IOT",
+  "bascotControl": "điều khiển botcat",
+  "humanControl": "điều khiển robot người",
+  "dogControl": "điều khiển robot chó",
+  "commentsetting______________": "Các biến dưới là các chữ trong trang setting",
+  "changelanguage": "Thay đổi ngôn ngữ",
+  "darkMode": "Chế độ tối",
+  "lightMode": "Chế độ sáng"
+}
