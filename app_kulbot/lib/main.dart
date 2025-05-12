@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'; //ngôn ngữ - language
 import 'package:flutter_localizations/flutter_localizations.dart'; //ngôn ngữ - language
-import 'package:wakelock/wakelock.dart'; //giữ màn hình sáng - keep screen on
+import 'package:wakelock_plus/wakelock_plus.dart'; //giữ màn hình sáng - keep screen on
 
 //dữ liệu - data
 import 'package:provider/provider.dart'; //provider - nhà cung cấp dữ liệu
@@ -92,7 +92,7 @@ class _SplashStaKulbotate extends State<SplashState> {
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     });
     //Hiển thị build ở dưới (logo công ty) 3 giây rồi chuyển sang trang HomeScreen
-    Wakelock.enable();
+    WakelockPlus.enable();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,

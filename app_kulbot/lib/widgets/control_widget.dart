@@ -12,15 +12,7 @@ import 'scanQR_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:Kulbot/provider/provider.dart';
 import 'package:Kulbot/l10n/l10n.dart';
-
-// GlobalKey _one = GlobalKey();
-// GlobalKey _two = GlobalKey();
-// GlobalKey _three = GlobalKey();
-// GlobalKey _four = GlobalKey();
-// GlobalKey _five = GlobalKey();
-// GlobalKey _six = GlobalKey();
-// GlobalKey _seven = GlobalKey();
-// GlobalKey _eight = GlobalKey();
+import 'package:Kulbot/utils/build/Control/Joystick360degrees.dart';
 
 class ControlWidget extends StatefulWidget {
   final bool checkAvailability;
@@ -48,6 +40,7 @@ class _ControlWidgetState extends State<ControlWidget> {
   late GlobalKey _seven;
   late GlobalKey _eight;
   late GlobalKey _nine;
+  late GlobalKey _joystickKey;
 
   late String _moveForwardCommand;
   late String _moveFLeftCommand;
@@ -73,8 +66,8 @@ class _ControlWidgetState extends State<ControlWidget> {
 
   JoystickMode _joystickModeLeft = JoystickMode.vertical;
   JoystickMode _joystickModeRight = JoystickMode.horizontal;
-  double _x = 100;
-  double _y = 100;
+  double _x = 0;
+  double _y = 0;
 
   List<_Message> messages = [];
 
@@ -94,6 +87,7 @@ class _ControlWidgetState extends State<ControlWidget> {
     _seven = GlobalKey();
     _eight = GlobalKey();
     _nine = GlobalKey();
+    _joystickKey = GlobalKey();
     _loadSettings();
 
     SystemChrome.setPreferredOrientations([
@@ -197,7 +191,6 @@ class _ControlWidgetState extends State<ControlWidget> {
   }
 
 // ...existing code...
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<LocaleProvider>(context);
@@ -205,224 +198,140 @@ class _ControlWidgetState extends State<ControlWidget> {
 
     return ShowCaseWidget(
       builder: (context) => Scaffold(
-        // backgroundColor: isDarkMode
-        //     ? Colors.black
-        //     : const Color.fromARGB(
-        //         255, 131, 139, 149),
-        appBar: AppBar(
-          backgroundColor: Colors.blueGrey[900],
-          title: Row(
-            children: [
-              Icon(Icons.rocket, color: Colors.cyanAccent), // Biểu tượng robot
-              SizedBox(width: 10),
-              Text(
-                "$connectedDeviceName",
-                style: TextStyle(
-                  color: Colors.cyanAccent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.cyanAccent),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: [
-            Showcase(
-              key: _one,
-              description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
-              child: IconButton(
-                icon:
-                    Icon(Icons.question_mark_rounded, color: Colors.cyanAccent),
-                onPressed: () {
-                  ShowCaseWidget.of(context).startShowCase([
-                    _one,
-                    _two,
-                    _three,
-                    _four,
-                    _five,
-                    _six,
-                    _seven,
-                    _eight,
-                    _nine,
-                  ]);
-                },
-              ),
-            ),
-            Showcase(
-              key: _two,
-              description: "Đây là nút chọn ngôn ngữ",
-              child: DropdownButton(
-                value: locale,
-                icon: Container(width: 12),
-                items: L10n.all.map(
-                  (locale) {
-                    final flag = L10n.getflag(locale.languageCode);
-
-                    return DropdownMenuItem(
-                      child: Center(
-                        child: Text(
-                          flag,
-                          style: TextStyle(fontSize: 32),
-                        ),
-                      ),
-                      value: locale,
-                      onTap: () {
-                        final provider =
-                            Provider.of<LocaleProvider>(context, listen: false);
-                        provider.setLocale(locale);
-                        _stopListening();
-                      },
-                    );
-                  },
-                ).toList(),
-                onChanged: (_) {},
-              ),
-            ),
-            Showcase(
-              key: _three,
-              description: 'Đây là nút quét mã QR để điều khiển robot',
-              child: IconButton(
-                icon: Icon(Icons.qr_code_scanner_outlined,
-                    color: Colors.cyanAccent),
-                onPressed: scanQRcodeNormal,
-              ),
-            ),
-            Showcase(
-              key: _four,
-              description: 'Bật / tắt Bluetooth và kết nối robot',
-              child: IconButton(
-                icon: Icon(
-                  _bluetoothService.bluetoothState.isEnabled
-                      ? (isConnected
-                          ? Icons.bluetooth_connected
-                          : Icons.bluetooth)
-                      : Icons.bluetooth_disabled,
-                  color: isConnected ? Colors.greenAccent : Colors.redAccent,
-                ),
-                onPressed: () {
-                  _bluetoothService.startDiscoveryWithTimeout();
-                  isConnected
-                      ? _bluetoothService.connection?.dispose()
-                      : _bluetoothService.connectBluetoothDialog(context);
-                },
-              ),
-            ),
-          ],
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Showcase(
-          key: _five,
-          description: 'Điều khiển robot bằng giọng nói',
-          child: AvatarGlow(
-            animate: _isListening,
-            glowColor: Colors.cyanAccent,
-            duration: const Duration(milliseconds: 2000),
-            repeat: true,
-            child: FloatingActionButton(
-              backgroundColor: Colors.cyanAccent,
-              onPressed: () => _listenVoiceToText(),
-              child: Icon(_isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.black),
-            ),
-          ),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          // backgroundColor: isDarkMode
+          //     ? Colors.black
+          //     : const Color.fromARGB(
+          //         255, 131, 139, 149),
+          appBar: AppBar(
+            backgroundColor: Colors.blueGrey[900],
+            title: Row(
               children: [
-                Showcase(
-                  key: _six,
-                  description: 'Bật đèn robot',
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isPressedLight = !isPressedLight;
-                        isPressedLight ? _light() : _endlight();
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isPressedLight ? Colors.grey : Colors.cyanAccent,
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      child: Icon(Icons.tips_and_updates_outlined,
-                          color: Colors.black),
-                    ),
-                  ),
-                ),
-                Showcase(
-                  key: _seven,
-                  description: 'Bật kèn robot',
-                  child: GestureDetector(
-                    onTapDown: (_) {
-                      setState(() {
-                        isPressedSound = true;
-                        _sound();
-                      });
-                    },
-                    onTapUp: (_) {
-                      setState(() {
-                        isPressedSound = false;
-                        _endsound();
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isPressedSound ? Colors.grey : Colors.cyanAccent,
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      child: Icon(Icons.volume_up, color: Colors.black),
-                    ),
+                Icon(Icons.rocket,
+                    color: Colors.cyanAccent), // Biểu tượng robot
+                SizedBox(width: 10),
+                Text(
+                  "$connectedDeviceName",
+                  style: TextStyle(
+                    color: Colors.cyanAccent,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Showcase(
-                  key: _eight,
-                  description: 'Joystick điều khiển robot lên/xuống',
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    margin: EdgeInsets.only(bottom: 40, left: 50),
-                    alignment: const Alignment(0, 0.8),
-                    child: Joystick(
-                      base: JoystickBase(
-                        mode: _joystickModeLeft,
-                        decoration: JoystickBaseDecoration(
-                          middleCircleColor: Colors.cyanAccent,
-                          drawOuterCircle: true,
-                          drawInnerCircle: true,
-                          boxShadowColor: Colors.cyanAccent.withOpacity(0.5),
-                        ),
-                        arrowsDecoration: JoystickArrowsDecoration(
-                          color: Colors.yellowAccent,
-                        ),
-                      ),
-                      stick: JoystickStick(
-                        size: 100,
-                        decoration: JoystickStickDecoration(
-                          color: Colors.yellowAccent,
-                        ),
-                      ),
-                      mode: _joystickModeLeft,
-                      listener: handleVerticalJoystickMove,
-                    ),
-                  ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.cyanAccent),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            actions: [
+              Showcase(
+                key: _one,
+                description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
+                child: IconButton(
+                  icon: Icon(Icons.question_mark_rounded,
+                      color: Colors.cyanAccent),
+                  onPressed: () {
+                    ShowCaseWidget.of(context).startShowCase([
+                      _one,
+                      _two,
+                      _three,
+                      _four,
+                      _five,
+                      _six,
+                      _seven,
+                      _eight,
+                      _nine,
+                      _joystickKey,
+                    ]);
+                  },
                 ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  width: MediaQuery.of(context).size.width * 0.3,
+              ),
+              Showcase(
+                key: _two,
+                description: "Đây là nút chọn ngôn ngữ",
+                child: DropdownButton(
+                  value: locale,
+                  icon: Container(width: 12),
+                  items: L10n.all.map(
+                    (locale) {
+                      final flag = L10n.getflag(locale.languageCode);
+
+                      return DropdownMenuItem(
+                        child: Center(
+                          child: Text(
+                            flag,
+                            style: TextStyle(fontSize: 32),
+                          ),
+                        ),
+                        value: locale,
+                        onTap: () {
+                          final provider = Provider.of<LocaleProvider>(context,
+                              listen: false);
+                          provider.setLocale(locale);
+                          _stopListening();
+                        },
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (_) {},
+                ),
+              ),
+              Showcase(
+                key: _three,
+                description: 'Đây là nút quét mã QR để điều khiển robot',
+                child: IconButton(
+                  icon: Icon(Icons.qr_code_scanner_outlined,
+                      color: Colors.cyanAccent),
+                  onPressed: scanQRcodeNormal,
+                ),
+              ),
+              Showcase(
+                key: _four,
+                description: 'Bật / tắt Bluetooth và kết nối robot',
+                child: IconButton(
+                  icon: Icon(
+                    _bluetoothService.bluetoothState.isEnabled
+                        ? (isConnected
+                            ? Icons.bluetooth_connected
+                            : Icons.bluetooth)
+                        : Icons.bluetooth_disabled,
+                    color: isConnected ? Colors.greenAccent : Colors.redAccent,
+                  ),
+                  onPressed: () {
+                    _bluetoothService.startDiscoveryWithTimeout();
+                    isConnected
+                        ? _bluetoothService.connection?.dispose()
+                        : _bluetoothService.connectBluetoothDialog(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: Showcase(
+            key: _five,
+            description: 'Điều khiển robot bằng giọng nói',
+            child: AvatarGlow(
+              animate: _isListening,
+              glowColor: Colors.cyanAccent,
+              duration: const Duration(milliseconds: 2000),
+              repeat: true,
+              child: FloatingActionButton(
+                backgroundColor: Colors.cyanAccent,
+                onPressed: () => _listenVoiceToText(),
+                child: Icon(_isListening ? Icons.mic : Icons.mic_none,
+                    color: Colors.black),
+              ),
+            ),
+          ),
+          body: Column(
+            children: [
+              // Dòng đầu
+              Expanded(
+                flex: 2,
+                child: Center(
                   child: Text(
                     voicetotext == '' ? "..." : voicetotext,
                     textAlign: TextAlign.center,
@@ -433,43 +342,210 @@ class _ControlWidgetState extends State<ControlWidget> {
                     ),
                   ),
                 ),
-                Showcase(
-                  key: _nine,
-                  description: 'Joystick điều khiển robot trái/phải',
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    margin: EdgeInsets.only(bottom: 40, right: 50),
-                    alignment: const Alignment(0, 0.8),
-                    child: Joystick(
-                      base: JoystickBase(
-                        mode: _joystickModeRight,
-                        decoration: JoystickBaseDecoration(
-                          middleCircleColor: Colors.cyanAccent,
-                          drawOuterCircle: true,
-                          drawInnerCircle: true,
-                          boxShadowColor: Colors.cyanAccent.withValues(),
+              ),
+
+              // Dòng dưới cùng
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Joystick360degrees(
+                        showcaseKey: _joystickKey,
+                        description: 'Joystick điều khiển robot theo 360 độ',
+                        onMove: (angle, strength) {
+                          double adjustedAngle = (angle + 90) % 360;
+                          print(
+                              "🎯 Raw angle: ${angle.toStringAsFixed(1)}°, Adjusted: ${adjustedAngle.toStringAsFixed(1)}°, Strength: ${strength.toStringAsFixed(2)}");
+
+                          if (strength < 0.2) {
+                            print("🛑 Dừng");
+                            _bluetoothService.sendMessage(_moveStopCommand);
+                          } else {
+                            if (adjustedAngle >= 337.5 ||
+                                adjustedAngle < 22.5) {
+                              print("⬆️ Tiến");
+                              _bluetoothService
+                                  .sendMessage(_moveForwardCommand);
+                            } else if (adjustedAngle >= 22.5 &&
+                                adjustedAngle < 67.5) {
+                              print("↗️ Tiến Phải");
+                              _bluetoothService.sendMessage(_moveFRightCommand);
+                            } else if (adjustedAngle >= 67.5 &&
+                                adjustedAngle < 112.5) {
+                              print("➡️ Xoay Phải");
+                              _bluetoothService
+                                  .sendMessage(_moveTurnRightCommand);
+                            } else if (adjustedAngle >= 112.5 &&
+                                adjustedAngle < 157.5) {
+                              print("↘️ Lùi Phải");
+                              _bluetoothService.sendMessage(_moveBRightCommand);
+                            } else if (adjustedAngle >= 157.5 &&
+                                adjustedAngle < 202.5) {
+                              print("⬇️ Lùi");
+                              _bluetoothService
+                                  .sendMessage(_moveBackwardCommand);
+                            } else if (adjustedAngle >= 202.5 &&
+                                adjustedAngle < 247.5) {
+                              print("↙️ Lùi Trái");
+                              _bluetoothService.sendMessage(_moveBLeftCommand);
+                            } else if (adjustedAngle >= 247.5 &&
+                                adjustedAngle < 292.5) {
+                              print("⬅️ Xoay Trái");
+                              _bluetoothService
+                                  .sendMessage(_moveTurnLeftCommand);
+                            } else if (adjustedAngle >= 292.5 &&
+                                adjustedAngle < 337.5) {
+                              print("↖️ Tiến Trái");
+                              _bluetoothService.sendMessage(_moveFLeftCommand);
+                            }
+                          }
+                        }),
+
+                    // Joystick tiến/lùi (trái)
+                    // Showcase(
+                    //   key: _eight,
+                    //   description: 'Joystick điều khiển robot lên/xuống',
+                    //   child: Container(
+                    //     width: 200,
+                    //     height: 200,
+                    //     margin: const EdgeInsets.only(left: 20),
+                    //     child: Joystick(
+                    //       base: JoystickBase(
+                    //         mode: _joystickModeLeft,
+                    //         decoration: JoystickBaseDecoration(
+                    //           middleCircleColor: Colors.cyanAccent,
+                    //           drawOuterCircle: true,
+                    //           drawInnerCircle: true,
+                    //           boxShadowColor:
+                    //               Colors.cyanAccent.withOpacity(0.5),
+                    //         ),
+                    //         arrowsDecoration: JoystickArrowsDecoration(
+                    //           color: Colors.yellowAccent,
+                    //         ),
+                    //       ),
+                    //       stick: JoystickStick(
+                    //         size: 100,
+                    //         decoration: JoystickStickDecoration(
+                    //           color: Colors.yellowAccent,
+                    //         ),
+                    //       ),
+                    //       mode: _joystickModeLeft,
+                    //       listener: handleVerticalJoystickMove,
+                    //     ),
+                    //   ),
+                    // ),
+
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Showcase(
+                                key: _six,
+                                description: 'Bật đèn robot',
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isPressedLight = !isPressedLight;
+                                      isPressedLight ? _light() : _endlight();
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: isPressedLight
+                                          ? Colors.grey
+                                          : Colors.cyanAccent,
+                                      borderRadius: BorderRadius.circular(50.0),
+                                    ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: const Icon(
+                                        Icons.tips_and_updates_outlined,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              // Nút bật kèn
+                              Showcase(
+                                key: _seven,
+                                description: 'Bật kèn robot',
+                                child: GestureDetector(
+                                  onTapDown: (_) {
+                                    setState(() {
+                                      isPressedSound = true;
+                                      _sound();
+                                    });
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() {
+                                      isPressedSound = false;
+                                      _endsound();
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: isPressedSound
+                                          ? Colors.grey
+                                          : Colors.cyanAccent,
+                                      borderRadius: BorderRadius.circular(50.0),
+                                    ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: const Icon(Icons.volume_up,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        arrowsDecoration: JoystickArrowsDecoration(
-                          color: Colors.yellowAccent,
-                        ),
-                      ),
-                      stick: JoystickStick(
-                        size: 100,
-                        decoration: JoystickStickDecoration(
-                          color: Colors.yellowAccent,
-                        ),
-                      ),
-                      mode: _joystickModeRight,
-                      listener: handleHorizontalJoystickMove,
+                        // const SizedBox(width: 10),
+                        // Showcase(
+                        //   key: _nine,
+                        //   description: 'Joystick điều khiển robot trái/phải',
+                        //   child: Container(
+                        //     width: 200,
+                        //     height: 200,
+                        //     margin: const EdgeInsets.only(right: 20),
+                        //     child: Joystick(
+                        //       base: JoystickBase(
+                        //         mode: _joystickModeRight,
+                        //         decoration: JoystickBaseDecoration(
+                        //           middleCircleColor: Colors.cyanAccent,
+                        //           drawOuterCircle: true,
+                        //           drawInnerCircle: true,
+                        //           boxShadowColor:
+                        //               Colors.cyanAccent.withOpacity(0.5),
+                        //         ),
+                        //         arrowsDecoration: JoystickArrowsDecoration(
+                        //           color: Colors.yellowAccent,
+                        //         ),
+                        //       ),
+                        //       stick: JoystickStick(
+                        //         size: 100,
+                        //         decoration: JoystickStickDecoration(
+                        //           color: Colors.yellowAccent,
+                        //         ),
+                        //       ),
+                        //       mode: _joystickModeRight,
+                        //       listener: handleHorizontalJoystickMove,
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              ),
+            ],
+          )),
     );
   }
 
@@ -585,7 +661,7 @@ class _ControlWidgetState extends State<ControlWidget> {
   void moveMotor() {
     if (!isConnected) return;
     final voice = voicetotext.toLowerCase();
-    if (voice.contains('Tiến') ||
+    if (voice.contains('tiến') ||
         voice.contains('lên') ||
         voice.contains('forward')) {
       _bluetoothService.sendMessage(_moveForwardCommand);

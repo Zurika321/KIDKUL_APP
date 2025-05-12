@@ -12,14 +12,15 @@ import 'package:Kulbot/provider/provider.dart';
 // Thư viện tiện ích khác
 import 'package:carousel_slider/carousel_slider.dart'; // Tạo carousel/slider cuộn ngang
 // import 'package:path_provider/path_provider.dart'; // Lấy đường dẫn thư mục nội bộ (dùng để lưu file local)
-import 'package:wakelock/wakelock.dart'; // Giữ màn hình luôn bật (không tắt khi không hoạt động)
+import 'package:wakelock_plus/wakelock_plus.dart'; //giữ màn hình sáng - keep screen on
 
 //get Widget Build - lấy widget build
-import 'package:Kulbot/utils/build/ButtonHomeScreen.dart';
+import 'package:Kulbot/utils/build/Home/ButtonHomeScreen.dart';
 
 //get page - lấy trang
 import 'package:Kulbot/screens/iot_screen/iotScreen.dart';
 import 'package:Kulbot/screens/carControll.dart';
+import 'package:Kulbot/screens/Control.dart';
 import 'package:Kulbot/screens/programingScreen.dart';
 import 'package:Kulbot/screens/settingScreen.dart';
 
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Wakelock.enable();
+    WakelockPlus.enable();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -116,6 +117,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: AppLocalizations.of(context)!.carControl,
         imgPath: 'lib/assets/images/steering-wheel.png',
         navigator: CarControl(),
+      ),
+      ButtonHomeScreenConfig(
+        icon: Icons.home,
+        title: AppLocalizations.of(context)!.control,
+        imgPath: 'lib/assets/images/steering-wheel.png',
+        navigator: Control(),
       ),
       // ButtonHomeScreen(
       //   imgPath: 'lib/assets/images/Bascot_16.png',
