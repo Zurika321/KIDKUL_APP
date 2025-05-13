@@ -15,14 +15,14 @@ import 'package:carousel_slider/carousel_slider.dart'; // Tạo carousel/slider 
 import 'package:wakelock_plus/wakelock_plus.dart'; //giữ màn hình sáng - keep screen on
 
 //get Widget Build - lấy widget build
-import 'package:Kulbot/utils/build/Home/ButtonHomeScreen.dart';
+import 'package:Kulbot/widgets/Home/ButtonHomeScreen.dart';
 
 //get page - lấy trang
-import 'package:Kulbot/screens/iot_screen/iotScreen.dart';
-import 'package:Kulbot/screens/carControll.dart';
-import 'package:Kulbot/screens/Control.dart';
-import 'package:Kulbot/screens/programingScreen.dart';
-import 'package:Kulbot/screens/settingScreen.dart';
+import 'package:Kulbot/widgets/IOT/iotScreen.dart';
+import 'package:Kulbot/widgets/Control/carControll.dart';
+import 'package:Kulbot/widgets/Control/Control.dart';
+import 'package:Kulbot/widgets/programing/programingScreen.dart';
+import 'package:Kulbot/widgets/Setting/settingScreen.dart';
 
 //get data - lấy dữ liệu
 // import 'package:shared_preferences/shared_preferences.dart'; // Lưu trữ dữ liệu cục bộ (SharedPreferences)
@@ -95,14 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
           const begin = 0.0;
           const end = 1.0;
           const curve = Curves.easeInOut;
-          final tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
           final scaleAnimation = animation.drive(tween);
 
-          return ScaleTransition(
-            scale: scaleAnimation,
-            child: child,
-          );
+          return ScaleTransition(scale: scaleAnimation, child: child);
         },
       ),
     );
@@ -157,21 +156,25 @@ class _HomeScreenState extends State<HomeScreen> {
       //   navigator: () => _navigateToScreen(context, dogControl()),
       // ), mấy cái này là comment của code cũ nên không xóa
       ButtonHomeScreenConfig(
-        icon: Icons
-            .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
+        icon:
+            Icons
+                .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
         title: AppLocalizations.of(context)!.setting,
         imgPath: 'lib/assets/images/setting.png',
         navigator: SettingScreen(),
       ),
     ];
 
-    final items = buttonConfigs
-        .map((btn) => ButtonHomeScreen(
-              imgPath: btn.imgPath,
-              textButton: btn.title,
-              navigator: () => _navigateToScreen(context, btn.navigator),
-            ))
-        .toList();
+    final items =
+        buttonConfigs
+            .map(
+              (btn) => ButtonHomeScreen(
+                imgPath: btn.imgPath,
+                textButton: btn.title,
+                navigator: () => _navigateToScreen(context, btn.navigator),
+              ),
+            )
+            .toList();
 
     return Scaffold(
       // backgroundColor: Color.fromARGB(255, 255, 255, 255),
@@ -195,22 +198,30 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: isDarkMode
-            ? Color.fromARGB(255, 85, 85, 85)
-            : Color.fromARGB(255, 215, 215, 215),
+        backgroundColor:
+            isDarkMode
+                ? Color.fromARGB(255, 85, 85, 85)
+                : Color.fromARGB(255, 215, 215, 215),
         selectedItemColor: Color.fromARGB(255, 67, 224, 255),
         unselectedItemColor:
             isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
-        items: buttonConfigs
-            .map((btn) =>
-                BottomNavigationBarItem(icon: Icon(btn.icon), label: btn.title))
-            .toList(),
+        items:
+            buttonConfigs
+                .map(
+                  (btn) => BottomNavigationBarItem(
+                    icon: Icon(btn.icon),
+                    label: btn.title,
+                  ),
+                )
+                .toList(),
       ),
     );
   }
 
   Widget _buildCarousel(
-      List<Widget> items, List<ButtonHomeScreenConfig> configs) {
+    List<Widget> items,
+    List<ButtonHomeScreenConfig> configs,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // final double availableHeight = constraints.maxHeight;
@@ -242,10 +253,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Transform(
                 alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(rotationY)
-                  ..scale(scale),
+                transform:
+                    Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(rotationY)
+                      ..scale(scale),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -254,9 +266,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: const Color.fromARGB(255, 181, 181, 181),
                         boxShadow: [
                           BoxShadow(
-                            color: _currentPage == index
-                                ? Color(0xFF3D5BFF)
-                                : Colors.black12,
+                            color:
+                                _currentPage == index
+                                    ? Color(0xFF3D5BFF)
+                                    : Colors.black12,
                             blurRadius: 10,
                             spreadRadius: 2,
                             offset: Offset(0, 5),

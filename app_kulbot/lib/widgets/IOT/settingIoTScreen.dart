@@ -1,4 +1,4 @@
-import 'package:Kulbot/widgets/settingIoT_widget.dart';
+import 'package:Kulbot/widgets/IOT/settingIoT_widget.dart';
 import 'package:flutter/material.dart';
 
 class SettingIoT extends StatefulWidget {

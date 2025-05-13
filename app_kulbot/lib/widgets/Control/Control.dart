@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Kulbot/widgets/RobotControlScreen.dart';
+import 'package:Kulbot/widgets/Control/RobotControlScreen.dart';
 
 class Control extends StatefulWidget {
   const Control({super.key});
@@ -31,13 +31,12 @@ class _ControlState extends State<Control> {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 80,
+          ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 600,
-              maxHeight: 600,
-            ),
+            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -63,10 +62,11 @@ class _ControlState extends State<Control> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RobotControlScreen(
-                                  projectName: "",
-                                  type: "new",
-                                ),
+                                builder:
+                                    (_) => RobotControlScreen(
+                                      projectName: "",
+                                      type: "new",
+                                    ),
                               ),
                             );
                           },
@@ -106,10 +106,11 @@ class _ControlState extends State<Control> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RobotControlScreen(
-                                  projectName: "",
-                                  type: "Robot_Car",
-                                ),
+                                builder:
+                                    (_) => RobotControlScreen(
+                                      projectName: "",
+                                      type: "Robot_Car",
+                                    ),
                               ),
                             );
                           },
@@ -126,10 +127,11 @@ class _ControlState extends State<Control> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RobotControlScreen(
-                                  projectName: "",
-                                  type: "Robot_Dog",
-                                ),
+                                builder:
+                                    (_) => RobotControlScreen(
+                                      projectName: "",
+                                      type: "Robot_Dog",
+                                    ),
                               ),
                             );
                           },
@@ -156,9 +158,10 @@ class _ControlState extends State<Control> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredProjects = savedProjects
-        .where((p) => p.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
+    final filteredProjects =
+        savedProjects
+            .where((p) => p.toLowerCase().contains(searchQuery.toLowerCase()))
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -180,8 +183,10 @@ class _ControlState extends State<Control> {
               child: TextField(
                 decoration: const InputDecoration(
                   hintText: 'Tìm kiếm...',
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   border: InputBorder.none,
                 ),
                 onChanged: (value) => setState(() => searchQuery = value),
@@ -196,21 +201,27 @@ class _ControlState extends State<Control> {
           spacing: 16,
           runSpacing: 16,
           children: [
-            ...filteredProjects.map((name) => SizedBox(
-                  width: 200,
-                  height: 150,
-                  child: CustomBox(
-                    title: name,
-                    icon: Icons.folder,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            RobotControlScreen(projectName: name, type: ""),
+            ...filteredProjects.map(
+              (name) => SizedBox(
+                width: 200,
+                height: 150,
+                child: CustomBox(
+                  title: name,
+                  icon: Icons.folder,
+                  onTap:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => RobotControlScreen(
+                                projectName: name,
+                                type: "",
+                              ),
+                        ),
                       ),
-                    ),
-                  ),
-                )),
+                ),
+              ),
+            ),
             SizedBox(
               width: 200,
               height: 150,
@@ -263,9 +274,11 @@ class CustomBox extends StatelessWidget {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(title,
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center),
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

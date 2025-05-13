@@ -5,7 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart'; //ngôn ngữ
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'; //ngôn ngữ - language
 
 //page chính - main page
-import 'package:Kulbot/screens/homeScreen.dart';
+import 'package:Kulbot/widgets/Home/homeScreen.dart';
 
 //các dịch vụ khác - other services
 // import 'package:Kulbot/service/bluetooth_service.dart';
@@ -59,7 +59,8 @@ class Kulbot extends StatelessWidget {
         brightness:
             themeNotifier.isDarkMode ? Brightness.dark : Brightness.light,
       ),
-      locale: localeProvider.locale ??
+      locale:
+          localeProvider.locale ??
           const Locale('en'), //hơi thừa ?? nhưng cho chắc
       supportedLocales:
           L10n.all, //những ngôn ngữ đc hỗ trợ - supported languages
@@ -89,7 +90,9 @@ class _SplashStaKulbotate extends State<SplashState> {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     });
     //Hiển thị build ở dưới (logo công ty) 3 giây rồi chuyển sang trang HomeScreen
     WakelockPlus.enable();
@@ -107,22 +110,12 @@ class _SplashStaKulbotate extends State<SplashState> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'lib/assets/images/kul_bot.png',
-              height: 150,
-            ),
-            const SizedBox(
-              height: 30,
-            ),
+            Image.asset('lib/assets/images/kul_bot.png', height: 150),
+            const SizedBox(height: 30),
             if (defaultTargetPlatform == TargetPlatform.android)
-              const CupertinoActivityIndicator(
-                color: Colors.white,
-                radius: 20,
-              )
+              const CupertinoActivityIndicator(color: Colors.white, radius: 20)
             else
-              const CircularProgressIndicator(
-                color: Colors.white,
-              )
+              const CircularProgressIndicator(color: Colors.white),
             // const LinearProgressIndicator(
             //   color: Colors.white,
             //   backgroundColor: Colors.white30,

@@ -1,4 +1,4 @@
-import 'package:Kulbot/widgets/iot_widget.dart';
+import 'package:Kulbot/widgets/IOT/iot_widget.dart';
 import 'package:flutter/material.dart';
 
 class Iotscreen extends StatefulWidget {

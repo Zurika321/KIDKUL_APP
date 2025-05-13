@@ -1,4 +1,4 @@
-import 'package:Kulbot/widgets/setting_widget.dart';
+import 'package:Kulbot/widgets/Setting/setting_widget.dart';
 import 'package:flutter/material.dart';
 
 class SettingScreen extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:Kulbot/widgets/control_widget.dart';
+import 'package:Kulbot/widgets/Control/control_widget.dart';
 import 'package:flutter/material.dart';
 
 class CarControl extends StatelessWidget {
