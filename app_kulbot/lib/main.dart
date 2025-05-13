@@ -1,6 +1,8 @@
 //ngôn ngữ - language
 import 'package:Kulbot/l10n/l10n.dart';
 import 'package:Kulbot/provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; //ngôn ngữ - language
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; //ngôn ngữ - language
 
 //page chính - main page
 import 'package:Kulbot/screens/homeScreen.dart';
@@ -11,8 +13,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart'; //ngôn ngữ - language
-import 'package:flutter_localizations/flutter_localizations.dart'; //ngôn ngữ - language
 import 'package:wakelock_plus/wakelock_plus.dart'; //giữ màn hình sáng - keep screen on
 
 //dữ liệu - data

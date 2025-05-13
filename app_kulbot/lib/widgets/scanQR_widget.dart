@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class ScanQRWidget extends StatefulWidget {
   final Function(String) onScanComplete;
@@ -16,43 +16,43 @@ class _ScanQRWidgetState extends State<ScanQRWidget> {
 
   //hàm quét QR 1 lần và lưu data vào _qrCodes
   Future<void> scanQRcodeOnce() async {
-    String scanData = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.QR);
+    // String scanData = await FlutterBarcodeScanner.scanBarcode(
+    //     '#ff6666', 'Cancel', true, ScanMode.QR);
 
-    if (scanData != '-1') {
-      // '-1' indicates that the user cancelled the scan
-      setState(() {
-        _qrCodes.add(scanData);
-        
-      });
-    }
+    // if (scanData != '-1') {
+    //   // '-1' indicates that the user cancelled the scan
+    //   setState(() {
+    //     _qrCodes.add(scanData);
+    //
+    //   });
+    // }
   }
 
   // hàm quét  QR dạng stream và gửi data 
   Future<void> scanQRcodeStream() async {
   bool isScanning = false; // Biến theo dõi trạng thái quét
 
-  FlutterBarcodeScanner.getBarcodeStreamReceiver(
-          '#ff6666', 'Cancel', true, ScanMode.QR)!
-      .listen((scanData) async {
-    if (!isScanning) {
-      isScanning = true; // Đặt trạng thái quét là đang quét
-
-      setState(() {
-        _scanQRres = scanData;
-        widget.onScanComplete(scanData);
-      });
-
-      // Delay for 1 second để đảm bảo quét xong
-      await Future.delayed(Duration(seconds: 1));
-
-      setState(() {
-        _scanQRres = null; // Xóa dữ liệu sau khi delay
-      });
-
-      isScanning = false; // Đặt lại trạng thái quét
-    }
-  });
+  // FlutterBarcodeScanner.getBarcodeStreamReceiver(
+  //         '#ff6666', 'Cancel', true, ScanMode.QR)!
+  //     .listen((scanData) async {
+  //   if (!isScanning) {
+  //     isScanning = true; // Đặt trạng thái quét là đang quét
+  //
+  //     setState(() {
+  //       _scanQRres = scanData;
+  //       widget.onScanComplete(scanData);
+  //     });
+  //
+  //     // Delay for 1 second để đảm bảo quét xong
+  //     await Future.delayed(Duration(seconds: 1));
+  //
+  //     setState(() {
+  //       _scanQRres = null; // Xóa dữ liệu sau khi delay
+  //     });
+  //
+  //     isScanning = false; // Đặt lại trạng thái quét
+  //   }
+  // });
 }
 
 

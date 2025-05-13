@@ -3,10 +3,11 @@ description: "App kulbot"
 
 publish_to: "none"
 
-version: 1.0.1
+version: 1.0.0+1
 
 environment:
-  sdk: ">=2.19.3 <3.0.0"
+  sdk: "3.7.0"
+  # sdk: ">=2.0.0 <3.0.0"
 
 dependencies:
   flutter_localizations:
@@ -19,7 +20,7 @@ dependencies:
   flutter_bluetooth_serial: ^0.4.0
 
   flutter_joystick: ^0.2.1
-  speech_to_text: ^6.6.2
+  speech_to_text: ^7.0.0
   avatar_glow: ^3.0.1
   carousel_slider: ^5.0.0
   provider: ^6.1.2
@@ -34,10 +35,12 @@ dependencies:
   path_provider: ^2.0.15
   #image_picker: ^1.0.0
   #exif: ^3.1.4
-  flutter_barcode_scanner: ^2.0.0
+  # flutter_barcode_scanner: ^2.0.0
+  # flutter_barcode_scanner: ^1.0.1
+  mobile_scanner: ^3.5.2 #^7.0.0
   showcaseview: ^3.0.0
   # audioplayers: ^6.0.0
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.2.3 #^2.5.3
   fluttertoast: ^8.2.6
   #webview_flutter_plus: ^0.4.7
   sleek_circular_slider: ^2.0.1
@@ -59,7 +62,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon.png"
+  image_path: "lib/assets/images/icon.png"
   min_sdk_android: 21
 
 dependency_overrides:
@@ -68,7 +71,6 @@ dependency_overrides:
 
 flutter:
   generate: true
-
   uses-material-design: true
 
   assets:

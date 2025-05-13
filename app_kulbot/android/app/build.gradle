@@ -26,7 +26,8 @@ android {
     namespace "com.example.app_kulbot"
 //    namespace "com.example.kulbot"
     compileSdkVersion 34
-    ndkVersion flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
+    // ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

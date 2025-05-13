@@ -82,56 +82,33 @@ class _SettingWidgetState extends State<SettingWidget> {
   Future<void> _saveSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    prefs.setString(
-        'moveForward',
-        _moveForwardController.text.isNotEmpty
-            ? _moveForwardController.text
-            : 'FF');
+    final settingsMap = {
+      'moveForward': _moveForwardController.text,
+      'moveFLeft': _moveFLeftController.text,
+      'moveFRight': _moveFRightController.text,
+      'moveBackward': _moveBackwardController.text,
+      'moveBLeft': _moveBLeftController.text,
+      'moveBRight': _moveBRightController.text,
+      'moveTurnLeft': _moveTurnLeftController.text,
+      'moveTurnRight': _moveTurnRightController.text,
+      'moveStop': _moveStopController.text,
+    };
 
-    prefs.setString(
-        'moveFLeft',
-        _moveFLeftController.text.isNotEmpty
-            ? _moveFLeftController.text
-            : 'GG');
+    final defaultValues = {
+      'moveForward': 'FF',
+      'moveFLeft': 'GG',
+      'moveFRight': 'II',
+      'moveBackward': 'BB',
+      'moveBLeft': 'JJ',
+      'moveBRight': 'HH',
+      'moveTurnLeft': 'LL',
+      'moveTurnRight': 'RR',
+      'moveStop': 'SS',
+    };
 
-    prefs.setString(
-        'moveFRight',
-        _moveFRightController.text.isNotEmpty
-            ? _moveFRightController.text
-            : 'II');
-
-    prefs.setString(
-        'moveBackward',
-        _moveBackwardController.text.isNotEmpty
-            ? _moveBackwardController.text
-            : 'BB');
-
-    prefs.setString(
-        'moveBLeft',
-        _moveBLeftController.text.isNotEmpty
-            ? _moveBLeftController.text
-            : 'JJ');
-
-    prefs.setString(
-        'moveBRight',
-        _moveBRightController.text.isNotEmpty
-            ? _moveBRightController.text
-            : 'HH');
-
-    prefs.setString(
-        'moveTurnLeft',
-        _moveTurnLeftController.text.isNotEmpty
-            ? _moveTurnLeftController.text
-            : 'LL');
-
-    prefs.setString(
-        'moveTurnRight',
-        _moveTurnRightController.text.isNotEmpty
-            ? _moveTurnRightController.text
-            : 'RR');
-
-    prefs.setString('moveStop',
-        _moveStopController.text.isNotEmpty ? _moveStopController.text : 'SS');
+    settingsMap.forEach((key, value) {
+      prefs.setString(key, value.isNotEmpty ? value : defaultValues[key]!);
+    });
   }
 
   // void _sendMessage() {
