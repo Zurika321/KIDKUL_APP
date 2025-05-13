@@ -19,6 +19,7 @@ import 'package:Kulbot/widgets/Home/ButtonHomeScreen.dart';
 
 //get page - lấy trang
 import 'package:Kulbot/widgets/IOT/iotScreen.dart';
+import 'package:Kulbot/widgets/IOT/IOT/IOT.dart';
 import 'package:Kulbot/widgets/Control/carControll.dart';
 import 'package:Kulbot/widgets/Control/Control.dart';
 import 'package:Kulbot/widgets/programing/programingScreen.dart';
@@ -140,6 +141,12 @@ class _HomeScreenState extends State<HomeScreen> {
         imgPath: 'lib/assets/images/iot.png',
         navigator: Iotscreen(),
       ),
+      ButtonHomeScreenConfig(
+        icon: Icons.devices,
+        title: AppLocalizations.of(context)!.iot + " 2",
+        imgPath: 'lib/assets/images/iot.png',
+        navigator: IOT(),
+      ),
       // ButtonHomeScreen(
       //   imgPath: 'lib/assets/images/kulbot.png',
       //   textButton: AppLocalizations.of(context)!.humanControl,
@@ -155,14 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
       //   textButton: AppLocalizations.of(context)!.dogControl,
       //   navigator: () => _navigateToScreen(context, dogControl()),
       // ), mấy cái này là comment của code cũ nên không xóa
-      ButtonHomeScreenConfig(
-        icon:
-            Icons
-                .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
-        title: AppLocalizations.of(context)!.setting,
-        imgPath: 'lib/assets/images/setting.png',
-        navigator: SettingScreen(),
-      ),
+      // ButtonHomeScreenConfig(
+      //   icon:
+      //       Icons
+      //           .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
+      //   title: AppLocalizations.of(context)!.setting,
+      //   imgPath: 'lib/assets/images/setting.png',
+      //   navigator: SettingScreen(),
+      // ),
     ];
 
     final items =
@@ -176,44 +183,124 @@ class _HomeScreenState extends State<HomeScreen> {
             )
             .toList();
 
+    // return Scaffold(
+    //   body: SafeArea(
+    //     bottom: true,
+    //     child: LayoutBuilder(
+    //       builder: (context, constraints) {
+    //         return SizedBox(
+    //           height: constraints.maxHeight,
+    //           child: _buildCarousel(items, buttonConfigs),
+    //         );
+    //       },
+    //     ),
+    //   ),
+    //   bottomNavigationBar: BottomNavigationBar(
+    //     currentIndex: _currentPage,
+    //     onTap: (index) {
+    //       setState(() {
+    //         _currentPage = index;
+    //         _carouselController.animateToPage(index);
+    //       });
+    //     },
+    //     type: BottomNavigationBarType.fixed,
+    //     backgroundColor:
+    //         isDarkMode
+    //             ? Color.fromARGB(255, 85, 85, 85)
+    //             : Color.fromARGB(255, 215, 215, 215),
+    //     selectedItemColor: Color.fromARGB(255, 67, 224, 255),
+    //     unselectedItemColor:
+    //         isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
+    //     items:
+    //         buttonConfigs
+    //             .map(
+    //               (btn) => BottomNavigationBarItem(
+    //                 icon: Icon(btn.icon),
+    //                 label: btn.title,
+    //               ),
+    //             )
+    //             .toList(),
+    //   ),
+    // );
     return Scaffold(
-      // backgroundColor: Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
         bottom: true,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              height: constraints.maxHeight,
-              child: _buildCarousel(items, buttonConfigs),
-            );
-          },
+        child: Column(
+          children: [
+            // === Thanh điều hướng nằm trên cùng ===
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Center(
+                child: Wrap(
+                  spacing: 10, // khoảng cách giữa các nút
+                  alignment: WrapAlignment.center,
+                  children:
+                      buttonConfigs.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        final btn = entry.value;
+                        final selected = _currentPage == index;
+
+                        final color =
+                            selected
+                                ? const Color.fromARGB(255, 67, 224, 255)
+                                : (isDarkMode
+                                    ? const Color.fromARGB(255, 150, 150, 150)
+                                    : Colors.grey);
+
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _currentPage = index;
+                                _carouselController.animateToPage(index);
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(30),
+                            splashColor: color.withOpacity(
+                              0.3,
+                            ), // hiệu ứng splash
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: color.withOpacity(
+                                      0.1,
+                                    ), // nền mờ của nút
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(btn.icon, color: color),
+                                ),
+                                // const SizedBox(height: 6),
+                                // Text(
+                                //   btn.title,
+                                //   style: TextStyle(color: color, fontSize: 12),
+                                // ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ),
+            ),
+
+            // === Carousel nằm bên dưới ===
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SizedBox(
+                    height: constraints.maxHeight,
+                    child: _buildCarousel(items, buttonConfigs),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage,
-        onTap: (index) {
-          setState(() {
-            _currentPage = index;
-            _carouselController.animateToPage(index);
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor:
-            isDarkMode
-                ? Color.fromARGB(255, 85, 85, 85)
-                : Color.fromARGB(255, 215, 215, 215),
-        selectedItemColor: Color.fromARGB(255, 67, 224, 255),
-        unselectedItemColor:
-            isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
-        items:
-            buttonConfigs
-                .map(
-                  (btn) => BottomNavigationBarItem(
-                    icon: Icon(btn.icon),
-                    label: btn.title,
-                  ),
-                )
-                .toList(),
       ),
     );
   }
