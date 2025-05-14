@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
+import 'package:Kulbot/provider/FileManage.dart';
+
+import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
+import 'package:Kulbot/widgets/IOT/Sample%26Data/IotLayoutProvider.dart'; //Lưu Layout
 
 class IOT extends StatefulWidget {
   const IOT({super.key});
@@ -10,166 +14,43 @@ class IOT extends StatefulWidget {
 }
 
 class _IOTState extends State<IOT> {
-  List<String> savedProjects = [];
-  String searchQuery = "";
+  List<String> allProjects = [];
+  List<String> filteredProjects = [];
   List<String> modelsLayoutIOT = ControlLayoutProvider.getAvailableTypes();
+  List<String> filteredModels = [];
+  String searchQuery = "";
 
   @override
   void initState() {
     super.initState();
-    loadProjects();
+    _loadSavedProjects();
   }
 
-  Future<void> loadProjects() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadSavedProjects() async {
+    final projectNames = await IotLayoutProvider.getSavedLayoutNames();
     setState(() {
-      savedProjects = prefs.getStringList('projects_iot') ?? [];
+      allProjects = projectNames;
     });
   }
 
-  // void openNewProjectDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return Dialog(
-  //         insetPadding: const EdgeInsets.symmetric(
-  //           horizontal: 24,
-  //           vertical: 80,
-  //         ),
-  //         child: ConstrainedBox(
-  //           constraints: BoxConstraints(
-  //             maxWidth: 600,
-  //             maxHeight: 600,
-  //             minHeight:
-  //                 (MediaQuery.of(context).size.height) -
-  //                 80, //80 là độ cao của appbar
-  //           ),
-  //           child: SingleChildScrollView(
-  //             padding: const EdgeInsets.all(16),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 const Text(
-  //                   "Chọn loại bảng điều khiển",
-  //                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-  //                 ),
-  //                 const SizedBox(height: 12),
-  //                 Wrap(
-  //                   spacing: 16,
-  //                   runSpacing: 16,
-  //                   children: [
-  //                     SizedBox(
-  //                       width: 120,
-  //                       height: 80,
-  //                       child: CustomBox(
-  //                         title: "Create New",
-  //                         icon: Icons.add,
-  //                         onTap: () {
-  //                           Navigator.pop(context);
-  //                           Navigator.push(
-  //                             context,
-  //                             MaterialPageRoute(
-  //                               builder:
-  //                                   (_) => RobotControlScreen(
-  //                                     projectName: "",
-  //                                     type: "new",
-  //                                   ),
-  //                             ),
-  //                           );
-  //                         },
-  //                       ),
-  //                     ),
-  //                     SizedBox(
-  //                       width: 120,
-  //                       height: 80,
-  //                       child: CustomBox(
-  //                         title: "Import",
-  //                         icon: Icons.upload_file,
-  //                         onTap: () {
-  //                           // TODO
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 const Text(
-  //                   "Các bảng điều khiển cơ bản",
-  //                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-  //                 ),
-  //                 const SizedBox(height: 8),
-  //                 Wrap(
-  //                   spacing: 16,
-  //                   runSpacing: 16,
-  //                   children: [
-  //                     SizedBox(
-  //                       width: 120,
-  //                       height: 80,
-  //                       child: CustomBox(
-  //                         title: "Robot xe",
-  //                         icon: Icons.toys,
-  //                         onTap: () {
-  //                           Navigator.pop(context);
-  //                           Navigator.push(
-  //                             context,
-  //                             MaterialPageRoute(
-  //                               builder:
-  //                                   (_) => RobotControlScreen(
-  //                                     projectName: "",
-  //                                     type: "Robot_Car",
-  //                                   ),
-  //                             ),
-  //                           );
-  //                         },
-  //                       ),
-  //                     ),
-  //                     SizedBox(
-  //                       width: 120,
-  //                       height: 80,
-  //                       child: CustomBox(
-  //                         title: "Robot chó",
-  //                         icon: Icons.pets,
-  //                         onTap: () {
-  //                           Navigator.pop(context);
-  //                           Navigator.push(
-  //                             context,
-  //                             MaterialPageRoute(
-  //                               builder:
-  //                                   (_) => RobotControlScreen(
-  //                                     projectName: "",
-  //                                     type: "Robot_Dog",
-  //                                   ),
-  //                             ),
-  //                           );
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 const Divider(height: 32),
-  //                 Align(
-  //                   alignment: Alignment.centerRight,
-  //                   child: TextButton(
-  //                     onPressed: () => Navigator.pop(context),
-  //                     child: const Text("Hủy"),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  void _filterProjects() {
+    final query = searchQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      filteredProjects = List.from(allProjects);
+      filteredModels = List.from(modelsLayoutIOT);
+    } else {
+      filteredProjects =
+          allProjects.where((p) => p.toLowerCase().contains(query)).toList();
+
+      filteredModels =
+          modelsLayoutIOT
+              .where((m) => m.toLowerCase().contains(query))
+              .toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filteredProjects =
-        savedProjects
-            .where((p) => p.toLowerCase().contains(searchQuery.toLowerCase()))
-            .toList();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Điều khiển Robot"),
@@ -196,7 +77,12 @@ class _IOTState extends State<IOT> {
                   ),
                   border: InputBorder.none,
                 ),
-                onChanged: (value) => setState(() => searchQuery = value),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                    _filterProjects();
+                  });
+                },
               ),
             ),
           ),
@@ -207,10 +93,47 @@ class _IOTState extends State<IOT> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (filteredProjects.isNotEmpty) ...[
-              // PHẦN 1: Dự án đã lưu
+            if (searchQuery.trim().isEmpty) ...[
+              if (allProjects.isNotEmpty) ...[
+                // PHẦN 1: Dự án đã lưu
+                const Text(
+                  "Chọn bảng điều khiển đã lưu",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: [
+                    ...allProjects.map(
+                      (name) => SizedBox(
+                        width: 120,
+                        height: 80,
+                        child: CustomBox(
+                          title: name,
+                          icon: Icons.folder,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => RobotControlScreen(
+                                      projectName: name,
+                                      type: "",
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24), // khoảng cách giữa các phần
+              ],
+              // PHẦN 2: Loại bảng điều khiển
               const Text(
-                "Chọn bảng điều khiển đã lưu",
+                "Chọn loại bảng điều khiển",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -239,10 +162,70 @@ class _IOTState extends State<IOT> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    width: 120,
+                    height: 80,
+                    child: CustomBox(
+                      title: "Import",
+                      icon: Icons.upload_file,
+                      onTap: () {
+                        // TODO
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // PHẦN 3: Các bảng điều khiển cơ bản
+              const Text(
+                "Các bảng điều khiển cơ bản",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  ...modelsLayoutIOT.map(
+                    (model) => SizedBox(
+                      width: 120,
+                      height: 80,
+                      child: CustomBox(
+                        title: model,
+                        icon: Icons.toys,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => RobotControlScreen(
+                                    projectName: "",
+                                    type: model,
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              // ==== PHẦN KẾT QUẢ TÌM KIẾM ====
+              const Text(
+                "🔍 Kết quả tìm kiếm",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
                   ...filteredProjects.map(
                     (name) => SizedBox(
-                      width: 200,
-                      height: 150,
+                      width: 120,
+                      height: 80,
                       child: CustomBox(
                         title: name,
                         icon: Icons.folder,
@@ -261,91 +244,31 @@ class _IOTState extends State<IOT> {
                       ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 24), // khoảng cách giữa các phần
-            ],
-            // PHẦN 2: Loại bảng điều khiển
-            const Text(
-              "Chọn loại bảng điều khiển",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                SizedBox(
-                  width: 120,
-                  height: 80,
-                  child: CustomBox(
-                    title: "Create New",
-                    icon: Icons.add,
-                    onTap: () {
-                      // Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => RobotControlScreen(
-                                projectName: "",
-                                type: "new",
-                              ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 120,
-                  height: 80,
-                  child: CustomBox(
-                    title: "Import",
-                    icon: Icons.upload_file,
-                    onTap: () {
-                      // TODO
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // PHẦN 3: Các bảng điều khiển cơ bản
-            const Text(
-              "Các bảng điều khiển cơ bản",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                ...modelsLayoutIOT.map(
-                  (model) => SizedBox(
-                    width: 120,
-                    height: 80,
-                    child: CustomBox(
-                      title: model,
-                      icon: Icons.toys,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => RobotControlScreen(
-                                  projectName: "",
-                                  type: model,
-                                ),
-                          ),
-                        );
-                      },
+                  ...filteredModels.map(
+                    (model) => SizedBox(
+                      width: 120,
+                      height: 80,
+                      child: CustomBox(
+                        title: model,
+                        icon: Icons.toys,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => RobotControlScreen(
+                                    projectName: "",
+                                    type: model,
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

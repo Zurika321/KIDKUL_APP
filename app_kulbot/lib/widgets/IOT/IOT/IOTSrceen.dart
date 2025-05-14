@@ -1,49 +1,72 @@
 import 'package:flutter/material.dart';
 
+//Mẫu và Class lưu trữ file txt
+import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
+import 'package:Kulbot/widgets/IOT/Sample%26Data/IotLayoutProvider.dart'; //Lưu Layout
+
+//class phần tử
+import 'package:Kulbot/widgets/IOT/phantu/PhanTu_IOT.dart'; //SCSWidget – hiển thị cảm biến
+
 class ControlItem {
   final String id;
   Offset relativePosition;
-  ControlItem({required this.id, required this.relativePosition});
+  Map<String, dynamic> config;
+
+  ControlItem({
+    required this.id,
+    required this.relativePosition,
+    this.config = const {}, // mặc định rỗng nếu không có
+  });
+
+  factory ControlItem.fromJson(Map<String, dynamic> json) {
+    return ControlItem(
+      id: json['id'],
+      relativePosition: Offset(
+        (json['x'] as num).toDouble(),
+        (json['y'] as num).toDouble(),
+      ),
+      config: Map<String, dynamic>.from(json['config'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'x': relativePosition.dx,
+    'y': relativePosition.dy,
+    'config': config,
+  };
 }
 
-class ControlLayoutProvider {
-  // Danh sách các mẫu và layout tương ứng
-  static final Map<String, List<ControlItem>> _layouts = {
-    'IOT1': [
-      ControlItem(id: 'joystick', relativePosition: const Offset(0.1, 0.7)),
-      ControlItem(id: 'light', relativePosition: const Offset(0.8, 0.7)),
-    ],
-    'IOT2': [
-      ControlItem(id: 'joystick', relativePosition: const Offset(0.05, 0.75)),
-      ControlItem(id: 'light', relativePosition: const Offset(0.7, 0.7)),
-      ControlItem(id: 'horn', relativePosition: const Offset(0.85, 0.7)),
-    ],
-  };
+void showSaveDialog(BuildContext context, Function(String) onSave) {
+  TextEditingController controller = TextEditingController(text: "United");
 
-  /// Trả về layout của một mẫu theo `type`
-  static List<ControlItem> getLayout(String type) {
-    return _layouts[type] ?? [];
-  }
-
-  /// Trả về danh sách tên các mẫu (ví dụ: ['IOT1', 'IOT2'])
-  static List<String> getAvailableTypes() {
-    return _layouts.keys.toList();
-  }
-
-  /// Trả về map toàn bộ layout: { 'IOT1': [...], 'IOT2': [...] }
-  static Map<String, List<ControlItem>> getAllLayouts() {
-    return Map.from(_layouts);
-  }
-
-  /// Kiểm tra một `type` có hợp lệ không
-  static bool isValidType(String type) {
-    return _layouts.containsKey(type);
-  }
+  showDialog(
+    context: context,
+    builder:
+        (_) => AlertDialog(
+          title: const Text('Nhập tên dự án'),
+          content: TextField(controller: controller),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSave(controller.text.trim());
+                Navigator.pop(context);
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        ),
+  );
 }
 
 class RobotControlScreen extends StatefulWidget {
   final String projectName;
   final String type;
+
   const RobotControlScreen({
     super.key,
     required this.projectName,
@@ -57,20 +80,13 @@ class RobotControlScreen extends StatefulWidget {
 class _RobotControlScreenState extends State<RobotControlScreen> {
   bool isEditingLayout = false;
   bool showMenu = false;
-  final List<String> availableControls = ['joystick', 'light', 'horn'];
-  final List<Map<String, dynamic>> controlGroups = [
-    {
-      'title': 'Joystick',
-      'controls': ['joystick'],
-    },
-    {
-      'title': 'Các nút điều khiển',
-      'controls': ['light', 'horn'],
-    },
-  ];
+  late String nameProject;
+  final List<Map<String, dynamic>> controlGroups = PhanTu_IOT.controlGroups;
   final List<ControlItem> placedControls = [];
 
   void handleDrop(String id, Offset position, Size screenSize) {
+    // if (placedControls.any((item) => item.id == id)) return;
+
     final adjustedPos = Offset(
       position.dx.clamp(0, screenSize.width * 0.9),
       position.dy.clamp(0, screenSize.height * 0.9),
@@ -81,7 +97,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     );
     setState(() {
       placedControls.add(ControlItem(id: id, relativePosition: relPos));
-      availableControls.remove(id);
     });
   }
 
@@ -91,8 +106,27 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     isEditingLayout = widget.type == "new";
     showMenu = isEditingLayout;
 
-    if (widget.type != "new") {
+    _initLayout(); // Gọi hàm async riêng
+  }
+
+  Future<void> _initLayout() async {
+    setState(() {
+      nameProject =
+          widget.projectName.isNotEmpty
+              ? widget.projectName
+              : (widget.type.isEmpty
+                  ? "Untitled"
+                  : widget.type == "new"
+                  ? "Untitled"
+                  : widget.type);
+    });
+    if (widget.type.isEmpty && widget.projectName.isNotEmpty) {
+      final items = await IotLayoutProvider.loadLayout(widget.projectName);
+      placedControls.addAll(items);
+      setState(() {});
+    } else if (widget.type != "new") {
       placedControls.addAll(ControlLayoutProvider.getLayout(widget.type));
+      setState(() {});
     }
   }
 
@@ -101,12 +135,28 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.projectName.isNotEmpty
-              ? widget.projectName
-              : (widget.type.isNotEmpty ? widget.type : "Untitled"),
-        ),
+        title: Text(nameProject),
         actions: [
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: () {
+              showSaveDialog(context, (String name) async {
+                final savedName = await IotLayoutProvider.saveLayout(
+                  name,
+                  placedControls,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✅ Đã lưu layout "$savedName" thành công!'),
+                  ),
+                );
+                setState(() {
+                  nameProject = savedName;
+                });
+              });
+            },
+          ),
+
           IconButton(
             icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
             onPressed:
@@ -120,7 +170,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
       body: Stack(
         children: [
           // Các nút đã đặt
-          ...placedControls.map((control) {
+          ...placedControls.asMap().entries.map((entry) {
+            final index = entry.key;
+            final control = entry.value;
+
             final position = Offset(
               control.relativePosition.dx * size.width,
               control.relativePosition.dy * size.height,
@@ -134,14 +187,39 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                         ? (details) {
                           setState(() {
                             final newPos = position + details.delta;
+
+                            final controlSize = PhanTu_IOT.getControlSize(
+                              control.id,
+                              size,
+                            );
+
                             control.relativePosition = Offset(
-                              newPos.dx.clamp(0, size.width) / size.width,
-                              newPos.dy.clamp(0, size.height) / size.height,
+                              (newPos.dx.clamp(
+                                    0.0,
+                                    size.width - controlSize.width,
+                                  )) /
+                                  size.width,
+                              (newPos.dy.clamp(
+                                    0.0,
+                                    size.height - controlSize.height,
+                                  )) /
+                                  size.height,
                             );
                           });
                         }
                         : null,
-                child: getControlWidget(control.id, size, inMenu: false),
+
+                child: PhanTu_IOT.getControlWidget(
+                  id: control.id,
+                  size: size,
+                  inMenu: false,
+                  config: control.config,
+                  onSave: (newConfig) {
+                    setState(() {
+                      placedControls[index].config = newConfig;
+                    });
+                  },
+                ),
               ),
             );
           }),
@@ -174,7 +252,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                             controlGroups.map((group) {
                               final title = group['title'] as String;
                               final controls =
-                                  group['controls'] as List<String>;
+                                  group['controls'] as List<dynamic>;
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
@@ -193,38 +271,52 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                       spacing: 12,
                                       runSpacing: 12,
                                       children:
-                                          controls.map((id) {
+                                          controls.map((control) {
+                                            final id = control['id'] as String;
+                                            final name =
+                                                control['name'] as String? ??
+                                                id;
+                                            final config =
+                                                control['config']
+                                                    as Map<String, dynamic>?;
+
                                             return Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Draggable<String>(
                                                   data: id,
-                                                  feedback: getControlWidget(
-                                                    id,
-                                                    size,
-                                                    isPreview: true,
-                                                    inMenu: false,
-                                                  ),
-                                                  onDragStarted: () {
-                                                    setState(
-                                                      () => showMenu = false,
-                                                    );
-                                                  },
-                                                  childWhenDragging: Opacity(
-                                                    opacity: 0.3,
-                                                    child: getControlWidget(
-                                                      id,
-                                                      size,
-                                                    ),
-                                                  ),
-                                                  child: getControlWidget(
-                                                    id,
-                                                    size,
-                                                  ),
+                                                  feedback:
+                                                      PhanTu_IOT.getControlWidget(
+                                                        id: id,
+                                                        size: size,
+                                                        config: config,
+                                                        isPreview: true,
+                                                        inMenu: false,
+                                                      ),
+
+                                                  onDragStarted:
+                                                      () => setState(
+                                                        () => showMenu = false,
+                                                      ),
+                                                  // childWhenDragging: Opacity(
+                                                  //   opacity: 0.3,
+                                                  //   child: getControlWidget(
+                                                  //   id: id,
+                                                  //   size: size,
+                                                  //   config: config,
+                                                  //   ),
+                                                  // ),
+                                                  child:
+                                                      PhanTu_IOT.getControlWidget(
+                                                        id: id,
+                                                        size: size,
+                                                        config: config,
+                                                        isPreview: true,
+                                                      ),
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  id,
+                                                  name,
                                                   style: const TextStyle(
                                                     fontSize: 12,
                                                   ),
@@ -264,92 +356,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 child: const Icon(Icons.add),
               )
               : null,
-    );
-  }
-
-  Widget getControlWidget(
-    String id,
-    Size size, {
-    bool isPreview = false,
-    bool inMenu = true,
-  }) {
-    final bool isSmall = isPreview || inMenu;
-
-    switch (id) {
-      case 'joystick':
-        final widgetSize = isSmall ? 80.0 : (size.height * 0.25);
-        return Container(
-          width: widgetSize,
-          height: widgetSize,
-          decoration: BoxDecoration(
-            color: Colors.cyanAccent.withOpacity(isPreview ? 0.7 : 1),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Text('🎮', style: TextStyle(fontSize: 24)),
-          ),
-        );
-
-      case 'light':
-        return LightButtonWidget(size: isSmall ? 80.0 : size.height * 0.1);
-
-      case 'horn':
-        return HornButtonWidget(size: isSmall ? 80.0 : size.height * 0.1);
-
-      default:
-        return const SizedBox();
-    }
-  }
-}
-
-class LightButtonWidget extends StatefulWidget {
-  final double size;
-
-  const LightButtonWidget({super.key, required this.size});
-
-  @override
-  State<LightButtonWidget> createState() => _LightButtonWidgetState();
-}
-
-class _LightButtonWidgetState extends State<LightButtonWidget> {
-  bool isOn = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isOn = !isOn;
-        });
-        // Gửi lệnh tới robot nếu cần
-      },
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          color: isOn ? Colors.yellowAccent : Colors.cyanAccent,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.lightbulb_outline, color: Colors.black),
-      ),
-    );
-  }
-}
-
-class HornButtonWidget extends StatelessWidget {
-  final double size;
-  const HornButtonWidget({super.key, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: const BoxDecoration(
-        color: Colors.orangeAccent,
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(Icons.volume_up, color: Colors.white),
     );
   }
 }
