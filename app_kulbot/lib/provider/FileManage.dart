@@ -33,6 +33,55 @@ class FileManager {
     return file.writeAsString(content);
   }
 
+  /// Ghi đè nội dung file đã tồn tại trong thư mục
+  static Future<bool> updateFile(
+    String fileName,
+    String content,
+    String folder,
+  ) async {
+    final dir = await _getDirectory(folder);
+    final file = File('${dir.path}/$fileName');
+
+    if (await file.exists()) {
+      await file.writeAsString(content);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /// Xoá file trong thư mục nếu tồn tại
+  static Future<bool> deleteFile(String fileName, String folder) async {
+    final dir = await _getDirectory(folder);
+    final file = File('${dir.path}/$fileName');
+
+    if (await file.exists()) {
+      await file.delete();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /// Đổi tên file trong thư mục (nếu file cũ tồn tại và tên mới chưa bị trùng)
+  static Future<bool> renameFile(
+    String oldName,
+    String newName,
+    String folder,
+  ) async {
+    final dir = await _getDirectory(folder);
+    final oldFile = File('${dir.path}/$oldName');
+    final newFile = File('${dir.path}/$newName');
+
+    if (await oldFile.exists()) {
+      if (await newFile.exists()) return false; // Không ghi đè
+      await oldFile.rename(newFile.path);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /// Lấy tất cả tên file .txt trong thư mục chỉ định
   static Future<List<String>> getAllFileNames(String folder) async {
     final dir = await _getDirectory(folder);

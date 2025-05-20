@@ -28,6 +28,7 @@ dependencies:
   #wakelock: ^0.6.2
   #highlight_text: ^1.7.0
   flutter_localization: ^0.2.0
+  flutter_blue_plus: ^1.35.5
 
   #tflite_flutter: ^0.10.4
   camera: ^0.10.5+2

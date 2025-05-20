@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
+
 //Phần tử
 import 'package:Kulbot/widgets/IOT/phantu/SCSWidget.dart'; //SCSWidget – hiển thị cảm biến
 import 'package:Kulbot/widgets/IOT/phantu/SwitchControlWidget.dart'; //SwitchControlWidget – hiển thị công tắc
@@ -17,26 +19,35 @@ class PhanTu_IOT {
         {
           'id': 'light',
           'name': 'Đèn',
-          'size': 0.1,
-          'sizeInMenu': 50,
+          'size': [0.1, 0, 0.1, 0],
+          //ko cần chuyển sang double vì hàm chuyển sang double dùm rồi
+          'sizeInMenu': [0, 50, 0, 50],
+          'max': 3,
           'widgetBuilder':
               (
-                double size,
+                Size size,
                 Map<String, dynamic> config,
+                Map<String, dynamic> value,
                 Function(Map<String, dynamic>)? onSave,
-              ) => LightButtonWidget(size: size),
+                VoidCallback? onDelete,
+              ) => LightButtonWidget(size: size.height),
         },
         {
           'id': 'horn',
           'name': 'Còi',
-          'size': 0.1,
-          'sizeInMenu': 50,
+          'size': [0.1, 0, 0.1, 0],
+          'sizeInMenu': [0, 50, 0, 50],
+          'max': 3,
           'widgetBuilder':
               (
-                double size,
+                Size size,
                 Map<String, dynamic> config,
+                Map<String, dynamic> value,
                 Function(Map<String, dynamic>)? onSave,
-              ) => HornButtonWidget(size: size),
+                VoidCallback? onDelete,
+              ) => HornButtonWidget(
+                size: size.height,
+              ), //lấy size height để tạo hộp vuông cho nút
         },
       ],
     },
@@ -45,58 +56,107 @@ class PhanTu_IOT {
       'controls': [
         {
           'id': 'SCSWidget',
-          'name': '',
-          'size': 0.5,
-          'sizeInMenu': 230,
-          'config': {'title': 'Temp', 'unit': '˚C', 'value': 0.0},
-          'widgetBuilder': (
-            double size,
-            Map<String, dynamic> config,
-            Function(Map<String, dynamic>)? onSave,
-          ) {
-            return SizedBox(
-              width: size,
-              height: size,
-              child: SCSWidget(config: config, onSave: onSave),
-            );
-          },
+          'name': 'SCSWidget',
+          'size': [0.5, 0, 0.5, 0],
+          'sizeInMenu': [0, 210, 0, 210],
+          // dạng [XScale,Xpx,YScale,Ypx] Scale là tỉ lệ màn hình px là chỉnh thẳng px => size width = XScale * screenWidth + Xpx
+          'max': 3,
+          'valueKeys': [
+            {'key': 'temp', 'default': 0},
+            // có thẻ thay đổi giá trị khi xuất hiện ở đây
+          ],
+          'config': {'title': 'Temp', 'unit': '˚C'},
+          //mảng setting tùy chỉnh (lưu chung trong dự án)
+          'widgetBuilder':
+              (
+                Size size,
+                Map<String, dynamic> config,
+                Map<String, dynamic> value,
+                Function(Map<String, dynamic>)? onSave,
+                VoidCallback? onDelete,
+              ) => SCSWidget(
+                config: config,
+                value: value,
+                onDelete: onDelete,
+                size: Size(size.width - 10, size.height - 10),
+              ),
         },
       ],
     },
   ];
 
-  static Size getControlSize(String id, Size screenSize) {
-    for (final group in controlGroups) {
-      final controls = group['controls'] as List<dynamic>;
-
-      for (final control in controls) {
+  static List<Map<String, dynamic>> getValueKeysById(String id) {
+    for (var group in controlGroups) {
+      for (var control in group['controls']) {
         if (control['id'] == id) {
-          final sizeRatio = control['size'] as double;
-          final size = screenSize.height * sizeRatio;
-          return Size(size, size);
+          final valueKeys = control['valueKeys'];
+          if (valueKeys != null && valueKeys is List) {
+            return List<Map<String, dynamic>>.from(valueKeys);
+          }
+          return [];
         }
       }
     }
+    return [];
+  } //lấy key tạo setValue trong class ControlValueManager
 
-    // Mặc định nếu không tìm thấy
-    return const Size(80, 80);
+  static Map<String, dynamic> getValueMapByControl(String id, String realId) {
+    final List<Map<String, dynamic>> keys = getValueKeysById(id);
+    final Map<String, dynamic> valueMap = {};
+
+    for (var item in keys) {
+      final key = item['key'];
+      final fullKey = '${realId}_${key}';
+      final def = item['default'] ?? 0;
+
+      if (!ControlValueManager.hasValue(fullKey)) {
+        ControlValueManager.setValue(fullKey, def);
+      }
+
+      valueMap[key] = ControlValueManager.getValue(fullKey);
+    }
+
+    return valueMap;
+  } // tạo mảng Map<String,dynamic> cho value khi gọi hàm getControlWidget
+
+  static int getMaxById(String id) {
+    for (var group in PhanTu_IOT.controlGroups) {
+      for (var control in group['controls']) {
+        if (control['id'] == id) return control['max'] ?? 5;
+      }
+    }
+    return 5;
   }
 
-  static List<double> _getControlSizeById(String id) {
+  static List<double> getControlSizeById(String id) {
+    // cái này là lấy size trong menu là 4 index đầu , 4 cái sau là ngoài menu
     for (final group in controlGroups) {
       for (final control in group['controls']) {
         if (control['id'] == id) {
-          return [control['sizeInMenu'], control['size'] ?? 0.1];
+          final sizeInMenu =
+              (control['sizeInMenu'] as List)
+                  .map((e) => (e is int) ? e.toDouble() : e as double)
+                  .toList();
+          final size =
+              (control['size'] as List)
+                  .map((e) => (e is int) ? e.toDouble() : e as double)
+                  .toList();
+
+          return [...sizeInMenu, ...size];
         }
       }
     }
-    return [80, 0.1];
+
+    // fallback cũng phải là List<double>
+    return [0.0, 50.0, 0.0, 50.0, 0.0, 80.0, 0.0, 80.0];
   }
 
   static Widget Function(
-    double size,
+    Size size,
     Map<String, dynamic> config,
+    Map<String, dynamic> value,
     Function(Map<String, dynamic>)? onSave,
+    VoidCallback? onDelete,
   )?
   getWidgetBuilderById(String id) {
     for (final group in controlGroups) {
@@ -104,9 +164,11 @@ class PhanTu_IOT {
         if (control['id'] == id) {
           return control['widgetBuilder']
               as Widget Function(
-                double,
+                Size,
+                Map<String, dynamic>,
                 Map<String, dynamic>,
                 Function(Map<String, dynamic>)?,
+                VoidCallback?,
               )?;
         }
       }
@@ -118,47 +180,67 @@ class PhanTu_IOT {
     required String id,
     required Size size,
     Map<String, dynamic>? config,
+    Map<String, dynamic>? value,
     bool isPreview = false,
+    // làm thêm cái hiện box mờ sau phần tử nhưng không quan trọng nên chưa làm
     bool inMenu = true,
     Function(Map<String, dynamic>)? onSave,
+    VoidCallback? onDelete, // ✅ thêm vào đây
+    bool lock = false,
   }) {
     final bool isSmall = isPreview || inMenu;
-    final List<double> SizeInOutMenu = _getControlSizeById(id);
-    // final double widgetSize = isSmall ? 80.0 : size.height * baseSize;
-    final double widgetSize =
-        isSmall
-            ? (SizeInOutMenu[0]) // <== dùng theo tỷ lệ size khai báo
-            : (size.height * SizeInOutMenu[1]);
+    final List<double> sizeInfo = getControlSizeById(id);
+    // [menu_XScale, menu_XOffset, menu_YScale, menu_YOffset, XScale, XOffset, YScale, YOffset]
 
+    // Tính kích thước theo tỷ lệ và offset
+    final double xScale = isSmall ? sizeInfo[0] : sizeInfo[4];
+    final double xOffset = isSmall ? sizeInfo[1] : sizeInfo[5];
+    final double yScale = isSmall ? sizeInfo[2] : sizeInfo[6];
+    final double yOffset = isSmall ? sizeInfo[3] : sizeInfo[7];
+
+    double width = size.height * xScale + xOffset;
+    double height = size.height * yScale + yOffset;
+
+    // Giới hạn để không âm hoặc quá nhỏ
+    width = width.clamp(30.0, size.width);
+    height = height.clamp(30.0, size.height);
+    // final double widgetSize = height;
+
+    if (config != null) {
+      config['lock'] = lock;
+    }
     switch (id) {
       case "joystick360":
-        return Container(
-          width: widgetSize,
-          height: widgetSize,
-          decoration: BoxDecoration(
-            color: Colors.cyanAccent.withOpacity(isPreview ? 0.7 : 1),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Text('🎮', style: TextStyle(fontSize: 24)),
+        return SizedBox(
+          width: width,
+          height: height,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.cyanAccent.withOpacity(isPreview ? 0.7 : 1),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text('🎮', style: TextStyle(fontSize: 24)),
+            ),
           ),
         );
-
-      // case "SwitchControlWidget":
-      //   return SizedBox(
-      //     width: widgetSize,
-      //     height: widgetSize,
-      //     child: SwitchControlWidget(
-      //       title: config?['title'] ?? 'Công tắc',
-      //       bluetoothKey: config?['bluetoothKey'] ?? '',
-      //     ),
-      //   );
 
       default:
         final builder = getWidgetBuilderById(id);
         if (builder != null) {
-          return builder(widgetSize, config ?? {}, onSave);
+          return SizedBox(
+            width: width,
+            height: height,
+            child: builder(
+              size,
+              config ?? <String, dynamic>{},
+              value ?? <String, dynamic>{},
+              onSave,
+              onDelete,
+            ), // ✅ truyền thêm
+          );
         }
+
         return const SizedBox();
     }
   }
@@ -194,6 +276,7 @@ class _LightButtonWidgetState extends State<LightButtonWidget> {
       child: Container(
         width: widget.size,
         height: widget.size,
+        // color: Colors.blue.withOpacity(0.3),
         decoration: BoxDecoration(
           color: isOn ? Colors.yellowAccent : Colors.cyanAccent,
           shape: BoxShape.circle,
@@ -213,6 +296,7 @@ class HornButtonWidget extends StatelessWidget {
     return Container(
       width: size,
       height: size,
+      // color: Colors.blue.withOpacity(0.3),
       decoration: const BoxDecoration(
         color: Colors.orangeAccent,
         shape: BoxShape.circle,

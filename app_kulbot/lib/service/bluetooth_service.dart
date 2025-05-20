@@ -16,8 +16,6 @@ class _DeviceWithAvailability {
 }
 
 class BluetoothService with ChangeNotifier {
-
-
   double? receivedValue1;
   double? receivedValue2;
   double? receivedValue3;
@@ -31,7 +29,8 @@ class BluetoothService with ChangeNotifier {
   Function()? onDeviceDisconnected;
 
   bool isDisconnecting = false;
-  FlutterBluetoothSerial flutterBluetoothSerial = FlutterBluetoothSerial.instance;
+  FlutterBluetoothSerial flutterBluetoothSerial =
+      FlutterBluetoothSerial.instance;
   BluetoothConnection? connection;
   List<_DeviceWithAvailability> devices = [];
 
@@ -56,7 +55,8 @@ class BluetoothService with ChangeNotifier {
     _name = name;
   }
 
-  final StreamController<Map<String, double?>> _streamController = StreamController.broadcast();
+  final StreamController<Map<String, double?>> _streamController =
+      StreamController.broadcast();
   Stream<Map<String, double?>> get stream => _streamController.stream;
 
   Future<void> requestLocationPermission() async {
@@ -66,25 +66,25 @@ class BluetoothService with ChangeNotifier {
     }
   }
 
-Future<void> requestBluetoothPermissions() async {
-  if (await Permission.bluetoothScan.isDenied ||
-      await Permission.bluetoothConnect.isDenied ||
-      await Permission.location.isDenied) {
-    await [
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-      Permission.location,
-    ].request();
+  Future<void> requestBluetoothPermissions() async {
+    if (await Permission.bluetoothScan.isDenied ||
+        await Permission.bluetoothConnect.isDenied ||
+        await Permission.location.isDenied) {
+      await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.location,
+      ].request();
+    }
   }
-}
 
-Future<void> startDiscoverySafely() async {
-  if (await Permission.location.isGranted) {
-    startDiscoveryWithTimeout();
-  } else {
-    await requestBluetoothPermissions();
+  Future<void> startDiscoverySafely() async {
+    if (await Permission.location.isGranted) {
+      startDiscoveryWithTimeout();
+    } else {
+      await requestBluetoothPermissions();
+    }
   }
-}
 
   void startDiscoveryWithTimeout() {
     Timer(Duration(seconds: 10), () {
@@ -94,15 +94,24 @@ Future<void> startDiscoverySafely() async {
     flutterBluetoothSerial.startDiscovery().listen((r) {
       bool isNewDevice = devices.every((device) => device.device != r.device);
       if (isNewDevice) {
-        devices.add(_DeviceWithAvailability(r.device, _DeviceAvailability.yes, r.rssi));
+        devices.add(
+          _DeviceWithAvailability(r.device, _DeviceAvailability.yes, r.rssi),
+        );
         notifyListeners();
       }
     });
   }
 
   void getBondedDevices() async {
-    List<BluetoothDevice> bondedDevices = await flutterBluetoothSerial.getBondedDevices();
-    devices = bondedDevices.map((device) => _DeviceWithAvailability(device, _DeviceAvailability.maybe)).toList();
+    List<BluetoothDevice> bondedDevices =
+        await flutterBluetoothSerial.getBondedDevices();
+    devices =
+        bondedDevices
+            .map(
+              (device) =>
+                  _DeviceWithAvailability(device, _DeviceAvailability.maybe),
+            )
+            .toList();
     notifyListeners();
   }
 
@@ -146,7 +155,9 @@ Future<void> startDiscoverySafely() async {
     for (var part in parts) {
       if (part.contains(':')) {
         List<String> subParts = part.split(':');
-        int? id = int.tryParse(subParts[0].trim().replaceAll(RegExp(r'[a-zA-Z ]'), ''));
+        int? id = int.tryParse(
+          subParts[0].trim().replaceAll(RegExp(r'[a-zA-Z ]'), ''),
+        );
         double? value = double.tryParse(subParts[1].trim());
 
         if (id != null && value != null) {
@@ -181,33 +192,35 @@ Future<void> startDiscoverySafely() async {
     }
   }
 
- Future<void> connectBluetoothDialog(BuildContext context) async {
-  await showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          // Start discovery only once when dialog is opened
-          if (_bluetoothState.isEnabled && devices.isEmpty) {
-            startDiscoverySafely(); // Pass setState
-          }
+  Future<void> connectBluetoothDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Start discovery only once when dialog is opened
+            if (_bluetoothState.isEnabled && devices.isEmpty) {
+              startDiscoverySafely(); // Pass setState
+            }
 
-          return AlertDialog(
-            alignment: Alignment.center,
-            title: const Text(
-              'Bluetooth',
-              style: TextStyle(fontSize: 20, color: Colors.black),
-            ),
-            content: _bluetoothState.isEnabled
-                ? buildDevicesListView(context, setState)
-                : const Text("Không tìm thấy thiết bị hoặc chưa bật bluetooth"),
-          );
-        },
-      );
-    },
-  );
-}
-
+            return AlertDialog(
+              alignment: Alignment.center,
+              title: const Text(
+                'Bluetooth',
+                style: TextStyle(fontSize: 20, color: Colors.black),
+              ),
+              content:
+                  _bluetoothState.isEnabled
+                      ? buildDevicesListView(context, setState)
+                      : const Text(
+                        "Không tìm thấy thiết bị hoặc chưa bật bluetooth",
+                      ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   /// Build the list of available devices
   Widget buildDevicesListView(BuildContext context, setState) {
@@ -219,51 +232,49 @@ Future<void> startDiscoverySafely() async {
       width: screenWidth * 0.5,
       height: screenHeight * 0.50,
       child: ListView(
-        children: devices.map((_device) {
-          Color iconColor =  Colors.green;
+        children:
+            devices.map((_device) {
+              Color iconColor = Colors.green;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: ElevatedButton(
-              onPressed: () async {
-                await connectToDevice(_device.device);
-                Navigator.of(context).pop(); // Close dialog
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(10, 50),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                shadowColor: Colors.grey[300],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50.0),
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    _device.device.name ?? "Unknown",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await connectToDevice(_device.device);
+                    Navigator.of(context).pop(); // Close dialog
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(10, 50),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shadowColor: Colors.grey[300],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        _device.device.address,
-                        style: const TextStyle(color: Colors.grey),
+                        _device.device.name ?? "Unknown",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(width: 3),
-                      Icon(
-                        Icons.android,
-                        color: iconColor,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _device.device.address,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(width: 3),
+                          Icon(Icons.android, color: iconColor),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }

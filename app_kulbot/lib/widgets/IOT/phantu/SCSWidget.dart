@@ -4,9 +4,19 @@ import 'package:flutter/material.dart';
 // SCSWidget – hiển thị cảm biến
 class SCSWidget extends StatefulWidget {
   final Map<String, dynamic> config;
+  final dynamic value;
   final Function(Map<String, dynamic>)? onSave;
+  final VoidCallback? onDelete;
+  final Size size;
 
-  const SCSWidget({super.key, required this.config, this.onSave});
+  SCSWidget({
+    super.key,
+    required this.config,
+    required this.value,
+    this.onSave,
+    this.onDelete,
+    required this.size,
+  });
 
   @override
   State<SCSWidget> createState() => _SCSWidgetState();
@@ -39,53 +49,55 @@ class _SCSWidgetState extends State<SCSWidget> {
     // Gọi callback cập nhật config ở bên ngoài
     widget.onSave?.call(newConfig);
 
+    setState(() {});
+
     if (mounted) Navigator.pop(context);
   }
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _unitController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final double value = widget.config['value']?.toDouble() ?? 0;
+    double sensorValue = 0;
+    double maxValue = _unitController.text == "˚C" ? 50.0 : 100.0;
+    bool lock = widget.config['lock'] ?? false;
 
-    return SCS(
-      value: value,
-      unit: _unitController.text,
-      trackColor: Colors.amber,
-      progressBarColor: Colors.orange,
-      min: 0,
-      max: 100,
-      trackWidth: 5,
-      progressBarWidth: 20,
-      bottomLabelText: _titleController.text,
-      editingControllerTitle: _titleController,
-      editingControllerUnit: _unitController,
-      onPress: _save,
+    if (widget.value is Map && widget.value['temp'] != null) {
+      sensorValue = widget.value['temp'].toDouble();
+    } else if (widget.value is Map && widget.value.isEmpty) {
+      sensorValue = 0.0; //giá trị mặc định ở menu
+    } else {
+      sensorValue = 99.0;
+      //nếu bạn thấy nó ra value 99 thì sai ở PhanTu_IOT hoặc IOTScreen nói chung là sai mảng value
+      debugPrint("⚠️ [SCSWidget] Giá trị không hợp lệ: ${widget.value}");
+    }
+    sensorValue = sensorValue.clamp(0.0, maxValue);
+
+    return Container(
+      width: widget.size.height,
+      height: widget.size.height,
+      color: Colors.blue.withAlpha((0.3 * 255).toInt()),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: SCS(
+              value: sensorValue,
+              unit: _unitController.text,
+              bottomLabelText: _titleController.text,
+              trackColor: Colors.amber,
+              progressBarColor: Colors.orange,
+              min: 0,
+              max: maxValue,
+              trackWidth: 5,
+              progressBarWidth: 20,
+              editingControllerTitle: _titleController,
+              editingControllerUnit: _unitController,
+              onPress: lock ? null : _save,
+              onDelete: lock ? null : widget.onDelete,
+              size: widget.size,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
-// Row(
-//   children: [
-//     Expanded(
-//       child: SCSWidget(
-//         value: snapshot.data?['receivedValue1'] ?? 0.0,
-//         unit: SCS_dv_1.isEmpty ? '˚C' : SCS_dv_1,
-//         title: SCS_title_1.isEmpty ? 'Temp 1' : SCS_title_1,
-//         editingControllerTitle: _editingSCS_title_1,
-//         editingControllerUnit: _editingSCS_dv_1,
-//         onPress: () {
-//           _saveSettings();
-//           Navigator.pop(context);
-//           _delayedLoadSettings();
-//         },
-//       ),
-//     ),
-//     // Widget thứ hai tương tự
-//   ],
-// ),

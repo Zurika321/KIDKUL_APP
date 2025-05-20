@@ -11,9 +11,10 @@ class IotLayoutProvider {
   ) async {
     final jsonList = items.map((e) => e.toJson()).toList();
     final content = jsonEncode(jsonList);
+    debugPrint('[SAVE] Content:\n$content');
 
     final file = await FileManager.saveWithUniqueName(baseName, content, 'IOT');
-    print('📁 File đã lưu tại: ${file.path}');
+    debugPrint('[SAVE] Đã lưu tại: ${file.path}');
 
     final savedName = file.path.split('/').last.replaceAll('.txt', '');
     return savedName; // Trả về tên thật đã lưu
@@ -26,14 +27,6 @@ class IotLayoutProvider {
       print("===> content loaded:\n$content");
 
       final List<dynamic> jsonList = jsonDecode(content);
-
-      // final items =
-      //     jsonList.map((item) {
-      //       final id = item['id'];
-      //       final dx = item['x']?.toDouble() ?? 0.0;
-      //       final dy = item['y']?.toDouble() ?? 0.0;
-      //       return ControlItem(id: id, relativePosition: Offset(dx, dy));
-      //     }).toList();
       final items =
           jsonList.map((item) {
             return ControlItem.fromJson(item);
@@ -51,5 +44,21 @@ class IotLayoutProvider {
   static Future<List<String>> getSavedLayoutNames() async {
     final files = await FileManager.getAllFileNames('IOT');
     return files.map((name) => name.replaceAll('.txt', '')).toList();
+  }
+
+  ///Cập nhật nội dung cho file đã có sẵn
+  static Future<bool> updateLayout(String name, List<ControlItem> items) async {
+    final content = jsonEncode(items.map((e) => e.toJson()).toList());
+    return FileManager.updateFile('$name.txt', content, 'IOT');
+  }
+
+  ///Xóa file theo tên
+  static Future<bool> deleteLayout(String name) async {
+    return FileManager.deleteFile('$name.txt', 'IOT');
+  }
+
+  ///Đổi tên file
+  static Future<bool> renameLayout(String oldName, String newName) async {
+    return FileManager.renameFile('$oldName.txt', '$newName.txt', 'IOT');
   }
 }

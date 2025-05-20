@@ -223,8 +223,10 @@ class _HomeScreenState extends State<HomeScreen> {
     //   ),
     // );
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 221, 221, 228),
       body: SafeArea(
         bottom: true,
+
         child: Column(
           children: [
             // === Thanh điều hướng nằm trên cùng ===

@@ -506,6 +506,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                     Expanded(
@@ -532,6 +533,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                   ],
@@ -565,6 +567,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                     Expanded(
@@ -591,6 +594,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                   ],
@@ -627,6 +631,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                     Expanded(
@@ -651,6 +656,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                   ],
@@ -682,6 +688,7 @@ class _IotWidgetState extends State<IotWidget> {
                                           Navigator.pop(context);
                                           _delayedLoadSettings();
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                     Expanded(
@@ -708,6 +715,7 @@ class _IotWidgetState extends State<IotWidget> {
                                             _delayedLoadSettings();
                                           });
                                         },
+                                        size: const Size(200, 200),
                                       ),
                                     ),
                                   ],
