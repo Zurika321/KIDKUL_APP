@@ -20,7 +20,7 @@ class ControlLayoutProvider {
         relativePosition: const Offset(0.5, 0.2),
         config: {'title': 'Nhiệt độ', 'unit': '°C'},
         lock: true,
-        canMove: false,
+        canMove: true,
       ),
       ControlItem(
         id: 'joystick360',

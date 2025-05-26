@@ -227,19 +227,14 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   bool isEditingLayout = false;
   bool showMenu = false;
   late String nameProject;
-  final List<Map<String, dynamic>> controlGroups = PhanTu_IOT.controlGroups;
+  final Map<String, Map<String, dynamic>> controlGroups =
+      PhanTu_IOT.controlGroups;
   final List<ControlItem> placedControls = [];
   final BluetoothService _bluetoothService = BluetoothService();
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String voicetotext = "";
-
-  late GlobalKey _one;
-  late GlobalKey _two;
-  late GlobalKey _three;
-  late GlobalKey _four;
-  late GlobalKey _five;
 
   String connectedDeviceName = "";
 
@@ -287,6 +282,9 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         ControlItem(id: id, realId: newRealId, relativePosition: relPos),
       );
     });
+    // for (final controlitem in placedControls) {
+    //   print(controlitem.realId.toString());
+    // }
   }
 
   @override
@@ -294,14 +292,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     super.initState();
     isEditingLayout = widget.type == "new";
     showMenu = isEditingLayout;
-
     _initLayout();
-
-    _one = GlobalKey();
-    _two = GlobalKey();
-    _three = GlobalKey();
-    _four = GlobalKey();
-    _five = GlobalKey();
 
     FlutterBluetoothSerial.instance.state.then((state) {
       setState(() {
@@ -356,6 +347,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   @override
   void dispose() {
     ControlValueManager.clearAll();
+    ShowKeyManager.clear();
     super.dispose();
   }
 
@@ -402,43 +394,78 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Scaffold(
-      backgroundColor: Color.fromARGB(255, 221, 221, 228),
-      appBar: AppBar(
-        title: Text(nameProject),
-        actions: [
-          // IconButton(
-          //   icon:
-          //       _bluetoothService.bluetoothState.isEnabled
-          //           ? Icon(
-          //             _bluetoothService.connection != null &&
-          //                     _bluetoothService.connection!.isConnected
-          //                 ? Icons.bluetooth_connected
-          //                 : Icons.bluetooth,
-          //             color:
-          //                 _bluetoothService.connection != null &&
-          //                         _bluetoothService.connection!.isConnected
-          //                     ? Colors.green
-          //                     : Colors.red,
-          //           )
-          //           : Icon(Icons.bluetooth, color: Colors.red),
-          //   onPressed: () {
-          //     _showBluetoothDialog(context); // Kết nối và nhận dữ liệu
-          //   },
-          // ),
-          IconButton(
-            icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
-            onPressed:
-                () => setState(() {
-                  final realId = "SCSWidget1_temp";
-                  final datatemp1 = ControlValueManager.getValue(realId);
-                  if (datatemp1 is num) {
-                    ControlValueManager.setValue(realId, datatemp1 + 1);
-                    debugPrint("✅ $realId = ${datatemp1 + 1}");
-                  }
-                }),
+    final isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
+
+    return ShowCaseWidget(
+      builder:
+          (context) => Scaffold(
+            backgroundColor: const Color.fromARGB(255, 221, 221, 228),
+            appBar: _buildAppBar(context, isDarkMode),
+            floatingActionButton:
+                isEditingLayout
+                    ? FloatingActionButton(
+                      onPressed: () => setState(() => showMenu = !showMenu),
+                      child: const Icon(Icons.add),
+                    )
+                    : null,
+            body: SafeArea(child: _buildMainStack(size)),
           ),
-          IconButton(
+    );
+  }
+
+  // appBar: AppBar(
+  //   title: Text(nameProject),
+  //   actions: [
+  //     IconButton(
+  //       icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
+  //       onPressed:
+  //           () => setState(() {
+  //             final realId = "SCSWidget1_temp";
+  //             final datatemp1 = ControlValueManager.getValue(realId);
+  //             if (datatemp1 is num) {
+  //               ControlValueManager.setValue(realId, datatemp1 + 1);
+  //               debugPrint("✅ $realId = ${datatemp1 + 1}");
+  //             }
+  //           }),
+  //     ),
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, bool isDarkMode) {
+    return AppBar(
+      backgroundColor: isDarkMode ? Colors.black45 : Colors.blueGrey[900],
+      title: Row(
+        children: [
+          Icon(Icons.rocket, color: Colors.cyanAccent),
+          SizedBox(width: 10),
+          Text(
+            "$connectedDeviceName",
+            style: TextStyle(
+              color: Colors.cyanAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.cyanAccent),
+        onPressed: () => Navigator.pop(context),
+      ),
+      actions: [
+        Showcase(
+          key: ShowKeyManager.createKey("Huongdan"),
+          description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
+          child: IconButton(
+            icon: Icon(Icons.question_mark_rounded, color: Colors.cyanAccent),
+            onPressed: () {
+              ShowCaseWidget.of(
+                context,
+              ).startShowCase(ShowKeyManager.getAllKeys());
+            },
+          ),
+        ),
+        Showcase(
+          key: ShowKeyManager.createKey("SaveProjectIOT"),
+          description: 'Đây là nút save project',
+          child: IconButton(
             icon: Icon(Icons.save),
             onPressed: () {
               showSaveDialog(
@@ -482,218 +509,240 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               );
             },
           ),
-
-          IconButton(
+        ),
+        Showcase(
+          key: ShowKeyManager.createKey("EditMode"),
+          description: "Bật/tắt chế độ edit",
+          child: IconButton(
             icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
-            onPressed:
-                () => setState(() {
-                  isEditingLayout = !isEditingLayout;
-                  showMenu = false;
-                }),
+            color: const Color.fromARGB(255, 0, 238, 255),
+            onPressed: () {
+              setState(() {
+                isEditingLayout = !isEditingLayout;
+                showMenu = false;
+              });
+            },
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Các nút đã đặt
-          ...placedControls.asMap().entries.map((entry) {
-            final index = entry.key;
-            final control = entry.value;
+        ),
+      ],
+    );
+  }
 
-            final List<double> sizeInfo = PhanTu_IOT.getControlSizeById(
-              control.id,
-            );
+  Widget _buildMainStack(Size size) {
+    return Stack(
+      children: [
+        // Các nút đã đặt
+        ...placedControls.asMap().entries.map((entry) {
+          final index = entry.key;
+          final control = entry.value;
 
-            final double xOffset = control.relativePosition.dx * size.width;
-            final double yOffset = control.relativePosition.dy * size.height;
+          final List<double> sizeInfo = PhanTu_IOT.getControlSizeById(
+            control.id,
+          );
 
-            final double width = sizeInfo[4] * size.height + sizeInfo[5];
-            final double height = sizeInfo[6] * size.height + sizeInfo[7];
+          final double xOffset = control.relativePosition.dx * size.width;
+          final double yOffset = control.relativePosition.dy * size.height;
 
-            final bool canMove = control.canMove && isEditingLayout;
-            final bool shouldLock =
-                control.lock || (!isEditingLayout && !control.lock);
-            return DraggableControl(
-              key: ValueKey(control.realId),
-              initialPosition: Offset(xOffset, yOffset),
-              screenSize: size,
-              elementSize: Size(width, height),
-              isEditing: canMove,
-              onDrop: (newOffset) {
+          final double width = sizeInfo[4] * size.height + sizeInfo[5];
+          final double height = sizeInfo[6] * size.height + sizeInfo[7];
+
+          final bool canMove = control.canMove && isEditingLayout;
+          final bool shouldLock =
+              control.lock || (!isEditingLayout && !control.lock);
+
+          final number = int.tryParse(
+            RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
+          );
+          return DraggableControl(
+            key: ValueKey(control.realId),
+            initialPosition: Offset(xOffset, yOffset),
+            screenSize: size,
+            elementSize: Size(width, height),
+            isEditing: canMove,
+            onDrop: (newOffset) {
+              setState(() {
+                control.relativePosition = Offset(
+                  newOffset.dx / size.width,
+                  newOffset.dy / size.height,
+                );
+              });
+            },
+            child: PhanTu_IOT.getControlWidget(
+              // key: ValueKey(control.realId),
+              id: control.id,
+              size: size,
+              inMenu: false,
+              value: PhanTu_IOT.getValueMapByControl(
+                control.id,
+                control.realId,
+              ),
+              config: control.config,
+              showKey: number == 1,
+              lock: shouldLock,
+              sendCommand: (msg) async {
+                _bluetoothService.sendMessage(msg);
+                await Future.delayed(Duration(milliseconds: 200));
+              }, //có sendCommand mới thực hiện nhưng hiện tại đang là có cả 2 lun
+              onSave: (newConfig) {
                 setState(() {
-                  control.relativePosition = Offset(
-                    newOffset.dx / size.width,
-                    newOffset.dy / size.height,
-                  );
+                  placedControls[index].config = newConfig;
                 });
               },
-              child: PhanTu_IOT.getControlWidget(
-                // key: ValueKey(control.realId),
-                id: control.id,
-                size: size,
-                inMenu: false,
-                value: PhanTu_IOT.getValueMapByControl(
-                  control.id,
-                  control.realId,
-                ),
-                config: control.config,
-                lock: shouldLock,
-                onSave: (newConfig) {
-                  setState(() {
-                    placedControls[index].config = newConfig;
-                  });
-                },
+              onDelete: () {
+                setState(() {
+                  placedControls.removeAt(index);
+                  ControlValueManager.removeValuesForRealId(control.realId);
+                });
+              },
+            ),
+          );
+        }),
 
-                onDelete: () {
-                  setState(() {
-                    placedControls.removeAt(index);
-                    ControlValueManager.removeValuesForRealId(control.realId);
-                  });
-                },
+        // Màn che + Menu bên phải
+        if (isEditingLayout && showMenu)
+          Stack(
+            children: [
+              // Nền mờ để tắt menu khi nhấn ra ngoài
+              GestureDetector(
+                onTap: () => setState(() => showMenu = false),
+                child: Container(
+                  color: Colors.black.withAlpha(77),
+                ), // 0.3 * 255 ≈ 77
               ),
-            );
-          }),
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                top: 0,
+                bottom: 0,
+                right: 0,
+                width: 250,
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(12),
+                  child: SingleChildScrollView(
+                    child: Builder(
+                      builder: (_) {
+                        // Gom các control theo title
+                        final Map<String, List<Map<String, dynamic>>>
+                        groupedControls = {};
+                        controlGroups.forEach((id, control) {
+                          final title = control['title'] ?? '';
+                          groupedControls.putIfAbsent(title, () => []).add({
+                            ...control,
+                            'id': id,
+                          });
+                        });
 
-          // Màn che + Menu bên phải
-          if (isEditingLayout && showMenu)
-            Stack(
-              children: [
-                GestureDetector(
-                  onTap: () => setState(() => showMenu = false),
-                  child: Container(color: Colors.black.withOpacity(0.3)),
-                ),
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  width: 250,
-                  child: Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(12),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children:
-                            controlGroups.map((group) {
-                              final title = group['title'] as String;
-                              final controls =
-                                  group['controls'] as List<dynamic>;
-
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      title,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        List<Widget> widgets = [];
+                        groupedControls.forEach((title, controls) {
+                          widgets.add(
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 12,
-                                      runSpacing: 12,
-                                      children:
-                                          controls.map((control) {
-                                            final id = control['id'] as String;
-                                            final name =
-                                                control['name'] as String? ??
-                                                id;
-                                            final configRaw = control['config'];
-                                            final config =
-                                                configRaw == null
-                                                    ? <String, dynamic>{}
-                                                    : Map<String, dynamic>.from(
-                                                      configRaw,
-                                                    );
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 12,
+                                    children:
+                                        controls.map((control) {
+                                          final id = control['id'];
+                                          final name = control['name'] ?? id;
+                                          final configRaw = control['config'];
+                                          final config =
+                                              configRaw == null
+                                                  ? <String, dynamic>{}
+                                                  : Map<String, dynamic>.from(
+                                                    configRaw,
+                                                  );
+                                          final sizeInfo =
+                                              PhanTu_IOT.getControlSizeById(id);
 
-                                            final List<double> sizeInfo =
-                                                PhanTu_IOT.getControlSizeById(
-                                                  id,
-                                                );
-                                            return Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Draggable<String>(
-                                                  data: id,
-                                                  feedback:
-                                                      PhanTu_IOT.getControlWidget(
-                                                        id: id,
-                                                        size: size,
-                                                        config: config,
-
-                                                        isPreview: true,
-                                                        inMenu: true,
-                                                      ),
-                                                  onDragStarted:
-                                                      () => setState(
-                                                        () => showMenu = false,
-                                                      ),
-                                                  child: SizedBox(
-                                                    width:
-                                                        sizeInfo[0] *
-                                                            size.width +
-                                                        sizeInfo[1],
-                                                    height:
-                                                        sizeInfo[2] *
-                                                            size.height +
-                                                        sizeInfo[3],
-                                                    child: PhanTu_IOT.getControlWidget(
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Draggable<String>(
+                                                data: id,
+                                                feedback:
+                                                    PhanTu_IOT.getControlWidget(
                                                       id: id,
                                                       size: size,
                                                       config: config,
                                                       isPreview: true,
                                                       inMenu: true,
-                                                      lock: true,
-                                                      //Mục đích chỗ này là khóa cái mở setting khi đang ở trong menu
                                                     ),
-                                                  ),
+                                                onDragStarted:
+                                                    () => setState(
+                                                      () => showMenu = false,
+                                                    ),
+                                                child: SizedBox(
+                                                  width:
+                                                      sizeInfo[0] * size.width +
+                                                      sizeInfo[1],
+                                                  height:
+                                                      sizeInfo[2] *
+                                                          size.height +
+                                                      sizeInfo[3],
+                                                  child:
+                                                      PhanTu_IOT.getControlWidget(
+                                                        id: id,
+                                                        size: size,
+                                                        config: config,
+                                                        isPreview: true,
+                                                        inMenu: true,
+                                                        lock: true,
+                                                      ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  name,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                name,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
                                                 ),
-                                              ],
-                                            );
-                                          }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                      ),
+                                              ),
+                                            ],
+                                          );
+                                        }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        });
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: widgets,
+                        );
+                      },
                     ),
                   ),
                 ),
-              ],
-            ),
-          // Drag target để thả button
-          if (isEditingLayout)
-            DragTarget<String>(
-              onAcceptWithDetails: (details) {
-                handleDrop(details.data, details.offset, size);
-                setState(() => showMenu = true);
-              },
-              builder:
-                  (context, candidateData, rejectedData) =>
-                      const SizedBox.expand(),
-            ),
-        ],
-      ),
-      floatingActionButton:
-          isEditingLayout
-              ? FloatingActionButton(
-                onPressed: () => setState(() => showMenu = !showMenu),
-                child: const Icon(Icons.add),
-              )
-              : null,
+              ),
+            ],
+          ),
+
+        // Drag target để thả button
+        if (isEditingLayout)
+          DragTarget<String>(
+            onAcceptWithDetails: (details) {
+              handleDrop(details.data, details.offset, size);
+              setState(() => showMenu = true);
+            },
+            builder:
+                (context, candidateData, rejectedData) =>
+                    const SizedBox.expand(),
+          ),
+      ],
     );
   }
 
