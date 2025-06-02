@@ -1,3 +1,4 @@
+import 'package:Kulbot/widgets/IOT/phantu/ControlMicWidget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
@@ -10,6 +11,7 @@ import 'package:Kulbot/widgets/IOT/phantu/SCSWidget.dart'; //SCSWidget – hiể
 // import 'package:Kulbot/widgets/IOT/phantu/SwitchControlWidget.dart'; //SwitchControlWidget – hiển thị công tắc
 // import 'package:Kulbot/widgets/IOT/SliderControlWidget.dart'; //SliderControlWidget – hiển thị thanh trượt
 import 'package:Kulbot/widgets/IOT/phantu/MicWIdget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Chart/ChartLogic.dart';
 import 'package:Kulbot/widgets/IOT/phantu/ControlButtonWidget.dart';
 
 //Mẫu và Class lưu trữ file txt
@@ -19,13 +21,13 @@ import 'package:Kulbot/widgets/IOT/phantu/ControlButtonWidget.dart';
 class PhanTu_IOT {
   static Map<String, Map<String, dynamic>> controlGroups = {
     'light': {
-      'title': 'Nút bật đèn',
+      'title': 'Các nút điều khiển',
       'name': 'Đèn',
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
+      'typeBox': "height",
       'max': 3,
       'config': {'title': 'Đèn', 'on': 'OO', 'off': 'PP'},
-      'haveCommand': true,
       'widgetBuilder':
           (
             Size size,
@@ -34,6 +36,7 @@ class PhanTu_IOT {
             Function(Map<String, dynamic>)? onSave,
             VoidCallback? onDelete,
             Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
           ) => ControlButtonWidget(
             config: config,
             size: Size(size.width - 10, size.height - 10),
@@ -43,27 +46,21 @@ class PhanTu_IOT {
             onDelete: onDelete,
           ),
     },
-    'horn': {
+    'mic': {
       'title': 'Các nút điều khiển',
-      'name': 'Còi',
+      'name': 'Mic',
       'size': [0.1, 0, 0.1, 0],
-      'sizeInMenu': [0, 50, 0, 50],
-      'max': 3,
-      'widgetBuilder':
-          (
-            Size size,
-            Map<String, dynamic> config,
-            Map<String, dynamic> value,
-            Function(Map<String, dynamic>)? onSave,
-            VoidCallback? onDelete,
-            Future<void> Function(String msg)? sendCommand,
-          ) => HornButtonWidget(size: size.height),
+      'sizeInMenu': [0, 40, 0, 40],
+      'typeBox': "height",
+      'max': 1,
+      'config': {'showkey': 'đây là cái mic'},
     },
     'SCSWidget': {
-      'title': 'Bảng trạng thái',
+      'title': 'Biểu đồ/đồ thị',
       'name': 'SCSWidget',
-      'size': [0.5, 0, 0.5, 0],
+      'size': [0.35, 0, 0.35, 0],
       'sizeInMenu': [0, 210, 0, 210],
+      'typeBox': "width",
       'max': 3,
       'valueKeys': [
         {'key': 'temp', 'default': 0},
@@ -77,6 +74,7 @@ class PhanTu_IOT {
             Function(Map<String, dynamic>)? onSave,
             VoidCallback? onDelete,
             Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
           ) => SCSWidget(
             config: config,
             value: value,
@@ -84,16 +82,25 @@ class PhanTu_IOT {
             size: Size(size.width - 10, size.height - 10),
           ),
     },
-    'mic': {
-      'title': 'ShowKey',
-      'name': 'Mic',
-      'size': [0.1, 0, 0.1, 0],
-      'sizeInMenu': [0, 40, 0, 40],
-      'max': 1,
-      'config': {'showkey': 'đây là cái mic'},
+    'CustomChart': {
+      'title': 'Biểu đồ/đồ thị',
+      'name': 'CustomChart',
+      'size': [0.4, 0, 0.3, 0],
+      'sizeInMenu': [0, 210, 0, 210],
+      'typeBox': "width",
+      'max': 3,
       'valueKeys': [
-        {'key': 'active', 'default': false},
+        {
+          'key': 'data',
+          'default':
+              {
+                    'data1': [0.0],
+                  }
+                  as Map<String, List<double>>,
+        },
+        {'key': 'isCurved', 'default': true},
       ],
+      'config': {"visibleCount": 10},
       'widgetBuilder':
           (
             Size size,
@@ -102,9 +109,14 @@ class PhanTu_IOT {
             Function(Map<String, dynamic>)? onSave,
             VoidCallback? onDelete,
             Future<void> Function(String msg)? sendCommand,
-          ) => MicShowKeyWidget(
-            size: size.height,
-            active: value['active'] ?? false,
+            bool inMenu,
+          ) => CustomChart(
+            size: size,
+            config: config,
+            value: value,
+            onSave: onSave,
+            onDelete: onDelete,
+            inMenu: inMenu,
           ),
     },
   };
@@ -126,19 +138,59 @@ class PhanTu_IOT {
     final Map<String, dynamic> valueMap = {};
 
     for (var item in keys) {
-      final key = item['key'];
-      final fullKey = '${realId}_${key}';
-      final def = item['default'] ?? 0;
+      final String key = item['key'];
+      final String fullKey = '${realId}_$key';
+      final dynamic def = item['default'];
 
+      // Nếu chưa có giá trị thì gán default
       if (!ControlValueManager.hasValue(fullKey)) {
         ControlValueManager.setValue(fullKey, def);
       }
 
-      valueMap[key] = ControlValueManager.getValue(fullKey);
+      // Lấy lại giá trị đã lưu (hoặc default) và ép kiểu theo kiểu của default
+      dynamic rawValue = ControlValueManager.getValue(fullKey);
+
+      // Ép kiểu thủ công dựa vào runtimeType của default
+      dynamic typedValue;
+      if (def is bool) {
+        typedValue = rawValue is bool ? rawValue : def;
+      } else if (def is int) {
+        typedValue = rawValue is int ? rawValue : def;
+      } else if (def is double) {
+        typedValue = rawValue is double ? rawValue : def;
+      } else if (def is String) {
+        typedValue = rawValue is String ? rawValue : def;
+      } else if (def is Map<String, List<double>>) {
+        typedValue =
+            rawValue is Map<String, dynamic>
+                ? rawValue.map((k, v) => MapEntry(k, List<double>.from(v)))
+                : def;
+      } else {
+        typedValue = rawValue; // fallback
+      }
+
+      valueMap[key] = typedValue;
     }
 
     return valueMap;
-  } // tạo mảng Map<String,dynamic> cho value khi gọi hàm getControlWidget
+  }
+  // tạo mảng Map<String,dynamic> cho value khi gọi hàm getControlWidget
+
+  static String getTypeBoxById(String id) {
+    final group = controlGroups[id];
+    if (group != null && group.containsKey('typeBox')) {
+      return group['typeBox'] ?? 'none';
+    }
+    return 'none';
+  }
+
+  static String getTitleById(String id) {
+    final group = controlGroups[id];
+    if (group != null && group.containsKey('title')) {
+      return group['title'] ?? 'Không có tiêu đề';
+    }
+    return 'Không có tiêu đề';
+  }
 
   static int getMaxById(String id) {
     final group = controlGroups[id];
@@ -172,6 +224,7 @@ class PhanTu_IOT {
     Function(Map<String, dynamic>)? onSave,
     VoidCallback? onDelete,
     Future<void> Function(String msg)? sendCommand,
+    bool inMenu,
   )?
   getWidgetBuilderById(String id) {
     final group = controlGroups[id];
@@ -184,6 +237,7 @@ class PhanTu_IOT {
             Function(Map<String, dynamic>)?,
             VoidCallback?,
             Future<void> Function(String msg)?,
+            bool inMenu,
           )?;
     }
     return null;
@@ -212,6 +266,7 @@ class PhanTu_IOT {
     bool lock = false,
     bool showKey = false,
     Future<void> Function(String msg)? sendCommand,
+    Future<void> Function(String msg)? VoiceTextToCommand,
   }) {
     final bool isSmall = isPreview || inMenu;
     final List<double> sizeInfo = getControlSizeById(id);
@@ -221,8 +276,12 @@ class PhanTu_IOT {
     final double yScale = isSmall ? sizeInfo[2] : sizeInfo[6];
     final double yOffset = isSmall ? sizeInfo[3] : sizeInfo[7];
 
-    double width = size.height * xScale + xOffset;
-    double height = size.height * yScale + yOffset;
+    final String typeBox = getTypeBoxById(id);
+
+    double width =
+        (typeBox == "height" ? size.height : size.width) * xScale + xOffset;
+    double height =
+        (typeBox == "width" ? size.width : size.height) * yScale + yOffset;
 
     width = width.clamp(30.0, size.width);
     height = height.clamp(30.0, size.height);
@@ -247,16 +306,31 @@ class PhanTu_IOT {
         ),
       );
     }
+    if (id == "mic") {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: MicWidget(
+          config: config,
+          onSave: onSave ?? (Map<String, dynamic> _) {},
+          onDelete: onDelete ?? () {},
+          lock: lock,
+          size: size,
+          voiceTextToCommand: VoiceTextToCommand,
+        ),
+      );
+    }
 
     final builder = getWidgetBuilderById(id);
     if (builder != null) {
       final Widget builtWidget = builder(
-        size,
+        Size(width, height),
         config,
         value,
         onSave,
         onDelete,
         sendCommand,
+        isSmall,
       );
 
       final bool useShowKey = showKey && !inMenu && !isPreview;

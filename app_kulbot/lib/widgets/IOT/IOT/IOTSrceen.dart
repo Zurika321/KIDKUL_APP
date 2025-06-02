@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; //báo có sử dụng chờ đợi
+import 'dart:math';
 
 //Mẫu và Class lưu trữ file txt
 import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
@@ -11,18 +11,18 @@ import 'package:Kulbot/widgets/IOT/phantu/PhanTu_IOT.dart'; //SCSWidget – hi�
 //class dịch vụ
 import 'package:Kulbot/service/bluetooth_service.dart'; //bluetooth
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt; //mic
 
 // import 'package:Kulbot/widgets/IOT/Bluetooth/bluetooth_device_dialog.dart';
 // import 'package:Kulbot/widgets/IOT/Bluetooth/bluetooth_service.dart'
 // as bt_service;
 
-import 'package:avatar_glow/avatar_glow.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 import 'package:Kulbot/l10n/l10n.dart'; // ngôn ngữ
+
+import 'package:Kulbot/widgets/IOT/phantu/listbox.dart'; // danh sách thiết bị
 
 class ControlValueManager {
   static final Map<String, dynamic> values = {};
@@ -232,7 +232,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   final List<ControlItem> placedControls = [];
   final BluetoothService _bluetoothService = BluetoothService();
 
-  late stt.SpeechToText _speech;
   bool _isListening = false;
   String voicetotext = "";
 
@@ -340,8 +339,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
     _bluetoothService.getBondedDevices();
     _checkBluetoothStatus();
-
-    _speech = stt.SpeechToText();
   }
 
   @override
@@ -450,6 +447,42 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.cable, color: Colors.cyanAccent),
+          onPressed: () {
+            setState(() {
+              const String name = "CustomChart1_data";
+              if (ControlValueManager.hasValue(name)) {
+                final value = ControlValueManager.getValue(name);
+                if (value is Map<String, List<double>>) {
+                  final random = Random();
+                  final updatedValue = {
+                    "data1": [
+                      ...?value["data1"],
+                      double.parse(
+                        (random.nextDouble() * 100).toStringAsFixed(1),
+                      ),
+                    ],
+                    "data2": [
+                      ...?value["data2"],
+                      double.parse(
+                        (random.nextDouble() * 100).toStringAsFixed(1),
+                      ),
+                    ],
+                  };
+                  ControlValueManager.setValue(name, updatedValue);
+                  debugPrint("✅ $name = ${updatedValue["data1"]}");
+                }
+              } else {
+                final value = <String, List<double>>{
+                  "data1": [10.0, 20.0, 30.0],
+                  "data2": [40.0, 50.0, 60.0],
+                };
+                ControlValueManager.setValue(name, value);
+              }
+            });
+          },
+        ),
         Showcase(
           key: ShowKeyManager.createKey("Huongdan"),
           description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
@@ -543,8 +576,17 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           final double xOffset = control.relativePosition.dx * size.width;
           final double yOffset = control.relativePosition.dy * size.height;
 
-          final double width = sizeInfo[4] * size.height + sizeInfo[5];
-          final double height = sizeInfo[6] * size.height + sizeInfo[7];
+          final String typeBox = PhanTu_IOT.getTypeBoxById(control.id);
+
+          double width =
+              (typeBox == "height" ? size.height : size.width) * sizeInfo[4] +
+              sizeInfo[5];
+          double height =
+              (typeBox == "width" ? size.width : size.height) * sizeInfo[6] +
+              sizeInfo[7];
+
+          width = width.clamp(30.0, size.width);
+          height = height.clamp(30.0, size.height);
 
           final bool canMove = control.canMove && isEditingLayout;
           final bool shouldLock =
@@ -553,6 +595,83 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           final number = int.tryParse(
             RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
           );
+          final String title = PhanTu_IOT.getTitleById(control.id);
+
+          Widget childWidget;
+          if (title == "Biểu đồ/đồ thị") {
+            childWidget = StreamBuilder<Map<String, dynamic>>(
+              stream: _bluetoothService.stream,
+              builder: (context, snapshot) {
+                final value = snapshot.data ?? {};
+                return PhanTu_IOT.getControlWidget(
+                  id: control.id,
+                  size: Size(size.width, size.height - 70.0),
+                  inMenu: false,
+                  value: PhanTu_IOT.getValueMapByControl(
+                    control.id,
+                    control.realId,
+                  ),
+                  config: control.config,
+                  showKey: number == 1,
+                  lock: shouldLock,
+                  sendCommand: (msg) async {
+                    debugPrint("Thực hiện bluetooth : " + msg.toString());
+                    await Future.delayed(const Duration(milliseconds: 200));
+                  },
+                  onSave: (newConfig) {
+                    setState(() {
+                      placedControls[index].config = newConfig;
+                    });
+                  },
+                  VoiceTextToCommand: (String msg) async {
+                    if (msg.isNotEmpty) {
+                      debugPrint("Gửi lệnh qua bluetooth: $msg");
+                    } else {
+                      debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
+                    }
+                  },
+                  onDelete: () {
+                    setState(() {
+                      placedControls.removeAt(index);
+                      ControlValueManager.removeValuesForRealId(control.realId);
+                    });
+                  },
+                );
+              },
+            );
+          } else {
+            childWidget = PhanTu_IOT.getControlWidget(
+              id: control.id,
+              size: Size(size.width, size.height - 70.0),
+              inMenu: false,
+              value: {},
+              config: control.config,
+              showKey: number == 1,
+              lock: shouldLock,
+              sendCommand: (msg) async {
+                debugPrint("Thực hiện bluetooth : " + msg.toString());
+                await Future.delayed(const Duration(milliseconds: 200));
+              },
+              onSave: (newConfig) {
+                setState(() {
+                  placedControls[index].config = newConfig;
+                });
+              },
+              VoiceTextToCommand: (String msg) async {
+                if (msg.isNotEmpty) {
+                  debugPrint("Gửi lệnh qua bluetooth: $msg");
+                } else {
+                  debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
+                }
+              },
+              onDelete: () {
+                setState(() {
+                  placedControls.removeAt(index);
+                  ControlValueManager.removeValuesForRealId(control.realId);
+                });
+              },
+            );
+          }
           return DraggableControl(
             key: ValueKey(control.realId),
             initialPosition: Offset(xOffset, yOffset),
@@ -567,36 +686,22 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 );
               });
             },
-            child: PhanTu_IOT.getControlWidget(
-              // key: ValueKey(control.realId),
-              id: control.id,
-              size: size,
-              inMenu: false,
-              value: PhanTu_IOT.getValueMapByControl(
-                control.id,
-                control.realId,
-              ),
-              config: control.config,
-              showKey: number == 1,
-              lock: shouldLock,
-              sendCommand: (msg) async {
-                _bluetoothService.sendMessage(msg);
-                await Future.delayed(Duration(milliseconds: 200));
-              }, //có sendCommand mới thực hiện nhưng hiện tại đang là có cả 2 lun
-              onSave: (newConfig) {
-                setState(() {
-                  placedControls[index].config = newConfig;
-                });
-              },
-              onDelete: () {
-                setState(() {
-                  placedControls.removeAt(index);
-                  ControlValueManager.removeValuesForRealId(control.realId);
-                });
-              },
-            ),
+            child: childWidget,
           );
         }),
+        //tạo t class position 16 16 cái listbox value là biến tên thiết bị
+        Positioned(
+          left: 16,
+          top: 16,
+          child: ListBox(
+            height: 40,
+            width: 150,
+            value:
+                connectedDeviceName.isEmpty
+                    ? "Vui lòng bât bluetooth"
+                    : connectedDeviceName,
+          ),
+        ),
 
         // Màn che + Menu bên phải
         if (isEditingLayout && showMenu)
@@ -663,8 +768,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                                   : Map<String, dynamic>.from(
                                                     configRaw,
                                                   );
-                                          final sizeInfo =
-                                              PhanTu_IOT.getControlSizeById(id);
 
                                           return Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -683,24 +786,15 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                                     () => setState(
                                                       () => showMenu = false,
                                                     ),
-                                                child: SizedBox(
-                                                  width:
-                                                      sizeInfo[0] * size.width +
-                                                      sizeInfo[1],
-                                                  height:
-                                                      sizeInfo[2] *
-                                                          size.height +
-                                                      sizeInfo[3],
-                                                  child:
-                                                      PhanTu_IOT.getControlWidget(
-                                                        id: id,
-                                                        size: size,
-                                                        config: config,
-                                                        isPreview: true,
-                                                        inMenu: true,
-                                                        lock: true,
-                                                      ),
-                                                ),
+                                                child:
+                                                    PhanTu_IOT.getControlWidget(
+                                                      id: id,
+                                                      size: size,
+                                                      config: config,
+                                                      isPreview: true,
+                                                      inMenu: true,
+                                                      lock: true,
+                                                    ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
@@ -744,85 +838,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           ),
       ],
     );
-  }
-
-  String _getSpeechLocale(String languageCode) {
-    switch (languageCode) {
-      case 'vi':
-        return 'vi_VN';
-      case 'en':
-      default:
-        return 'en_US';
-    }
-  }
-
-  Future<void> checkLocales() async {
-    var locales = await _speech.locales();
-    for (var locale in locales) {
-      print('${locale.localeId} - ${locale.name}');
-    }
-  }
-
-  String _previousText = "";
-  Timer? _debounce;
-
-  void _listenVoiceToText() async {
-    final provider = Provider.of<LocaleProvider>(context, listen: false);
-    final locale = provider.locale ?? Locale('en');
-    String languageCode = locale.languageCode;
-
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
-
-      if (available) {
-        _previousText = "";
-        voicetotext = "";
-
-        setState(() => _isListening = true);
-        await checkLocales();
-
-        _speech.listen(
-          localeId: _getSpeechLocale(languageCode),
-          onResult: (val) {
-            print('🟢 Speech raw: ${val.recognizedWords}');
-
-            _debounce?.cancel();
-
-            // Khởi tạo lại timer — chỉ xử lý sau khi im lặng ~1 giây
-            _debounce = Timer(Duration(milliseconds: 500), () {
-              String newPart =
-                  val.recognizedWords.substring(_previousText.length).trim();
-
-              if (newPart.isNotEmpty) {
-                setState(() {
-                  voicetotext = newPart;
-                });
-                // moveMotor();
-              }
-
-              _previousText = val.recognizedWords;
-            });
-          },
-        );
-      } else {
-        print("Không thể khởi tạo mic.");
-      }
-    } else {
-      _stopListening();
-    }
-  }
-
-  void _stopListening() {
-    if (_isListening) {
-      _speech.stop();
-      setState(() {
-        _isListening = false;
-        voicetotext = "...";
-      });
-    }
   }
 
   final String _moveForwardCommand = "";
