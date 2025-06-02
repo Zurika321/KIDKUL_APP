@@ -51,11 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    // _audioPlayer = AudioPlayer();
-    // _playMusic();
-    // _audioPlayer?.onPlayerComplete.listen((event) {
-    //   _playMusic();
-    // });
   }
 
   @override
@@ -63,30 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // _audioPlayer?.dispose();
     super.dispose();
   }
-
-  // void _playMusic() async {
-  //   // Load file nhạc từ assets
-  //   final ByteData data =
-  //       await rootBundle.load('lib/assets/music/background-music.mp3');
-  //   final Uint8List bytes = data.buffer.asUint8List();
-
-  //   // Lưu file nhạc vào thư mục tạm thời
-  //   final Directory tempDir = await getTemporaryDirectory();
-  //   final String tempPath = tempDir.path;
-  //   final File tempFile = File('$tempPath/background-music.mp3');
-  //   await tempFile.writeAsBytes(bytes);
-
-  //   // Phát file nhạc từ thư mục tạm thời
-  //   await _audioPlayer?.play(DeviceFileSource(tempFile.path));
-  // }
-
-  // Future<void> _loadSettings() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _moveForwardCommand = prefs.getString('moveForward') ?? 'FF';
-  //     _moveBackwardCommand = prefs.getString('moveBackward') ?? 'BB';
-  //   });
-  // }
 
   void _navigateToScreen(BuildContext context, Widget screen) {
     Navigator.of(context).push(
@@ -112,12 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
     final List<ButtonHomeScreenConfig> buttonConfigs = [
-      ButtonHomeScreenConfig(
-        icon: Icons.home,
-        title: AppLocalizations.of(context)!.carControl,
-        imgPath: 'lib/assets/images/steering-wheel.png',
-        navigator: CarControl(),
-      ),
       ButtonHomeScreenConfig(
         icon: Icons.home,
         title: AppLocalizations.of(context)!.control,
@@ -147,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
         imgPath: 'lib/assets/images/iot.png',
         navigator: IOT(),
       ),
+
       // ButtonHomeScreen(
       //   imgPath: 'lib/assets/images/kulbot.png',
       //   textButton: AppLocalizations.of(context)!.humanControl,
@@ -162,14 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
       //   textButton: AppLocalizations.of(context)!.dogControl,
       //   navigator: () => _navigateToScreen(context, dogControl()),
       // ), mấy cái này là comment của code cũ nên không xóa
-      // ButtonHomeScreenConfig(
-      //   icon:
-      //       Icons
-      //           .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
-      //   title: AppLocalizations.of(context)!.setting,
-      //   imgPath: 'lib/assets/images/setting.png',
-      //   navigator: SettingScreen(),
-      // ),
+      ButtonHomeScreenConfig(
+        icon:
+            Icons
+                .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
+        title: AppLocalizations.of(context)!.setting,
+        imgPath: 'lib/assets/images/setting.png',
+        navigator: SettingScreen(),
+      ),
     ];
 
     final items =
@@ -303,6 +269,32 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentPage,
+        onTap: (index) {
+          setState(() {
+            _currentPage = index;
+            _carouselController.animateToPage(index);
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor:
+            isDarkMode
+                ? Color.fromARGB(255, 211, 61, 61)
+                : Color.fromARGB(255, 60, 107, 234),
+        selectedItemColor: Color.fromARGB(255, 67, 224, 255),
+        unselectedItemColor:
+            isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
+        items:
+            buttonConfigs
+                .map(
+                  (btn) => BottomNavigationBarItem(
+                    icon: Icon(btn.icon),
+                    label: btn.title,
+                  ),
+                )
+                .toList(),
       ),
     );
   }

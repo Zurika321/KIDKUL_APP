@@ -1,6 +1,9 @@
+import 'package:Kulbot/widgets/Control/CarControlScreen.dart';
+import 'package:Kulbot/widgets/Control/DogControlScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Kulbot/widgets/Control/RobotControlScreen.dart';
+// import 'package:Kulbot/widgets/Control/RobotControlScreen.dart';
+import 'package:Kulbot/widgets/Control/control_widget.dart';
 
 class Control extends StatefulWidget {
   const Control({super.key});
@@ -26,136 +29,6 @@ class _ControlState extends State<Control> {
     });
   }
 
-  void openNewProjectDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 80,
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Chọn loại bảng điều khiển",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 80,
-                        child: CustomBox(
-                          title: "Create New",
-                          icon: Icons.add,
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => RobotControlScreen(
-                                      projectName: "",
-                                      type: "new",
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 120,
-                        height: 80,
-                        child: CustomBox(
-                          title: "Import",
-                          icon: Icons.upload_file,
-                          onTap: () {
-                            // TODO
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Các bảng điều khiển cơ bản",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 80,
-                        child: CustomBox(
-                          title: "Robot xe",
-                          icon: Icons.toys,
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => RobotControlScreen(
-                                      projectName: "",
-                                      type: "Robot_Car",
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 120,
-                        height: 80,
-                        child: CustomBox(
-                          title: "Robot chó",
-                          icon: Icons.pets,
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => RobotControlScreen(
-                                      projectName: "",
-                                      type: "Robot_Dog",
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 32),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Hủy"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final filteredProjects =
@@ -176,7 +49,6 @@ class _ControlState extends State<Control> {
             child: Container(
               width: 200,
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade400),
               ),
@@ -207,30 +79,133 @@ class _ControlState extends State<Control> {
                 height: 150,
                 child: CustomBox(
                   title: name,
-                  icon: Icons.folder,
+                  icon: Image.asset(
+                    'lib/assets/images/', // đường dẫn tới ảnh trong thư mục assets
+                    width: 40,
+                    height: 40,
+                  ),
                   onTap:
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder:
-                              (_) => RobotControlScreen(
-                                projectName: name,
-                                type: "",
+                              (_) => ControlWidget(
+                                checkAvailability:
+                                    true, // hoặc false tùy logic bạn muốn
                               ),
                         ),
                       ),
+                  backgroundColor: const Color.fromARGB(255, 228, 234, 184),
                 ),
               ),
             ),
             SizedBox(
-              width: 200,
-              height: 150,
-              child: CustomBox(
-                title: "New",
-                icon: Icons.add,
-                onTap: openNewProjectDialog,
+              height: 300,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    SizedBox(width: 8),
+                    SizedBox(
+                      width: 300,
+                      height: 300,
+                      child: CustomBox(
+                        title: "Robot xe",
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          236,
+                          164,
+                          135,
+                        ),
+                        icon: Image.asset(
+                          'lib/assets/images/xe.png', // Thay bằng đường dẫn ảnh của bạn
+                          width: 300,
+                          height: 250,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CarControlScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    SizedBox(
+                      width: 300,
+                      height: 300,
+                      child: CustomBox(
+                        title: "Robot người",
+                        icon: Image.asset(
+                          'lib/assets/images/kul_bot.png', // Thay bằng đường dẫn ảnh của bạn
+                          width: 300,
+                          height: 250,
+                        ),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          108,
+                          165,
+                          191,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => ControlWidget(
+                                    checkAvailability:
+                                        true, // hoặc false tùy logic bạn muốn
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    SizedBox(
+                      width: 300,
+                      height: 300,
+                      child: CustomBox(
+                        title: "Robot chó",
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          113,
+                          200,
+                          113,
+                        ),
+                        icon: Image.asset(
+                          'lib/assets/images/dog.jpg', // Thay bằng đường dẫn ảnh của bạn
+                          width: 300,
+                          height: 250,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => DogWidget()),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                  ],
+                ),
               ),
             ),
+
+            // SizedBox(
+            //   width: 200,
+            //   height: 150,
+            //   child: CustomBox(
+            //     title: "New",
+            //     icon: Icons.add,
+            //     onTap: openNewProjectDialog,
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -240,15 +215,17 @@ class _ControlState extends State<Control> {
 
 class CustomBox extends StatelessWidget {
   final String title;
-  final IconData icon;
+  final Widget icon;
   final VoidCallback onTap;
+  final Color backgroundColor;
 
   const CustomBox({
-    super.key,
+    Key? key,
     required this.title,
     required this.icon,
     required this.onTap,
-  });
+    required this.backgroundColor,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +233,7 @@ class CustomBox extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade300),
           boxShadow: [
@@ -270,8 +247,9 @@ class CustomBox extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: Colors.blueAccent),
+            icon,
             const SizedBox(height: 8),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(

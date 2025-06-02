@@ -136,6 +136,16 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     super.initState();
     isEditingLayout = widget.type == "new";
     showMenu = isEditingLayout;
+
+    if (widget.type == "Robot_Dog") {
+      placedControls.add(
+        ControlItem(
+          id: 'light',
+          relativePosition: const Offset(0.8, 0.7),
+          size: const Size(50, 50),
+        ),
+      );
+    }
   }
 
   Offset? _dragStart;
