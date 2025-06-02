@@ -50,11 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    // _audioPlayer = AudioPlayer();
-    // _playMusic();
-    // _audioPlayer?.onPlayerComplete.listen((event) {
-    //   _playMusic();
-    // });
   }
 
   @override
@@ -62,30 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // _audioPlayer?.dispose();
     super.dispose();
   }
-
-  // void _playMusic() async {
-  //   // Load file nhạc từ assets
-  //   final ByteData data =
-  //       await rootBundle.load('lib/assets/music/background-music.mp3');
-  //   final Uint8List bytes = data.buffer.asUint8List();
-
-  //   // Lưu file nhạc vào thư mục tạm thời
-  //   final Directory tempDir = await getTemporaryDirectory();
-  //   final String tempPath = tempDir.path;
-  //   final File tempFile = File('$tempPath/background-music.mp3');
-  //   await tempFile.writeAsBytes(bytes);
-
-  //   // Phát file nhạc từ thư mục tạm thời
-  //   await _audioPlayer?.play(DeviceFileSource(tempFile.path));
-  // }
-
-  // Future<void> _loadSettings() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _moveForwardCommand = prefs.getString('moveForward') ?? 'FF';
-  //     _moveBackwardCommand = prefs.getString('moveBackward') ?? 'BB';
-  //   });
-  // }
 
   void _navigateToScreen(BuildContext context, Widget screen) {
     Navigator.of(context).push(
@@ -95,14 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
           const begin = 0.0;
           const end = 1.0;
           const curve = Curves.easeInOut;
-          final tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
           final scaleAnimation = animation.drive(tween);
 
-          return ScaleTransition(
-            scale: scaleAnimation,
-            child: child,
-          );
+          return ScaleTransition(scale: scaleAnimation, child: child);
         },
       ),
     );
@@ -112,12 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
     final List<ButtonHomeScreenConfig> buttonConfigs = [
-      ButtonHomeScreenConfig(
-        icon: Icons.home,
-        title: AppLocalizations.of(context)!.carControl,
-        imgPath: 'lib/assets/images/steering-wheel.png',
-        navigator: CarControl(),
-      ),
       ButtonHomeScreenConfig(
         icon: Icons.home,
         title: AppLocalizations.of(context)!.control,
@@ -157,24 +121,28 @@ class _HomeScreenState extends State<HomeScreen> {
       //   navigator: () => _navigateToScreen(context, dogControl()),
       // ), mấy cái này là comment của code cũ nên không xóa
       ButtonHomeScreenConfig(
-        icon: Icons
-            .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
+        icon:
+            Icons
+                .settings, //mấy icon này có thể chưa đúng có thể sau này sẽ sửa lại
         title: AppLocalizations.of(context)!.setting,
         imgPath: 'lib/assets/images/setting.png',
         navigator: SettingScreen(),
       ),
     ];
 
-    final items = buttonConfigs
-        .map((btn) => ButtonHomeScreen(
-              imgPath: btn.imgPath,
-              textButton: btn.title,
-              navigator: () => _navigateToScreen(context, btn.navigator),
-            ))
-        .toList();
+    final items =
+        buttonConfigs
+            .map(
+              (btn) => ButtonHomeScreen(
+                imgPath: btn.imgPath,
+                textButton: btn.title,
+                navigator: () => _navigateToScreen(context, btn.navigator),
+              ),
+            )
+            .toList();
 
     return Scaffold(
-      // backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Color.fromARGB(255, 124, 163, 227),
       body: SafeArea(
         bottom: true,
         child: LayoutBuilder(
@@ -195,22 +163,30 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: isDarkMode
-            ? Color.fromARGB(255, 85, 85, 85)
-            : Color.fromARGB(255, 215, 215, 215),
+        backgroundColor:
+            isDarkMode
+                ? Color.fromARGB(255, 211, 61, 61)
+                : Color.fromARGB(255, 60, 107, 234),
         selectedItemColor: Color.fromARGB(255, 67, 224, 255),
         unselectedItemColor:
             isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
-        items: buttonConfigs
-            .map((btn) =>
-                BottomNavigationBarItem(icon: Icon(btn.icon), label: btn.title))
-            .toList(),
+        items:
+            buttonConfigs
+                .map(
+                  (btn) => BottomNavigationBarItem(
+                    icon: Icon(btn.icon),
+                    label: btn.title,
+                  ),
+                )
+                .toList(),
       ),
     );
   }
 
   Widget _buildCarousel(
-      List<Widget> items, List<ButtonHomeScreenConfig> configs) {
+    List<Widget> items,
+    List<ButtonHomeScreenConfig> configs,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // final double availableHeight = constraints.maxHeight;
@@ -242,10 +218,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Transform(
                 alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(rotationY)
-                  ..scale(scale),
+                transform:
+                    Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(rotationY)
+                      ..scale(scale),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -254,9 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: const Color.fromARGB(255, 181, 181, 181),
                         boxShadow: [
                           BoxShadow(
-                            color: _currentPage == index
-                                ? Color(0xFF3D5BFF)
-                                : Colors.black12,
+                            color:
+                                _currentPage == index
+                                    ? Color(0xFF3D5BFF)
+                                    : Colors.black12,
                             blurRadius: 10,
                             spreadRadius: 2,
                             offset: Offset(0, 5),

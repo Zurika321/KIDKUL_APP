@@ -232,18 +232,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                   icon: Icon(Icons.question_mark_rounded,
                       color: Colors.cyanAccent),
                   onPressed: () {
-                    ShowCaseWidget.of(context).startShowCase([
-                      _one,
-                      _two,
-                      _three,
-                      _four,
-                      _five,
-                      _six,
-                      _seven,
-                      _eight,
-                      _nine,
-                      _joystickKey,
-                    ]);
+                 
                   },
                 ),
               ),
