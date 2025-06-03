@@ -1,7 +1,6 @@
-import 'package:Kulbot/widgets/IOT/phantu/ControlMicWidget.dart';
 import 'package:flutter/material.dart';
 
-import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
+// import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
 
 //thư viện
 import 'package:showcaseview/showcaseview.dart'; //showcase
@@ -11,8 +10,10 @@ import 'package:Kulbot/widgets/IOT/phantu/SCSWidget.dart'; //SCSWidget – hiể
 // import 'package:Kulbot/widgets/IOT/phantu/SwitchControlWidget.dart'; //SwitchControlWidget – hiển thị công tắc
 // import 'package:Kulbot/widgets/IOT/SliderControlWidget.dart'; //SliderControlWidget – hiển thị thanh trượt
 import 'package:Kulbot/widgets/IOT/phantu/MicWIdget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/ControlMicWidget.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/ChartLogic.dart';
 import 'package:Kulbot/widgets/IOT/phantu/ControlButtonWidget.dart';
+import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 
 //Mẫu và Class lưu trữ file txt
 // import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
@@ -58,7 +59,7 @@ class PhanTu_IOT {
     'SCSWidget': {
       'title': 'Biểu đồ/đồ thị',
       'name': 'SCSWidget',
-      'size': [0.35, 0, 0.35, 0],
+      'size': [0.3, 0, 0.3, 0],
       'sizeInMenu': [0, 210, 0, 210],
       'typeBox': "width",
       'max': 3,
@@ -92,11 +93,10 @@ class PhanTu_IOT {
       'valueKeys': [
         {
           'key': 'data',
-          'default':
-              {
-                    'data1': [0.0],
-                  }
-                  as Map<String, List<double>>,
+          'default': {
+            'data1': [0.0],
+            'data2': [0.0],
+          },
         },
         {'key': 'isCurved', 'default': true},
       ],
@@ -147,29 +147,17 @@ class PhanTu_IOT {
         ControlValueManager.setValue(fullKey, def);
       }
 
-      // Lấy lại giá trị đã lưu (hoặc default) và ép kiểu theo kiểu của default
+      // Lấy lại giá trị đã lưu (hoặc default)
       dynamic rawValue = ControlValueManager.getValue(fullKey);
 
-      // Ép kiểu thủ công dựa vào runtimeType của default
-      dynamic typedValue;
-      if (def is bool) {
-        typedValue = rawValue is bool ? rawValue : def;
-      } else if (def is int) {
-        typedValue = rawValue is int ? rawValue : def;
-      } else if (def is double) {
-        typedValue = rawValue is double ? rawValue : def;
-      } else if (def is String) {
-        typedValue = rawValue is String ? rawValue : def;
-      } else if (def is Map<String, List<double>>) {
-        typedValue =
-            rawValue is Map<String, dynamic>
-                ? rawValue.map((k, v) => MapEntry(k, List<double>.from(v)))
-                : def;
+      // Nếu là Map, ép kiểu lại cho an toàn
+      if (rawValue is Map) {
+        valueMap[key] = Map<String, dynamic>.fromEntries(
+          rawValue.entries.map((e) => MapEntry(e.key.toString(), e.value)),
+        );
       } else {
-        typedValue = rawValue; // fallback
+        valueMap[key] = rawValue;
       }
-
-      valueMap[key] = typedValue;
     }
 
     return valueMap;

@@ -58,7 +58,7 @@ class _AreaOrLineChartWidgetsState extends State<AreaOrLineChartWidgets> {
   @override
   Widget build(BuildContext context) {
     final chartEntries = widget.chartData.entries.toList();
-    final double pixelsPerPoint = widget.size.width / (widget.visibleCount + 2);
+    final double pixelsPerPoint = widget.size.width / widget.visibleCount;
     // print(
     //   widget.size.height.toString() +
     //       " " +
@@ -68,10 +68,11 @@ class _AreaOrLineChartWidgetsState extends State<AreaOrLineChartWidgets> {
     //       " " +
     //       widget.endIndex.toString(),
     // );
+    final double width = widget.endIndex * pixelsPerPoint;
 
     return SizedBox(
-      width: widget.endIndex * pixelsPerPoint,
-      height: widget.size.height - 40,
+      width: width < widget.size.width ? widget.size.width : width,
+      height: widget.size.height - 50,
       child: LineChart(
         LineChartData(
           lineBarsData: [

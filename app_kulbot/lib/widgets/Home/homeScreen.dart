@@ -20,7 +20,6 @@ import 'package:Kulbot/widgets/Home/ButtonHomeScreen.dart';
 //get page - lấy trang
 import 'package:Kulbot/widgets/IOT/iotScreen.dart';
 import 'package:Kulbot/widgets/IOT/IOT/IOT.dart';
-import 'package:Kulbot/widgets/Control/carControll.dart';
 import 'package:Kulbot/widgets/Control/Control.dart';
 import 'package:Kulbot/widgets/programing/programingScreen.dart';
 import 'package:Kulbot/widgets/Setting/settingScreen.dart';
@@ -270,32 +269,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage,
-        onTap: (index) {
-          setState(() {
-            _currentPage = index;
-            _carouselController.animateToPage(index);
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor:
-            isDarkMode
-                ? Color.fromARGB(255, 211, 61, 61)
-                : Color.fromARGB(255, 60, 107, 234),
-        selectedItemColor: Color.fromARGB(255, 67, 224, 255),
-        unselectedItemColor:
-            isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
-        items:
-            buttonConfigs
-                .map(
-                  (btn) => BottomNavigationBarItem(
-                    icon: Icon(btn.icon),
-                    label: btn.title,
-                  ),
-                )
-                .toList(),
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: _currentPage,
+      //   onTap: (index) {
+      //     setState(() {
+      //       _currentPage = index;
+      //       _carouselController.animateToPage(index);
+      //     });
+      //   },
+      //   type: BottomNavigationBarType.fixed,
+      //   backgroundColor:
+      //       isDarkMode
+      //           ? Color.fromARGB(255, 211, 61, 61)
+      //           : Color.fromARGB(255, 60, 107, 234),
+      //   selectedItemColor: Color.fromARGB(255, 67, 224, 255),
+      //   unselectedItemColor:
+      //       isDarkMode ? Color.fromARGB(255, 150, 150, 150) : Colors.grey,
+      //   items:
+      //       buttonConfigs
+      //           .map(
+      //             (btn) => BottomNavigationBarItem(
+      //               icon: Icon(btn.icon),
+      //               label: btn.title,
+      //             ),
+      //           )
+      //           .toList(),
+      // ),
     );
   }
 

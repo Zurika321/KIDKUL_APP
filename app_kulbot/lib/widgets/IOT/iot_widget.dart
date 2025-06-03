@@ -435,13 +435,13 @@ class _IotWidgetState extends State<IotWidget> {
                 child: Column(
                   children: [
                     Container(
-                      child: StreamBuilder<Map<String, double?>>(
+                      child: StreamBuilder<Map<String, dynamic>>(
                         stream:
                             _bluetoothService
                                 .stream, // Lấy luồng dữ liệu từ BluetoothService
                         builder: (
                           BuildContext context,
-                          AsyncSnapshot<Map<String, double?>> snapshot,
+                          AsyncSnapshot<Map<String, dynamic?>> snapshot,
                         ) {
                           if (snapshot.hasError) {
                             return Text('Lỗi: ${snapshot.error}');
@@ -484,7 +484,8 @@ class _IotWidgetState extends State<IotWidget> {
                                     Expanded(
                                       child: SCS(
                                         value:
-                                            snapshot.data?['receivedValue1'] ??
+                                            snapshot.data?['receivedValue1']
+                                                .toDouble() ??
                                             0.0,
                                         unit:
                                             SCS_dv_1.isEmpty ? '˚C' : SCS_dv_1,
@@ -512,7 +513,8 @@ class _IotWidgetState extends State<IotWidget> {
                                     Expanded(
                                       child: SCS(
                                         value:
-                                            snapshot.data?['receivedValue2'] ??
+                                            snapshot.data?['receivedValue2']
+                                                .toDouble() ??
                                             0.0,
                                         unit: SCS_dv_2.isEmpty ? '%' : SCS_dv_2,
                                         trackColor: Colors.amber,
@@ -545,7 +547,8 @@ class _IotWidgetState extends State<IotWidget> {
                                     Expanded(
                                       child: SCS(
                                         value:
-                                            snapshot.data?['receivedValue3'] ??
+                                            snapshot.data?['receivedValue3']
+                                                .toDouble() ??
                                             0.0,
                                         unit:
                                             SCS_dv_3.isEmpty ? '˚C' : SCS_dv_3,
@@ -573,7 +576,8 @@ class _IotWidgetState extends State<IotWidget> {
                                     Expanded(
                                       child: SCS(
                                         value:
-                                            snapshot.data?['receivedValue4'] ??
+                                            snapshot.data?['receivedValue4']
+                                                .toDouble() ??
                                             0.0,
                                         unit: SCS_dv_4.isEmpty ? '%' : SCS_dv_4,
                                         trackColor: Colors.amber,

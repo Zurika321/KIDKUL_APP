@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 
 enum _DeviceAvailability { no, maybe, yes }
 
@@ -55,9 +56,9 @@ class BluetoothService with ChangeNotifier {
     _name = name;
   }
 
-  final StreamController<Map<String, double?>> _streamController =
+  final StreamController<Map<String, dynamic?>> _streamController =
       StreamController.broadcast();
-  Stream<Map<String, double?>> get stream => _streamController.stream;
+  Stream<Map<String, dynamic?>> get stream => _streamController.stream;
 
   Future<void> requestLocationPermission() async {
     var status = await Permission.location.request();
@@ -136,48 +137,71 @@ class BluetoothService with ChangeNotifier {
     }
   }
 
+  Map<String, dynamic> dataDaDich = {};
+
   void _onDataReceived(Uint8List data) {
     String dataString = utf8.decode(data);
     _parseAndStoreData(dataString);
+    // receivedValue1 = 0.0;
+    // receivedValue2 = 0.0;
+    // receivedValue3 = 0.0;
+    // receivedValue4 = 0.0;
 
-    _streamController.add({
-      "receivedValue1": receivedValue1,
-      "receivedValue2": receivedValue2,
-      "receivedValue3": receivedValue3,
-      "receivedValue4": receivedValue4,
-    });
+    _streamController.add(
+      Map<String, dynamic>.fromEntries(
+        dataDaDich.entries.map((e) => MapEntry(e.key.toString(), e.value)),
+      ),
+    );
+    // _streamController.add({
+    //   "receivedValue1": receivedValue1,
+    //   "receivedValue2": receivedValue2,
+    //   "receivedValue3": receivedValue3,
+    //   "receivedValue4": receivedValue4,
+    // });
   }
 
+  //receivedValue4
+
+  // [$1:0.0;$2:0.0;$3:0.0;$4:0.0;]
+  // void _parseAndStoreData(String dataString) {
+  //   debugPrint("Received data: $dataString");
+  //   // dataString = dataString.replaceAll(RegExp(r'[\$]'), '');
+  //   List<String> parts = dataString.split(';');
+  //   for (var part in parts) {
+  //     if (part.contains(':')) {
+  //       List<String> subParts = part.split(':');
+  //       // int? id = int.tryParse(
+  //       //   subParts[0].trim().replaceAll(RegExp(r'[a-zA-Z ]'), ''),
+  //       // );
+  //       String id = ("v" + subParts[0]).trim();
+  //       double? value = double.tryParse(subParts[1].trim());
+
+  //       if (id != null && value != null) {
+  //         dataDaDich[id] = value;
+  //         notifyListeners();
+  //       }
+  //     }
+  //   }
+  // }
   void _parseAndStoreData(String dataString) {
-    dataString = dataString.replaceAll(RegExp(r'[\$]'), '');
-    List<String> parts = dataString.split(';');
+    debugPrint("Received data: $dataString");
+    dataString = dataString.trim();
 
-    for (var part in parts) {
-      if (part.contains(':')) {
-        List<String> subParts = part.split(':');
-        int? id = int.tryParse(
-          subParts[0].trim().replaceAll(RegExp(r'[a-zA-Z ]'), ''),
-        );
-        double? value = double.tryParse(subParts[1].trim());
+    // Bỏ qua nếu chuỗi rỗng hoặc không phải JSON
+    if (dataString.isEmpty ||
+        !(dataString.startsWith('{') || dataString.startsWith('['))) {
+      return;
+    }
 
-        if (id != null && value != null) {
-          switch (id) {
-            case 1:
-              receivedValue1 = value;
-              break;
-            case 2:
-              receivedValue2 = value;
-              break;
-            case 3:
-              receivedValue3 = value;
-              break;
-            case 4:
-              receivedValue4 = value;
-              break;
-          }
-          notifyListeners();
-        }
+    try {
+      final decoded = jsonDecode(dataString);
+
+      if (decoded is Map) {
+        dataDaDich.addAll(decoded.map((k, v) => MapEntry(k.toString(), v)));
+        notifyListeners();
       }
+    } catch (e) {
+      debugPrint("Lỗi phân tích JSON: $e");
     }
   }
 

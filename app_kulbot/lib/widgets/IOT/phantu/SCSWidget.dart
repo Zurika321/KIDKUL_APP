@@ -60,8 +60,8 @@ class _SCSWidgetState extends State<SCSWidget> {
     double maxValue = _unitController.text == "˚C" ? 50.0 : 100.0;
     bool lock = widget.config['lock'] ?? false;
 
-    if (widget.value is Map && widget.value['temp'] != null) {
-      sensorValue = widget.value['temp'].toDouble();
+    if (widget.value is Map && widget.value['id1'] != null) {
+      sensorValue = widget.value['id1'].toDouble();
     } else if (widget.value is Map && widget.value.isEmpty) {
       sensorValue = 0.0; //giá trị mặc định ở menu
     } else {

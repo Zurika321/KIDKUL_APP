@@ -1,247 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/WidgetChart.dart';
-import 'package:fl_chart/fl_chart.dart'
-    show
-        LineChart,
-        LineChartData,
-        LineChartBarData,
-        FlSpot,
-        FlDotData,
-        FlTitlesData,
-        FlGridData,
-        FlBorderData,
-        AxisTitles,
-        SideTitles;
-
-//Biểu đồ miền 1 mục tiêu
-class AreaChartWidget extends StatefulWidget {
-  final Size size;
-  final Map<String, dynamic> config;
-  final Map<String, dynamic> value;
-  final Function(Map<String, dynamic>)? onSave;
-  final VoidCallback? onDelete;
-  // final Future<void> Function(String msg)? sendCommand;
-
-  const AreaChartWidget({
-    super.key,
-    required this.size,
-    required this.config,
-    required this.value,
-    this.onSave,
-    this.onDelete,
-    // this.sendCommand,
-  });
-
-  @override
-  State<AreaChartWidget> createState() => _AreaChartWidgetState();
-}
-
-class _AreaChartWidgetState extends State<AreaChartWidget> {
-  int startIndex = 0;
-
-  void _showEditDialog(BuildContext context) {
-    final titleController = TextEditingController(
-      text: widget.config['title'] ?? '',
-    );
-
-    final visibleCount = widget.config['visibleCount'] ?? 10;
-    final visibleCountController = TextEditingController(
-      text: visibleCount.toString(),
-    );
-
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text('Chỉnh sửa biểu đồ'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Tên biểu đồ'),
-              ),
-              TextField(
-                controller: visibleCountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Số điểm hiển thị trên 1 trang',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: widget.onDelete,
-              child: const Text('Xoá', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () {
-                final newConfig = Map<String, dynamic>.from(widget.config);
-                newConfig['title'] = titleController.text;
-
-                // Chuyển từ String sang int an toàn
-                final parsedCount = int.tryParse(visibleCountController.text);
-                if (parsedCount != null && parsedCount > 0) {
-                  newConfig['visibleCount'] = parsedCount;
-                }
-
-                widget.onSave?.call(newConfig);
-                Navigator.pop(context);
-              },
-              child: const Text('Lưu'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isLocked = widget.config['lock'] == true;
-    final chartColor = widget.config['color'] ?? Colors.blue;
-    final chartTitle = widget.config['title'] ?? 'Biểu đồ miền';
-    final int visibleCount = widget.config['visibleCount'] ?? 10;
-
-    List<double> chartData =
-        (widget.value['data'] ?? [10.0, 20.0, 50.0, 10.0, 30.0]).cast<double>();
-
-    final int endIndex = (startIndex + visibleCount).clamp(0, chartData.length);
-    final visibleData = chartData.sublist(startIndex, endIndex);
-
-    return GestureDetector(
-      onDoubleTap: !isLocked ? () => _showEditDialog(context) : null,
-      child: Container(
-        width: widget.size.width,
-        height: widget.size.height,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: chartColor),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              chartTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: LineChart(
-                LineChartData(
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: List.generate(
-                        visibleData.length,
-                        (i) => FlSpot(i.toDouble(), visibleData[i]),
-                      ),
-                      isCurved: true,
-                      color: chartColor,
-                      barWidth: 2,
-                      dotData: FlDotData(show: true),
-                    ),
-                  ],
-                  titlesData: FlTitlesData(
-                    show: true,
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        reservedSize: 44,
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: TextStyle(fontSize: 12),
-                          );
-                        },
-                      ),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        // reservedSize: 30,
-                        showTitles: false,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: TextStyle(fontSize: 12),
-                          );
-                        },
-                      ),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        // reservedSize: 44,
-                        showTitles: false,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: TextStyle(fontSize: 12),
-                          );
-                        },
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        reservedSize: 30,
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: TextStyle(fontSize: 12),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  gridData: FlGridData(show: true),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: Colors.black, width: 1),
-                  ),
-                ),
-              ),
-            ),
-            if (chartData.length > visibleCount)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed:
-                        startIndex > 0
-                            ? () {
-                              setState(() {
-                                startIndex -= visibleCount;
-                                if (startIndex < 0) startIndex = 0;
-                              });
-                            }
-                            : null,
-                    icon: const Icon(Icons.arrow_left),
-                  ),
-                  Text('${startIndex + 1}-${endIndex} / ${chartData.length}'),
-                  IconButton(
-                    onPressed:
-                        endIndex < chartData.length
-                            ? () {
-                              setState(() {
-                                startIndex += visibleCount;
-                                if (startIndex >= chartData.length) {
-                                  startIndex = chartData.length - visibleCount;
-                                  if (startIndex < 0) startIndex = 0;
-                                }
-                              });
-                            }
-                            : null,
-                    icon: const Icon(Icons.arrow_right),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// import 'package:fl_chart/fl_chart.dart'
+//     show
+//         LineChart,
+//         LineChartData,
+//         LineChartBarData,
+//         FlSpot,
+//         FlDotData,
+//         FlTitlesData,
+//         FlGridData,
+//         FlBorderData,
+//         AxisTitles,
+//         SideTitles;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -300,19 +71,41 @@ class _CustomChartStates extends State<CustomChart> {
       Data = DataFake;
       debugPrint("IN MENU: Data = $Data");
     } else {
-      // Nếu widget.value['data'] là null hoặc rỗng
-      if (widget.value['data'] == null) {
-        Data = {};
-        Chuacodulieu = true;
-      } else if ((widget.value['data'] as Map).isEmpty) {
+      final value = widget.value;
+      if (value.isEmpty) {
         Data = {};
         Chuacodulieu = true;
       } else {
-        Data = Map<String, List<double>>.from(
-          (widget.value['data'] as Map).map(
-            (key, value) => MapEntry(key, List<double>.from(value)),
-          ),
-        );
+        Data = {};
+        value.forEach((key, val) {
+          final k = key.toString();
+          List<double> values;
+          if (val is List) {
+            values =
+                val
+                    .map(
+                      (e) =>
+                          e is double
+                              ? e
+                              : double.tryParse(e.toString()) ?? 0.0,
+                    )
+                    .toList();
+          } else if (val is num) {
+            values = [val.toDouble()];
+          } else {
+            values = [];
+          }
+          if (Data.containsKey(k)) {
+            Data[k]!.addAll(values);
+          } else {
+            Data[k] = List<double>.from(values);
+          }
+          // Giới hạn số lượng phần tử nếu muốn
+          if (Data[k]!.length > 100) {
+            Data[k] = Data[k]!.sublist(Data[k]!.length - 100);
+          }
+        });
+        Chuacodulieu = Data.isEmpty;
       }
     }
     print("INIT: Data = $Data");
@@ -326,21 +119,46 @@ class _CustomChartStates extends State<CustomChart> {
   @override
   void didUpdateWidget(CustomChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.value['data'] != oldWidget.value['data']) {
+    debugPrint("dữ liệu mới nhận đc: ${widget.value}");
+    if (widget.value != oldWidget.value) {
       setState(() {
-        if (widget.value['data'] != null &&
-            widget.value['data'] is Map<String, List<dynamic>>) {
-          Data = Map<String, List<double>>.from(
-            (widget.value['data'] as Map).map(
-              (key, value) => MapEntry(key, List<double>.from(value)),
-            ),
-          );
+        final value = widget.value;
+        if (value.isNotEmpty) {
+          value.forEach((key, val) {
+            final k = key.toString();
+            List<double> values;
+            if (val is List) {
+              values =
+                  val
+                      .map(
+                        (e) =>
+                            e is double
+                                ? e
+                                : double.tryParse(e.toString()) ?? 0.0,
+                      )
+                      .toList();
+            } else if (val is num) {
+              values = [val.toDouble()];
+            } else {
+              values = [];
+            }
+            if (Data.containsKey(k)) {
+              Data[k]!.addAll(values);
+            } else {
+              Data[k] = List<double>.from(values);
+            }
+            // Giới hạn số lượng phần tử nếu muốn
+            if (Data[k]!.length > 100) {
+              Data[k] = Data[k]!.sublist(Data[k]!.length - 100);
+            }
+          });
           Chuacodulieu = Data.isEmpty;
-          debugPrint("UPDATED: Data = $Data");
+          debugPrint("UPDATED (append): Data = $Data");
         } else {
-          Data = {};
-          Chuacodulieu = true;
+          if (Data.isEmpty) {
+            Chuacodulieu = true;
+            debugPrint("UPDATED: Data = null or empty");
+          }
         }
       });
     }
@@ -562,7 +380,8 @@ class _CustomChartStates extends State<CustomChart> {
               widget.config['datasets'] ??
                   (Data.isNotEmpty ? [Data.keys.first] : []),
             );
-
+    debugPrint("CustomChart value: ${widget.value}");
+    debugPrint("CustomChart Data: $Data");
     Map<String, List<double>> chartData = {};
     for (var dataset in selectedDatasets) {
       if (Data.containsKey(dataset)) {

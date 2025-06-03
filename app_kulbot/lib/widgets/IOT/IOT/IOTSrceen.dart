@@ -21,26 +21,27 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 import 'package:Kulbot/l10n/l10n.dart'; // ngôn ngữ
+import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart'; // quản lý key của showcase
 
 import 'package:Kulbot/widgets/IOT/phantu/listbox.dart'; // danh sách thiết bị
 
-class ControlValueManager {
-  static final Map<String, dynamic> values = {};
+// class ControlValueManager {
+//   static final Map<String, dynamic> values = {};
 
-  static dynamic getValue(String id) => values[id];
+//   static dynamic getValue(String id) => values[id];
 
-  static void setValue(String id, dynamic newValue) => values[id] = newValue;
+//   static void setValue(String id, dynamic newValue) => values[id] = newValue;
 
-  static bool hasValue(String id) => values.containsKey(id);
+//   static bool hasValue(String id) => values.containsKey(id);
 
-  static void clearAll() {
-    values.clear();
-  }
+//   static void clearAll() {
+//     values.clear();
+//   }
 
-  static void removeValuesForRealId(String realId) {
-    values.removeWhere((key, _) => key.startsWith('$realId\_'));
-  }
-}
+//   static void removeValuesForRealId(String realId) {
+//     values.removeWhere((key, _) => key.startsWith('$realId\_'));
+//   }
+// }
 
 class ControlItem {
   final String id; // ID gốc để tạo widget (VD: "horn")
@@ -388,6 +389,35 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     }
   }
 
+  final String _moveForwardCommand = "";
+  final String _moveBackwardCommand = "";
+  final String _moveTurnLeftCommand = "";
+  final String _moveTurnRightCommand = "";
+  final String _moveStopCommand = "";
+  bool get isConnected => (_bluetoothService.connection?.isConnected ?? false);
+
+  void moveMotor() {
+    if (!isConnected) return;
+    final voice = voicetotext.toLowerCase();
+    if (voice.contains('tiến') ||
+        voice.contains('lên') ||
+        voice.contains('forward')) {
+      _bluetoothService.sendMessage(_moveForwardCommand);
+    } else if (voice.contains('lui') ||
+        voice.contains('lùi') ||
+        voice.contains('back')) {
+      _bluetoothService.sendMessage(_moveBackwardCommand);
+    } else if (voice.contains('trái') || voice.contains('left')) {
+      _bluetoothService.sendMessage(_moveTurnLeftCommand);
+    } else if (voice.contains('phải') || voice.contains('right')) {
+      _bluetoothService.sendMessage(_moveTurnRightCommand);
+    } else if (voice.contains('dừng') || voice.contains('stop')) {
+      _bluetoothService.sendMessage(_moveStopCommand);
+    } else {
+      print("Không nhận diện được lệnh thoại: $voicetotext");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -427,6 +457,9 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   //     ),
 
   PreferredSizeWidget _buildAppBar(BuildContext context, bool isDarkMode) {
+    final provider = Provider.of<LocaleProvider>(context);
+    var locale = provider.locale ?? Locale('en');
+
     return AppBar(
       backgroundColor: isDarkMode ? Colors.black45 : Colors.blueGrey[900],
       title: Row(
@@ -434,7 +467,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           Icon(Icons.rocket, color: Colors.cyanAccent),
           SizedBox(width: 10),
           Text(
-            "$connectedDeviceName",
+            nameProject,
             style: TextStyle(
               color: Colors.cyanAccent,
               fontWeight: FontWeight.bold,
@@ -447,6 +480,62 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
+        // Showcase(
+        //   key: ShowKeyManager.createKey("LanguageSelector"),
+        //   description: "Đây là nút chọn ngôn ngữ",
+        //   child: DropdownButton(
+        //     value: locale,
+        //     icon: Container(width: 12),
+        //     items:
+        //         L10n.all.map((locale) {
+        //           final flag = L10n.getflag(locale.languageCode);
+
+        //           return DropdownMenuItem(
+        //             child: Center(
+        //               child: Text(flag, style: TextStyle(fontSize: 32)),
+        //             ),
+        //             value: locale,
+        //             onTap: () {
+        //               final provider = Provider.of<LocaleProvider>(
+        //                 context,
+        //                 listen: false,
+        //               );
+        //               provider.setLocale(locale);
+        //             },
+        //           );
+        //         }).toList(),
+        //     onChanged: (_) {},
+        //   ),
+        // ),
+        // Showcase(
+        //   key: ShowKeyManager.createKey("ScanQRcode"),
+        //   description: 'Đây là nút quét mã QR để điều khiển robot',
+        //   child: IconButton(
+        //     icon: Icon(
+        //       Icons.qr_code_scanner_outlined,
+        //       color: Colors.cyanAccent,
+        //     ),
+        //     onPressed: scanQRcodeNormal,
+        //   ),
+        // ),
+        Showcase(
+          key: ShowKeyManager.createKey("TongLeBluetooth"),
+          description: 'Bật / tắt Bluetooth và kết nối robot',
+          child: IconButton(
+            icon: Icon(
+              _bluetoothService.bluetoothState.isEnabled
+                  ? (isConnected ? Icons.bluetooth_connected : Icons.bluetooth)
+                  : Icons.bluetooth_disabled,
+              color: isConnected ? Colors.greenAccent : Colors.redAccent,
+            ),
+            onPressed: () {
+              _bluetoothService.startDiscoveryWithTimeout();
+              isConnected
+                  ? _bluetoothService.connection?.dispose()
+                  : _bluetoothService.connectBluetoothDialog(context);
+            },
+          ),
+        ),
         IconButton(
           icon: const Icon(Icons.cable, color: Colors.cyanAccent),
           onPressed: () {
@@ -471,14 +560,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                     ],
                   };
                   ControlValueManager.setValue(name, updatedValue);
-                  debugPrint("✅ $name = ${updatedValue["data1"]}");
                 }
-              } else {
-                final value = <String, List<double>>{
-                  "data1": [10.0, 20.0, 30.0],
-                  "data2": [40.0, 50.0, 60.0],
-                };
-                ControlValueManager.setValue(name, value);
               }
             });
           },
@@ -562,55 +644,106 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   }
 
   Widget _buildMainStack(Size size) {
-    return Stack(
-      children: [
-        // Các nút đã đặt
-        ...placedControls.asMap().entries.map((entry) {
-          final index = entry.key;
-          final control = entry.value;
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: _bluetoothService.stream,
+      builder: (context, snapshot) {
+        final dynamicData =
+            (snapshot.data != null)
+                ? Map<String, dynamic>.fromEntries(
+                  snapshot.data!.entries.map(
+                    (e) => MapEntry(e.key.toString(), e.value),
+                  ),
+                )
+                : <String, dynamic>{};
+        debugPrint("Dữ liệu động: $dynamicData");
+        return Stack(
+          children: [
+            // Các nút đã đặt
+            ...placedControls.asMap().entries.map((entry) {
+              final index = entry.key;
+              final control = entry.value;
 
-          final List<double> sizeInfo = PhanTu_IOT.getControlSizeById(
-            control.id,
-          );
+              final List<double> sizeInfo = PhanTu_IOT.getControlSizeById(
+                control.id,
+              );
 
-          final double xOffset = control.relativePosition.dx * size.width;
-          final double yOffset = control.relativePosition.dy * size.height;
+              final double xOffset = control.relativePosition.dx * size.width;
+              final double yOffset = control.relativePosition.dy * size.height;
 
-          final String typeBox = PhanTu_IOT.getTypeBoxById(control.id);
+              final String typeBox = PhanTu_IOT.getTypeBoxById(control.id);
 
-          double width =
-              (typeBox == "height" ? size.height : size.width) * sizeInfo[4] +
-              sizeInfo[5];
-          double height =
-              (typeBox == "width" ? size.width : size.height) * sizeInfo[6] +
-              sizeInfo[7];
+              double width =
+                  (typeBox == "height" ? size.height : size.width) *
+                      sizeInfo[4] +
+                  sizeInfo[5];
+              double height =
+                  (typeBox == "width" ? size.width : size.height) *
+                      sizeInfo[6] +
+                  sizeInfo[7];
 
-          width = width.clamp(30.0, size.width);
-          height = height.clamp(30.0, size.height);
+              width = width.clamp(30.0, size.width);
+              height = height.clamp(30.0, size.height);
 
-          final bool canMove = control.canMove && isEditingLayout;
-          final bool shouldLock =
-              control.lock || (!isEditingLayout && !control.lock);
+              final bool canMove = control.canMove && isEditingLayout;
+              final bool shouldLock =
+                  control.lock || (!isEditingLayout && !control.lock);
 
-          final number = int.tryParse(
-            RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
-          );
-          final String title = PhanTu_IOT.getTitleById(control.id);
+              final number = int.tryParse(
+                RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
+              );
+              final String title = PhanTu_IOT.getTitleById(control.id);
 
-          Widget childWidget;
-          if (title == "Biểu đồ/đồ thị") {
-            childWidget = StreamBuilder<Map<String, dynamic>>(
-              stream: _bluetoothService.stream,
-              builder: (context, snapshot) {
-                final value = snapshot.data ?? {};
-                return PhanTu_IOT.getControlWidget(
+              final bool isChart = title == "Biểu đồ/đồ thị";
+              final bool bluetoothOff =
+                  _bluetoothService.bluetoothState == BluetoothState.STATE_OFF;
+              final bool notConnected = !isConnected;
+
+              Widget childWidget;
+              if (isChart && (bluetoothOff || notConnected)) {
+                childWidget = SizedBox(
+                  width: width,
+                  height: height,
+                  child: Container(
+                    width: size.width,
+                    height: size.height,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error, color: Colors.red, size: 48),
+                          const SizedBox(height: 8),
+                          Text(
+                            bluetoothOff
+                                ? "⚠️ Bluetooth chưa bật!"
+                                : "⚠️ Chưa kết nối với robot!",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                childWidget = PhanTu_IOT.getControlWidget(
                   id: control.id,
                   size: Size(size.width, size.height - 70.0),
                   inMenu: false,
-                  value: PhanTu_IOT.getValueMapByControl(
-                    control.id,
-                    control.realId,
-                  ),
+                  value: //null,
+                      isChart ? dynamicData : null,
+                  // PhanTu_IOT.getValueMapByControl(
+                  //   control.id,
+                  //   control.realId,
+                  // ),
                   config: control.config,
                   showKey: number == 1,
                   lock: shouldLock,
@@ -637,236 +770,181 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                     });
                   },
                 );
-              },
-            );
-          } else {
-            childWidget = PhanTu_IOT.getControlWidget(
-              id: control.id,
-              size: Size(size.width, size.height - 70.0),
-              inMenu: false,
-              value: {},
-              config: control.config,
-              showKey: number == 1,
-              lock: shouldLock,
-              sendCommand: (msg) async {
-                debugPrint("Thực hiện bluetooth : " + msg.toString());
-                await Future.delayed(const Duration(milliseconds: 200));
-              },
-              onSave: (newConfig) {
-                setState(() {
-                  placedControls[index].config = newConfig;
-                });
-              },
-              VoiceTextToCommand: (String msg) async {
-                if (msg.isNotEmpty) {
-                  debugPrint("Gửi lệnh qua bluetooth: $msg");
-                } else {
-                  debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
-                }
-              },
-              onDelete: () {
-                setState(() {
-                  placedControls.removeAt(index);
-                  ControlValueManager.removeValuesForRealId(control.realId);
-                });
-              },
-            );
-          }
-          return DraggableControl(
-            key: ValueKey(control.realId),
-            initialPosition: Offset(xOffset, yOffset),
-            screenSize: size,
-            elementSize: Size(width, height),
-            isEditing: canMove,
-            onDrop: (newOffset) {
-              setState(() {
-                control.relativePosition = Offset(
-                  newOffset.dx / size.width,
-                  newOffset.dy / size.height,
-                );
-              });
-            },
-            child: childWidget,
-          );
-        }),
-        //tạo t class position 16 16 cái listbox value là biến tên thiết bị
-        Positioned(
-          left: 16,
-          top: 16,
-          child: ListBox(
-            height: 40,
-            width: 150,
-            value:
-                connectedDeviceName.isEmpty
-                    ? "Vui lòng bât bluetooth"
-                    : connectedDeviceName,
-          ),
-        ),
+              }
 
-        // Màn che + Menu bên phải
-        if (isEditingLayout && showMenu)
-          Stack(
-            children: [
-              // Nền mờ để tắt menu khi nhấn ra ngoài
-              GestureDetector(
-                onTap: () => setState(() => showMenu = false),
-                child: Container(
-                  color: Colors.black.withAlpha(77),
-                ), // 0.3 * 255 ≈ 77
+              return DraggableControl(
+                key: ValueKey(control.realId),
+                initialPosition: Offset(xOffset, yOffset),
+                screenSize: size,
+                elementSize: Size(width, height),
+                isEditing: canMove,
+                onDrop: (newOffset) {
+                  setState(() {
+                    control.relativePosition = Offset(
+                      newOffset.dx / size.width,
+                      newOffset.dy / size.height,
+                    );
+                  });
+                },
+                child: childWidget,
+              );
+            }),
+            //tạo t class position 16 16 cái listbox value là biến tên thiết bị
+            Positioned(
+              left: 16,
+              top: 16,
+              child: ListBox(
+                height: 40,
+                width: 150,
+                value:
+                    connectedDeviceName.isEmpty
+                        ? "Vui lòng bât bluetooth"
+                        : connectedDeviceName,
               ),
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-                top: 0,
-                bottom: 0,
-                right: 0,
-                width: 250,
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(12),
-                  child: SingleChildScrollView(
-                    child: Builder(
-                      builder: (_) {
-                        // Gom các control theo title
-                        final Map<String, List<Map<String, dynamic>>>
-                        groupedControls = {};
-                        controlGroups.forEach((id, control) {
-                          final title = control['title'] ?? '';
-                          groupedControls.putIfAbsent(title, () => []).add({
-                            ...control,
-                            'id': id,
-                          });
-                        });
+            ),
 
-                        List<Widget> widgets = [];
-                        groupedControls.forEach((title, controls) {
-                          widgets.add(
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+            // Màn che + Menu bên phải
+            if (isEditingLayout && showMenu)
+              Stack(
+                children: [
+                  // Nền mờ để tắt menu khi nhấn ra ngoài
+                  GestureDetector(
+                    onTap: () => setState(() => showMenu = false),
+                    child: Container(
+                      color: Colors.black.withAlpha(77),
+                    ), // 0.3 * 255 ≈ 77
+                  ),
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: 250,
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(12),
+                      child: SingleChildScrollView(
+                        child: Builder(
+                          builder: (_) {
+                            // Gom các control theo title
+                            final Map<String, List<Map<String, dynamic>>>
+                            groupedControls = {};
+                            controlGroups.forEach((id, control) {
+                              final title = control['title'] ?? '';
+                              groupedControls.putIfAbsent(title, () => []).add({
+                                ...control,
+                                'id': id,
+                              });
+                            });
+
+                            List<Widget> widgets = [];
+                            groupedControls.forEach((title, controls) {
+                              widgets.add(
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 12,
+                                        runSpacing: 12,
+                                        children:
+                                            controls.map((control) {
+                                              final id = control['id'];
+                                              final name =
+                                                  control['name'] ?? id;
+                                              final configRaw =
+                                                  control['config'];
+                                              final config =
+                                                  configRaw == null
+                                                      ? <String, dynamic>{}
+                                                      : Map<
+                                                        String,
+                                                        dynamic
+                                                      >.from(configRaw);
+
+                                              return Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Draggable<String>(
+                                                    data: id,
+                                                    feedback:
+                                                        PhanTu_IOT.getControlWidget(
+                                                          id: id,
+                                                          size: size,
+                                                          config: config,
+                                                          isPreview: true,
+                                                          inMenu: true,
+                                                        ),
+                                                    onDragStarted:
+                                                        () => setState(
+                                                          () =>
+                                                              showMenu = false,
+                                                        ),
+                                                    child:
+                                                        PhanTu_IOT.getControlWidget(
+                                                          id: id,
+                                                          size: size,
+                                                          config: config,
+                                                          isPreview: true,
+                                                          inMenu: true,
+                                                          lock: true,
+                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    name,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }).toList(),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 12,
-                                    runSpacing: 12,
-                                    children:
-                                        controls.map((control) {
-                                          final id = control['id'];
-                                          final name = control['name'] ?? id;
-                                          final configRaw = control['config'];
-                                          final config =
-                                              configRaw == null
-                                                  ? <String, dynamic>{}
-                                                  : Map<String, dynamic>.from(
-                                                    configRaw,
-                                                  );
+                                ),
+                              );
+                            });
 
-                                          return Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Draggable<String>(
-                                                data: id,
-                                                feedback:
-                                                    PhanTu_IOT.getControlWidget(
-                                                      id: id,
-                                                      size: size,
-                                                      config: config,
-                                                      isPreview: true,
-                                                      inMenu: true,
-                                                    ),
-                                                onDragStarted:
-                                                    () => setState(
-                                                      () => showMenu = false,
-                                                    ),
-                                                child:
-                                                    PhanTu_IOT.getControlWidget(
-                                                      id: id,
-                                                      size: size,
-                                                      config: config,
-                                                      isPreview: true,
-                                                      inMenu: true,
-                                                      lock: true,
-                                                    ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                name,
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: widgets,
-                        );
-                      },
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: widgets,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
 
-        // Drag target để thả button
-        if (isEditingLayout)
-          DragTarget<String>(
-            onAcceptWithDetails: (details) {
-              handleDrop(details.data, details.offset, size);
-              setState(() => showMenu = true);
-            },
-            builder:
-                (context, candidateData, rejectedData) =>
-                    const SizedBox.expand(),
-          ),
-      ],
+            // Drag target để thả button
+            if (isEditingLayout)
+              DragTarget<String>(
+                onAcceptWithDetails: (details) {
+                  handleDrop(details.data, details.offset, size);
+                  setState(() => showMenu = true);
+                },
+                builder:
+                    (context, candidateData, rejectedData) =>
+                        const SizedBox.expand(),
+              ),
+          ],
+        );
+      },
     );
-  }
-
-  final String _moveForwardCommand = "";
-  final String _moveBackwardCommand = "";
-  final String _moveTurnLeftCommand = "";
-  final String _moveTurnRightCommand = "";
-  final String _moveStopCommand = "";
-  bool get isConnected => (_bluetoothService.connection?.isConnected ?? false);
-
-  void moveMotor() {
-    if (!isConnected) return;
-    final voice = voicetotext.toLowerCase();
-    if (voice.contains('tiến') ||
-        voice.contains('lên') ||
-        voice.contains('forward')) {
-      _bluetoothService.sendMessage(_moveForwardCommand);
-    } else if (voice.contains('lui') ||
-        voice.contains('lùi') ||
-        voice.contains('back')) {
-      _bluetoothService.sendMessage(_moveBackwardCommand);
-    } else if (voice.contains('trái') || voice.contains('left')) {
-      _bluetoothService.sendMessage(_moveTurnLeftCommand);
-    } else if (voice.contains('phải') || voice.contains('right')) {
-      _bluetoothService.sendMessage(_moveTurnRightCommand);
-    } else if (voice.contains('dừng') || voice.contains('stop')) {
-      _bluetoothService.sendMessage(_moveStopCommand);
-    } else {
-      print("Không nhận diện được lệnh thoại: $voicetotext");
-    }
   }
 }
 
