@@ -6,14 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart'; //showcase
 
 //Phần tử
-import 'package:Kulbot/widgets/IOT/phantu/SCSWidget.dart'; //SCSWidget – hiển thị cảm biến
+import 'package:Kulbot/widgets/IOT/phantu/SCS/SCSWidget.dart'; //SCSWidget – hiển thị cảm biến
 // import 'package:Kulbot/widgets/IOT/phantu/SwitchControlWidget.dart'; //SwitchControlWidget – hiển thị công tắc
 // import 'package:Kulbot/widgets/IOT/SliderControlWidget.dart'; //SliderControlWidget – hiển thị thanh trượt
-import 'package:Kulbot/widgets/IOT/phantu/MicWIdget.dart';
-import 'package:Kulbot/widgets/IOT/phantu/ControlMicWidget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Mic/MicWIdget.dart';
+// import 'package:Kulbot/widgets/IOT/phantu/Mic/ControlMicWidget.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/ChartLogic.dart';
-import 'package:Kulbot/widgets/IOT/phantu/ControlButtonWidget.dart';
-import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Button/ControlButtonWidget.dart';
+// import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Label/label.dart';
+import 'package:Kulbot/widgets/IOT/phantu/listbox.dart';
 
 //Mẫu và Class lưu trữ file txt
 // import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
@@ -21,6 +23,8 @@ import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 
 class PhanTu_IOT {
   static Map<String, Map<String, dynamic>> controlGroups = {
+    //Đừng để id bắt đầu giống nhau vd: mic và micshowkey
+    //Tại lười nên không muốn fix cái này :)))
     'light': {
       'title': 'Các nút điều khiển',
       'name': 'Đèn',
@@ -28,7 +32,13 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 3,
-      'config': {'title': 'Đèn', 'on': 'OO', 'off': 'PP'},
+      'config': {
+        'title': 'Đèn',
+        'on': 'OO',
+        'off': 'PP',
+        'showkey': 'đây là nút bật tắt',
+      },
+      //config mặc định khi add vào widget chính
       'widgetBuilder':
           (
             Size size,
@@ -49,12 +59,88 @@ class PhanTu_IOT {
     },
     'mic': {
       'title': 'Các nút điều khiển',
-      'name': 'Mic',
+      'name': 'Mic 1',
       'size': [0.1, 0, 0.1, 0],
-      'sizeInMenu': [0, 40, 0, 40],
+      'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 1,
       'config': {'showkey': 'đây là cái mic'},
+    },
+    'ListBox': {
+      'title': 'Các nút điều khiển',
+      'name': 'Trạng thái bluetooth',
+      'size': [0.3, 50, 0.2, 50],
+      'sizeInMenu': [0, 150, 0, 100],
+      'typeBox': "height",
+      'max': 1,
+      'config': {'showkey': 'Hiển thị trạng thái bluetooth'},
+      'widgetBuilder':
+          (
+            Size size,
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => ListBox(
+            config: config,
+            value: value,
+            onDelete: onDelete,
+            onSave: onSave,
+          ),
+    },
+    'LabelString': {
+      'title': 'Các nút điều khiển',
+      'name': 'Label String',
+      'size': [0.3, 50, 0.2, 50],
+      'sizeInMenu': [0, 150, 0, 100],
+      'typeBox': "height",
+      'max': 1,
+      'config': {'showkey': 'đây là cái Label String'},
+      'widgetBuilder':
+          (
+            Size size,
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => Label(
+            config: config,
+            value: value,
+            onDelete: onDelete,
+            onSave: onSave,
+            dataDouble: false,
+            inMenu: inMenu,
+          ),
+    },
+    'LabelDouble': {
+      'title': 'Các nút điều khiển',
+      'name': 'Label Double',
+      'size': [0.3, 50, 0.2, 50],
+      'sizeInMenu': [0, 150, 0, 100],
+      'typeBox': "height",
+      'max': 1,
+      'config': {'showkey': 'đây là cái Label Double'},
+      'widgetBuilder':
+          (
+            Size size,
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => Label(
+            config: config,
+            value: value,
+            onDelete: onDelete,
+            onSave: onSave,
+            dataDouble: true,
+            inMenu: inMenu,
+          ),
     },
     'SCSWidget': {
       'title': 'Biểu đồ/đồ thị',
@@ -63,9 +149,6 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 210, 0, 210],
       'typeBox': "width",
       'max': 3,
-      'valueKeys': [
-        {'key': 'temp', 'default': 0},
-      ],
       'config': {'title': 'Temp', 'unit': '˚C'},
       'widgetBuilder':
           (
@@ -81,6 +164,7 @@ class PhanTu_IOT {
             value: value,
             onDelete: onDelete,
             size: Size(size.width - 10, size.height - 10),
+            inMenu: inMenu,
           ),
     },
     'CustomChart': {
@@ -90,16 +174,6 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 210, 0, 210],
       'typeBox': "width",
       'max': 3,
-      'valueKeys': [
-        {
-          'key': 'data',
-          'default': {
-            'data1': [0.0],
-            'data2': [0.0],
-          },
-        },
-        {'key': 'isCurved', 'default': true},
-      ],
       'config': {"visibleCount": 10},
       'widgetBuilder':
           (
@@ -120,49 +194,6 @@ class PhanTu_IOT {
           ),
     },
   };
-
-  static List<Map<String, dynamic>> getValueKeysById(String id) {
-    final group = controlGroups[id];
-    if (group != null) {
-      if (group.containsKey("valueKeys") &&
-          group["valueKeys"] != null &&
-          group["valueKeys"].isNotEmpty) {
-        return List<Map<String, dynamic>>.from(group["valueKeys"]);
-      }
-    }
-    return [];
-  } //lấy key tạo setValue trong class ControlValueManager
-
-  static Map<String, dynamic> getValueMapByControl(String id, String realId) {
-    final List<Map<String, dynamic>> keys = getValueKeysById(id);
-    final Map<String, dynamic> valueMap = {};
-
-    for (var item in keys) {
-      final String key = item['key'];
-      final String fullKey = '${realId}_$key';
-      final dynamic def = item['default'];
-
-      // Nếu chưa có giá trị thì gán default
-      if (!ControlValueManager.hasValue(fullKey)) {
-        ControlValueManager.setValue(fullKey, def);
-      }
-
-      // Lấy lại giá trị đã lưu (hoặc default)
-      dynamic rawValue = ControlValueManager.getValue(fullKey);
-
-      // Nếu là Map, ép kiểu lại cho an toàn
-      if (rawValue is Map) {
-        valueMap[key] = Map<String, dynamic>.fromEntries(
-          rawValue.entries.map((e) => MapEntry(e.key.toString(), e.value)),
-        );
-      } else {
-        valueMap[key] = rawValue;
-      }
-    }
-
-    return valueMap;
-  }
-  // tạo mảng Map<String,dynamic> cho value khi gọi hàm getControlWidget
 
   static String getTypeBoxById(String id) {
     final group = controlGroups[id];
@@ -277,36 +308,32 @@ class PhanTu_IOT {
     config ??= <String, dynamic>{};
     value ??= <String, dynamic>{};
     config['lock'] = lock;
+    config["width"] ??= width;
+    config["height"] ??= height;
 
-    // Trường hợp đặc biệt với joystick
-    if (id == "joystick360") {
-      return SizedBox(
-        width: width,
-        height: height,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.cyanAccent.withOpacity(isPreview ? 0.7 : 1),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Text('🎮', style: TextStyle(fontSize: 24)),
-          ),
-        ),
-      );
-    }
+    Widget? Customrieng;
+
     if (id == "mic") {
-      return SizedBox(
-        width: width,
-        height: height,
-        child: MicWidget(
-          config: config,
-          onSave: onSave ?? (Map<String, dynamic> _) {},
-          onDelete: onDelete ?? () {},
-          lock: lock,
-          size: size,
-          voiceTextToCommand: VoiceTextToCommand,
-        ),
+      Customrieng = MicShowKeyWidget(
+        config: config,
+        onSave: onSave ?? (Map<String, dynamic> _) {},
+        onDelete: onDelete ?? () {},
+        lock: lock,
+        voiceTextToCommand: VoiceTextToCommand,
       );
+    } //trường hợp tự custom
+
+    final bool useShowKey = showKey && !inMenu && !isPreview;
+
+    if (Customrieng != null) {
+      return useShowKey
+          ? ShowKeyWrapper(
+            keyShowcase:
+                ShowKeyManager.getKey(id) ?? ShowKeyManager.createKey(id),
+            description: getNoteShowKey(id),
+            child: Customrieng,
+          )
+          : Customrieng;
     }
 
     final builder = getWidgetBuilderById(id);
@@ -321,21 +348,14 @@ class PhanTu_IOT {
         isSmall,
       );
 
-      final bool useShowKey = showKey && !inMenu && !isPreview;
-
-      return SizedBox(
-        width: width,
-        height: height,
-        child:
-            useShowKey
-                ? ShowKeyWrapper(
-                  keyShowcase:
-                      ShowKeyManager.getKey(id) ?? ShowKeyManager.createKey(id),
-                  description: getNoteShowKey(id),
-                  child: builtWidget,
-                )
-                : builtWidget,
-      );
+      return useShowKey
+          ? ShowKeyWrapper(
+            keyShowcase:
+                ShowKeyManager.getKey(id) ?? ShowKeyManager.createKey(id),
+            description: getNoteShowKey(id),
+            child: builtWidget,
+          )
+          : builtWidget;
     }
 
     return const SizedBox();
@@ -413,59 +433,5 @@ class ShowKeyWrapper extends StatelessWidget {
     return Showcase(key: keyShowcase, description: description, child: child);
     // ],
     // );
-  }
-}
-
-class LightButtonWidget extends StatefulWidget {
-  final double size;
-
-  const LightButtonWidget({super.key, required this.size});
-
-  @override
-  State<LightButtonWidget> createState() => _LightButtonWidgetState();
-}
-
-class _LightButtonWidgetState extends State<LightButtonWidget> {
-  bool isOn = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isOn = !isOn;
-        });
-        // Gửi lệnh tới robot nếu cần
-      },
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        // color: Colors.blue.withOpacity(0.3),
-        decoration: BoxDecoration(
-          color: isOn ? Colors.yellowAccent : Colors.cyanAccent,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.lightbulb_outline, color: Colors.black),
-      ),
-    );
-  }
-}
-
-class HornButtonWidget extends StatelessWidget {
-  final double size;
-  const HornButtonWidget({super.key, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      // color: Colors.blue.withOpacity(0.3),
-      decoration: const BoxDecoration(
-        color: Colors.orangeAccent,
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(Icons.volume_up, color: Colors.white),
-    );
   }
 }

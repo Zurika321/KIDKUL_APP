@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:Kulbot/utils/service/AnimatedToggleSwitch.dart';
-import 'package:Kulbot/widgets/IOT/SleekCircularSlider.dart';
+import 'package:Kulbot/widgets/IOT/phantu/SCS/SleekCircularSlider.dart';
 import 'package:Kulbot/widgets/IOT/settingIoT_widget.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';

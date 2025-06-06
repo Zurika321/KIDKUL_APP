@@ -23,13 +23,6 @@ class ControlLayoutProvider {
         canMove: true,
       ),
       ControlItem(
-        id: 'joystick360',
-        realId: 'joystick3601',
-        relativePosition: const Offset(0.5, 0.7),
-        lock: true,
-        canMove: false,
-      ),
-      ControlItem(
         id: 'light',
         realId: 'light1',
         relativePosition: const Offset(0.7, 0.7),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/WidgetChart.dart';
 // import 'package:fl_chart/fl_chart.dart'
 //     show
@@ -49,9 +48,7 @@ class CustomChart extends StatefulWidget {
 
 class _CustomChartStates extends State<CustomChart> {
   final scrollController = ScrollController();
-  final bluetoothstate = ControlValueManager.getValue("bluetoothState");
-
-  final Map<String, List<double>> DataFake = {
+  late final Map<String, List<double>> DataFake = {
     'data1': [10.0, 20.0, 50.0, 10.0, 30.0],
     'data2': [15.0, 30.0, 90.0, 60.0, 50.0],
     'data3': [20.0, 40.0, 50.0, 20.0, 10.0],
@@ -61,54 +58,33 @@ class _CustomChartStates extends State<CustomChart> {
 
   late Map<String, List<double>> Data;
   late bool Chuacodulieu = false;
+  late double width;
+  late double height;
 
   @override
   void initState() {
     super.initState();
     bool inMenu = widget.inMenu;
+    width = (widget.config['width'] ?? 160).toDouble();
+    height = (widget.config['height'] ?? 100).toDouble();
 
     if (inMenu) {
       Data = DataFake;
-      debugPrint("IN MENU: Data = $Data");
     } else {
       final value = widget.value;
+      Data = {};
       if (value.isEmpty) {
-        Data = {};
         Chuacodulieu = true;
       } else {
-        Data = {};
         value.forEach((key, val) {
           final k = key.toString();
-          List<double> values;
-          if (val is List) {
-            values =
-                val
-                    .map(
-                      (e) =>
-                          e is double
-                              ? e
-                              : double.tryParse(e.toString()) ?? 0.0,
-                    )
-                    .toList();
-          } else if (val is num) {
-            values = [val.toDouble()];
-          } else {
-            values = [];
-          }
-          if (Data.containsKey(k)) {
-            Data[k]!.addAll(values);
-          } else {
-            Data[k] = List<double>.from(values);
-          }
-          // Giới hạn số lượng phần tử nếu muốn
-          if (Data[k]!.length > 100) {
-            Data[k] = Data[k]!.sublist(Data[k]!.length - 100);
+          if (val is double) {
+            Data[k] = [val];
           }
         });
         Chuacodulieu = Data.isEmpty;
       }
     }
-    print("INIT: Data = $Data");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -119,46 +95,45 @@ class _CustomChartStates extends State<CustomChart> {
   @override
   void didUpdateWidget(CustomChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    debugPrint("dữ liệu mới nhận đc: ${widget.value}");
     if (widget.value != oldWidget.value) {
       setState(() {
         final value = widget.value;
         if (value.isNotEmpty) {
           value.forEach((key, val) {
             final k = key.toString();
-            List<double> values;
-            if (val is List) {
-              values =
-                  val
-                      .map(
-                        (e) =>
-                            e is double
-                                ? e
-                                : double.tryParse(e.toString()) ?? 0.0,
-                      )
-                      .toList();
-            } else if (val is num) {
-              values = [val.toDouble()];
-            } else {
-              values = [];
-            }
-            if (Data.containsKey(k)) {
-              Data[k]!.addAll(values);
-            } else {
-              Data[k] = List<double>.from(values);
-            }
-            // Giới hạn số lượng phần tử nếu muốn
-            if (Data[k]!.length > 100) {
-              Data[k] = Data[k]!.sublist(Data[k]!.length - 100);
+            if (val is double) {
+              if (Data.containsKey(k)) {
+                Data[k]!.add(val);
+              } else {
+                Data[k] = [val];
+              }
+              // Giới hạn số lượng phần tử nếu muốn
+              if (Data[k]!.length > 100) {
+                Data[k] = Data[k]!.sublist(Data[k]!.length - 100);
+              }
             }
           });
-          Chuacodulieu = Data.isEmpty;
-          debugPrint("UPDATED (append): Data = $Data");
-        } else {
-          if (Data.isEmpty) {
-            Chuacodulieu = true;
-            debugPrint("UPDATED: Data = null or empty");
+
+          // Sau khi cập nhật, đồng bộ độ dài các list
+          if (Data.isNotEmpty) {
+            final maxLength = Data.values
+                .map((list) => list.length)
+                .reduce((a, b) => a > b ? a : b);
+            Data.forEach((key, list) {
+              while (list.length < maxLength) {
+                // Thêm giá trị cuối cùng cho đến khi đủ độ dài
+                list.add(list.isNotEmpty ? list.last : 0.0);
+              }
+            });
           }
+
+          Chuacodulieu = Data.isEmpty;
+        } else {
+          // if (Data.isEmpty) {
+          //   Chuacodulieu = true;
+          // }
+          Chuacodulieu = widget.value.isEmpty;
+          //vì Data đã được tạo sẵn khi kết nối nên khi thiết bị bị ngắt thì sẽ là Chuacodulieu = true
         }
       });
     }
@@ -169,7 +144,7 @@ class _CustomChartStates extends State<CustomChart> {
     });
   }
 
-  void _showEditDialog(BuildContext context) {
+  void _showEditDialog() {
     final titleController = TextEditingController(
       text: widget.config['title'] ?? 'Biểu đồ',
     );
@@ -249,7 +224,7 @@ class _CustomChartStates extends State<CustomChart> {
                     const SizedBox(height: 10),
                     if (Data.isEmpty) ...[
                       const Text(
-                        'Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết bluetooth.',
+                        'Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết bluetooth!',
                         style: TextStyle(color: Colors.red),
                       ),
                     ] else ...[
@@ -268,7 +243,8 @@ class _CustomChartStates extends State<CustomChart> {
                                   )
                                   .toList(),
                           decoration: InputDecoration(
-                            labelText: 'Chọn dữ liệu ${index + 1}',
+                            labelText:
+                                'Chọn Cổng dữ liệu cho mục tiêu ${index + 1}',
                           ),
                           onChanged: (val) {
                             if (val != null) {
@@ -293,30 +269,31 @@ class _CustomChartStates extends State<CustomChart> {
                 ),
                 TextButton(
                   onPressed: () {
-                    if (Data.isNotEmpty) {
-                      if (selectedDatasets.every((ds) => ds == 'None')) {
-                        selectedDatasets[0] = Data.keys.first;
-                      }
+                    final newConfig = Map<String, dynamic>.from(widget.config);
+                    newConfig['title'] = titleController.text;
+                    newConfig['chartType'] = chartType;
 
-                      final newConfig = Map<String, dynamic>.from(
-                        widget.config,
-                      );
-                      newConfig['title'] = titleController.text;
-                      newConfig['chartType'] = chartType;
-                      newConfig['datasets'] = selectedDatasets;
-
-                      final parsedCount = int.tryParse(
-                        visibleCountController.text,
-                      );
-                      if (parsedCount != null && parsedCount > 0) {
-                        newConfig['visibleCount'] = parsedCount;
-                      }
-
-                      newConfig['numberOfTargets'] = 3;
-
-                      widget.onSave?.call(newConfig);
-                      Navigator.pop(context);
+                    final parsedCount = int.tryParse(
+                      visibleCountController.text,
+                    );
+                    if (parsedCount != null && parsedCount > 0) {
+                      newConfig['visibleCount'] = parsedCount;
                     }
+
+                    if (Data.isEmpty) {
+                      newConfig['datasets'] = [];
+                    } else {
+                      if (selectedDatasets.every((ds) => ds == 'None')) {
+                        // Chỉ gán nếu Data không rỗng
+                        if (Data.keys.isNotEmpty) {
+                          selectedDatasets[0] = Data.keys.first;
+                        }
+                      }
+                      newConfig['datasets'] = selectedDatasets;
+                    }
+
+                    widget.onSave?.call(newConfig);
+                    Navigator.pop(context);
                   },
                   child: const Text('Lưu'),
                 ),
@@ -328,46 +305,8 @@ class _CustomChartStates extends State<CustomChart> {
     );
   }
 
-  Widget _buildErrorWidget(String Error, Size size, bool isLocked) {
-    return GestureDetector(
-      onDoubleTap: !isLocked ? () => _showEditDialog(context) : null,
-      child: Container(
-        width: size.width,
-        height: size.height,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.red, size: 48),
-              const SizedBox(height: 8),
-              Text(
-                Error,
-                style: const TextStyle(fontSize: 16, color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (Chuacodulieu) {
-      return _buildErrorWidget(
-        'Không có dữ liệu để hiển thị, vui lòng kiểm tra kết nối bluetooth. \n double tap để mở setting',
-        widget.size,
-        widget.config['lock'] == true,
-      );
-    }
-    final isLocked = widget.config['lock'] == true;
     final chartTitle = widget.config['title'] ?? 'Biểu đồ';
     final int visibleCount =
         widget.inMenu ? 5 : widget.config['visibleCount'] ?? 10;
@@ -380,141 +319,154 @@ class _CustomChartStates extends State<CustomChart> {
               widget.config['datasets'] ??
                   (Data.isNotEmpty ? [Data.keys.first] : []),
             );
-    debugPrint("CustomChart value: ${widget.value}");
-    debugPrint("CustomChart Data: $Data");
+    // debugPrint("CustomChart value: ${widget.value}");
+    // debugPrint("CustomChart Data: $Data");
     Map<String, List<double>> chartData = {};
     for (var dataset in selectedDatasets) {
       if (Data.containsKey(dataset)) {
         chartData[dataset] = Data[dataset]!;
       }
-      //else {
-      // Data[dataset] = [];
-      //}
     }
 
     final int numberOfTargets = chartData.length;
 
-    final maxlength = chartData.values
-        .map((data) => data.length)
-        .reduce((a, b) => a > b ? a : b);
-
-    if (chartData.isEmpty) {
-      return _buildErrorWidget(
-        'Không có dữ liệu để hiển thị',
-        widget.size,
-        isLocked,
-      );
-    } else if (chartData.values.any((data) => data.isEmpty)) {
-      return _buildErrorWidget(
-        'Dữ liệu không hợp lệ hoặc trống',
-        widget.size,
-        isLocked,
-      );
-    } else if (chartData.values.any((data) => data.length < maxlength)) {
-      return _buildErrorWidget(
-        'Dữ liệu không đồng nhất, độ dài không bằng nhau',
-        widget.size,
-        isLocked,
-      );
-    } else if (numberOfTargets >= 6 || numberOfTargets <= 0) {
-      return _buildErrorWidget(
-        'Số mục tiêu cần để hiển thị là: 1-5 mục tiêu',
-        widget.size,
-        isLocked,
-      );
+    String Error = '';
+    if (Chuacodulieu && !widget.inMenu) {
+      Error = 'Không có dữ liệu.';
+    } else if (chartData.isEmpty && !widget.inMenu) {
+      Error = 'Cổng hiện tại không có dữ liệu.';
     }
 
-    return GestureDetector(
-      onDoubleTap: !isLocked ? () => _showEditDialog(context) : null,
-      // child: OverflowBox(
-      //   minHeight: 30.0,
-      //   maxHeight: double.infinity,
-      //   minWidth: 30.0,
-      //   maxWidth: double.infinity,
-      child: Container(
-        width: widget.size.width,
-        height: widget.size.height,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.blue),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child:
-        // Stack(
-        //   children: [
-        //     Positioned.fill(
-        //       child: Scrollbar(
-        //         controller: scrollController,
-        //         thumbVisibility: true,
-        //         child: SingleChildScrollView(
-        //           controller: scrollController,
-        //           scrollDirection: Axis.horizontal,
-        //           child: SingleChildScrollView(
-        //             scrollDirection: Axis.vertical,
-        //             clipBehavior: Clip.none,
-        //             child:
-        //                 chartType == 'area' || chartType == 'line'
-        //                     ? AreaOrLineChartWidgets(
-        //                       numberOfTargets: numberOfTargets,
-        //                       visibleCount: visibleCount,
-        //                       chartData: chartData,
-        //                       endIndex: chartData.values.first.length,
-        //                       size: widget.size,
-        //                       isCurved: chartType == 'area',
-        //                     )
-        //                     : ColumnChartWidget(
-        //                       numberOfTargets: numberOfTargets,
-        //                       visibleCount: visibleCount,
-        //                       endIndex: chartData.values.first.length,
-        //                       chartData: chartData,
-        //                       size: widget.size,
-        //                     ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        Column(
-          children: [
-            Text(
-              chartTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            // Expanded(
-            Scrollbar(
-              controller: scrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
+    return Container(
+      width: width,
+      height: height,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Stack(
+        children: [
+          Text(chartTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Error.isNotEmpty
+              ? SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      alignment: Alignment.center,
+                      child: Text(
+                        Error,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AreaOrLineChartWidgets(
+                      numberOfTargets: numberOfTargets,
+                      visibleCount: visibleCount,
+                      chartData: chartData,
+                      endIndex:
+                          Error.isNotEmpty
+                              ? DataFake.values.first.length
+                              : chartData.values.first.length,
+                      size: widget.size,
+                      isCurved: chartType == 'area',
+                    ),
+                  ],
+                ),
+              )
+              : Scrollbar(
                 controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                // Để mặc định hoặc dùng Clip.hardEdge để chỉ cắt trái/phải
-                // clipBehavior: Clip.hardEdge, // <-- có thể bỏ dòng này vì mặc định đã là hardEdge
-                child:
-                    chartType == 'area' || chartType == 'line'
-                        ? AreaOrLineChartWidgets(
-                          numberOfTargets: numberOfTargets,
-                          visibleCount: visibleCount,
-                          chartData: chartData,
-                          endIndex: chartData.values.first.length,
-                          size: widget.size,
-                          isCurved: chartType == 'area',
-                        )
-                        : ColumnChartWidget(
-                          numberOfTargets: numberOfTargets,
-                          visibleCount: visibleCount,
-                          endIndex: chartData.values.first.length,
-                          chartData: chartData,
-                          size: widget.size,
-                        ),
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: Axis.horizontal,
+                  child:
+                      (chartType == 'area' || chartType == 'line')
+                          ? AreaOrLineChartWidgets(
+                            numberOfTargets: numberOfTargets,
+                            visibleCount: visibleCount,
+                            chartData: chartData,
+                            endIndex: chartData.values.first.length,
+                            size: widget.size,
+                            isCurved: chartType == 'area',
+                          )
+                          : ColumnChartWidget(
+                            numberOfTargets: numberOfTargets,
+                            visibleCount: visibleCount,
+                            chartData: chartData,
+                            endIndex: chartData.values.first.length,
+                            size: widget.size,
+                          ),
+                ),
+              ),
+          if (widget.config["lock"] == false)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    width += details.delta.dx;
+                    height += details.delta.dy;
+                    width = width.clamp(150, 600);
+                    height = height.clamp(150, 600);
+                  });
+                },
+                onPanEnd: (_) {
+                  widget.onSave?.call({
+                    ...widget.config,
+                    'width': width,
+                    'height': height,
+                  });
+                },
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.open_in_full,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
-            // ),
-          ],
-        ),
+          if (widget.config["lock"] == false)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: _showEditDialog,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-      // ),
     );
   }
 }

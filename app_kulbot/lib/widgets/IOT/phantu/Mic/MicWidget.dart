@@ -8,7 +8,7 @@ class MicShowKeyWidget extends StatefulWidget {
   final Map<String, dynamic> config;
   final Function(Map<String, dynamic>)? onSave;
   final VoidCallback? onDelete;
-  final Future<void> Function(String msg)? VoiceTextToCommand;
+  final Future<void> Function(String msg)? voiceTextToCommand;
   final bool lock;
 
   const MicShowKeyWidget({
@@ -16,7 +16,7 @@ class MicShowKeyWidget extends StatefulWidget {
     required this.config,
     this.onSave,
     this.onDelete,
-    this.VoiceTextToCommand,
+    this.voiceTextToCommand,
     required this.lock,
   });
 
@@ -31,6 +31,8 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
   Timer? _debounce;
   String _selectedLanguage = 'vi';
   late stt.SpeechToText _speech;
+  late double width;
+  late double height;
 
   // Dummy speech object, replace with your actual speech recognition instance
   // final _speech = ...;
@@ -49,6 +51,9 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+
+    width = (widget.config['width'] ?? 160).toDouble();
+    height = (widget.config['height'] ?? 100).toDouble();
   }
 
   void _listenVoiceToText() async {
@@ -117,12 +122,12 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
   }
 
   void _callVoiceTextToCommand(String msg) {
-    if (widget.VoiceTextToCommand != null && msg.isNotEmpty) {
-      widget.VoiceTextToCommand!(msg);
+    if (widget.voiceTextToCommand != null && msg.isNotEmpty) {
+      widget.voiceTextToCommand!(msg);
     }
   }
 
-  void _showLanguageDialog() {
+  void _showEditDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -175,27 +180,103 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTap: widget.lock == false ? _showLanguageDialog : null,
-      child: AvatarGlow(
-        animate: _isListening,
-        glowColor: Colors.cyanAccent,
-        duration: const Duration(milliseconds: 2000),
-        repeat: true,
-        child: FloatingActionButton(
-          backgroundColor: Colors.cyanAccent,
-          onPressed: !widget.lock ? _listenVoiceToText : null,
-          tooltip:
-              voicetotext.isNotEmpty
-                  ? voicetotext
-                  : _isListening
-                  ? "Đang lắng nghe..."
-                  : "Nhấn để nói",
-          child: Icon(
-            _isListening ? Icons.mic : Icons.mic_none,
-            color: Colors.black,
+    return Container(
+      width: width,
+      height: height,
+      child: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: width - 16, // chừa chỗ cho nút kéo
+              height: height - 16,
+              child: AvatarGlow(
+                animate: _isListening,
+                glowColor: Colors.cyanAccent,
+                duration: const Duration(milliseconds: 2000),
+                repeat: true,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.cyanAccent,
+                  onPressed: !widget.lock ? _listenVoiceToText : null,
+                  tooltip:
+                      voicetotext.isNotEmpty
+                          ? voicetotext
+                          : _isListening
+                          ? "Đang lắng nghe..."
+                          : "Nhấn để nói",
+                  child: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+          if (widget.config["lock"] == false)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    width += details.delta.dx;
+                    height += details.delta.dy;
+                    width = width.clamp(
+                      56,
+                      300,
+                    ); // 56 là kích thước min của FAB
+                    height = height.clamp(56, 300);
+                  });
+                },
+                onPanEnd: (_) {
+                  widget.onSave?.call({
+                    ...widget.config,
+                    'width': width,
+                    'height': height,
+                  });
+                },
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.open_in_full,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          if (widget.config["lock"] == false)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: _showEditDialog,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
