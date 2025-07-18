@@ -10,12 +10,16 @@ import 'package:Kulbot/widgets/IOT/phantu/SCS/SCSWidget.dart'; //SCSWidget – h
 // import 'package:Kulbot/widgets/IOT/phantu/SwitchControlWidget.dart'; //SwitchControlWidget – hiển thị công tắc
 // import 'package:Kulbot/widgets/IOT/SliderControlWidget.dart'; //SliderControlWidget – hiển thị thanh trượt
 import 'package:Kulbot/widgets/IOT/phantu/Mic/MicWIdget.dart';
-// import 'package:Kulbot/widgets/IOT/phantu/Mic/ControlMicWidget.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/ChartLogic.dart';
-import 'package:Kulbot/widgets/IOT/phantu/Button/ControlButtonWidget.dart';
 // import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Label/label.dart';
 import 'package:Kulbot/widgets/IOT/phantu/listbox.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Button/ControlButtonWidget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Button/HoldLightWidget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Button/SwitchLightWidget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/Button/VolumeSliderWidget.dart';
+import 'package:Kulbot/widgets/IOT/phantu/HienThi/HienThiLight.dart';
+import 'package:Kulbot/widgets/IOT/phantu/listbox_tester.dart';
 
 //Mẫu và Class lưu trữ file txt
 // import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
@@ -25,23 +29,21 @@ class PhanTu_IOT {
   static Map<String, Map<String, dynamic>> controlGroups = {
     //Đừng để id bắt đầu giống nhau vd: mic và micshowkey
     //Tại lười nên không muốn fix cái này :)))
-    'light': {
-      'title': 'Các nút điều khiển',
-      'name': 'Đèn',
+    'Button_light': {
+      'title': 'control buttons',
+      'name': "Button",
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 3,
       'config': {
-        'title': 'Đèn',
+        'title': 'Light',
         'on': 'OO',
         'off': 'PP',
-        'showkey': 'đây là nút bật tắt',
+        "showkey": "sk_button",
       },
-      //config mặc định khi add vào widget chính
       'widgetBuilder':
           (
-            Size size,
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -50,33 +52,109 @@ class PhanTu_IOT {
             bool inMenu,
           ) => ControlButtonWidget(
             config: config,
-            size: Size(size.width - 10, size.height - 10),
             lock: config['lock'] == true,
-            sendCommand: sendCommand ?? null,
+            sendCommand: sendCommand,
             onSave: onSave,
             onDelete: onDelete,
+            inMenu: inMenu,
+          ),
+    },
+    'HoldLight': {
+      'title': 'control buttons',
+      'name': 'Hold Button',
+      'typeBox': "height",
+      'size': [0.1, 0, 0.1, 0],
+      'sizeInMenu': [0, 50, 0, 50],
+      'max': 4,
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_hold_button"},
+      'widgetBuilder':
+          (
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => HoldButtonWidget(
+            config: config,
+            lock: config['lock'] == true,
+            sendCommand: sendCommand,
+            onSave: onSave,
+            onDelete: onDelete,
+            inMenu: inMenu,
+          ),
+    },
+    'SwitchButton': {
+      'title': 'control buttons',
+      'name': 'Switch Button',
+      'typeBox': "height",
+      'size': [0.1, 0, 0.1, 0],
+      'sizeInMenu': [0, 50, 0, 50],
+      'max': 4,
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_switch_button"},
+      'widgetBuilder':
+          (
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => SwitchButtonWidget(
+            config: config,
+            lock: config['lock'] == true,
+            sendCommand: sendCommand,
+            onSave: onSave,
+            onDelete: onDelete,
+            inMenu: inMenu,
+          ),
+    },
+    'volume': {
+      'title': 'control buttons',
+      'name': 'Volume',
+      'typeBox': 'height',
+      'size': [0, 210, 0, 60],
+      'sizeInMenu': [0, 210, 0, 60],
+      'max': 1,
+      'getData': true,
+      'config': {'title': 'Volume', "showkey": "sk_volume"},
+      'widgetBuilder':
+          (
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => VolumeSliderWidget(
+            value: value,
+            lock: config['lock'] == true,
+            onDelete: onDelete,
+            inMenu: inMenu,
+            config: config,
+            onSave: onSave,
+            sendCommand: sendCommand,
           ),
     },
     'mic': {
-      'title': 'Các nút điều khiển',
-      'name': 'Mic 1',
+      'title': 'control buttons',
+      'name': 'Mic',
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': 'đây là cái mic'},
+      'config': {"showkey": "sk_mic"},
     },
     'ListBox': {
-      'title': 'Các nút điều khiển',
-      'name': 'Trạng thái bluetooth',
+      'title': 'Status',
+      'name': 'Bluetooth Status',
       'size': [0.3, 50, 0.2, 50],
-      'sizeInMenu': [0, 150, 0, 100],
+      'sizeInMenu': [0, 200, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': 'Hiển thị trạng thái bluetooth'},
+      'config': {'showkey': "sk_listbox"},
       'widgetBuilder':
           (
-            Size size,
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -90,17 +168,65 @@ class PhanTu_IOT {
             onSave: onSave,
           ),
     },
-    'LabelString': {
-      'title': 'Các nút điều khiển',
-      'name': 'Label String',
+    'ListBoxTester': {
+      'title': 'Status',
+      'name': 'ListBox Tester',
       'size': [0.3, 50, 0.2, 50],
-      'sizeInMenu': [0, 150, 0, 100],
+      'sizeInMenu': [0, 210, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': 'đây là cái Label String'},
+      'config': {"showkey": "sk_listbox_tester"},
       'widgetBuilder':
           (
-            Size size,
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => ListBoxTester(
+            config: config,
+            value: value,
+            onDelete: onDelete,
+            onSave: onSave,
+          ),
+    },
+    'Light': {
+      'title': 'data tables',
+      'name': 'Light',
+      'typeBox': "height",
+      'size': [0.1, 0, 0.1, 0],
+      'sizeInMenu': [0, 50, 0, 50],
+      'max': 4,
+      'getData': true,
+      'config': {"showkey": "sk_light"},
+      'widgetBuilder':
+          (
+            Map<String, dynamic> config,
+            Map<String, dynamic> value,
+            Function(Map<String, dynamic>)? onSave,
+            VoidCallback? onDelete,
+            Future<void> Function(String msg)? sendCommand,
+            bool inMenu,
+          ) => Hienthilight(
+            config: config,
+            value: value,
+            onSave: onSave,
+            onDelete: onDelete,
+            inMenu: inMenu,
+          ),
+    },
+    'LabelString': {
+      'title': 'data tables',
+      'name': 'Label String',
+      'size': [0.3, 50, 0.2, 50],
+      'sizeInMenu': [0, 210, 0, 100],
+      'typeBox': "height",
+      'max': 1,
+      'getData': true,
+      'config': {"showkey": "sk_label_string"},
+      'widgetBuilder':
+          (
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -117,16 +243,16 @@ class PhanTu_IOT {
           ),
     },
     'LabelDouble': {
-      'title': 'Các nút điều khiển',
+      'title': 'data tables',
       'name': 'Label Double',
       'size': [0.3, 50, 0.2, 50],
-      'sizeInMenu': [0, 150, 0, 100],
+      'sizeInMenu': [0, 210, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': 'đây là cái Label Double'},
+      'getData': true,
+      'config': {"showkey": "sk_label_double"},
       'widgetBuilder':
           (
-            Size size,
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -143,16 +269,16 @@ class PhanTu_IOT {
           ),
     },
     'SCSWidget': {
-      'title': 'Biểu đồ/đồ thị',
-      'name': 'SCSWidget',
+      'title': 'data tables',
+      'name': 'SCS',
       'size': [0.3, 0, 0.3, 0],
       'sizeInMenu': [0, 210, 0, 210],
       'typeBox': "width",
       'max': 3,
-      'config': {'title': 'Temp', 'unit': '˚C'},
+      'getData': true,
+      'config': {'title': 'Temp', 'unit': '˚C', "showkey": "sk_scs"},
       'widgetBuilder':
           (
-            Size size,
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -163,21 +289,21 @@ class PhanTu_IOT {
             config: config,
             value: value,
             onDelete: onDelete,
-            size: Size(size.width - 10, size.height - 10),
+            onSave: onSave,
             inMenu: inMenu,
           ),
     },
     'CustomChart': {
-      'title': 'Biểu đồ/đồ thị',
-      'name': 'CustomChart',
+      'title': 'data tables',
+      'name': 'Chart',
       'size': [0.4, 0, 0.3, 0],
       'sizeInMenu': [0, 210, 0, 210],
       'typeBox': "width",
       'max': 3,
-      'config': {"visibleCount": 10},
+      'getData': true,
+      'config': {"visibleCount": 10, "showkey": "sk_chart"},
       'widgetBuilder':
           (
-            Size size,
             Map<String, dynamic> config,
             Map<String, dynamic> value,
             Function(Map<String, dynamic>)? onSave,
@@ -185,7 +311,6 @@ class PhanTu_IOT {
             Future<void> Function(String msg)? sendCommand,
             bool inMenu,
           ) => CustomChart(
-            size: size,
             config: config,
             value: value,
             onSave: onSave,
@@ -203,12 +328,20 @@ class PhanTu_IOT {
     return 'none';
   }
 
-  static String getTitleById(String id) {
+  // static String getTitleById(String id) {
+  //   final group = controlGroups[id];
+  //   if (group != null && group.containsKey('title')) {
+  //     return group['title'] ?? 'Không có tiêu đề';
+  //   }
+  //   return 'Không có tiêu đề';
+  // }
+
+  static bool getGetDataById(String id) {
     final group = controlGroups[id];
-    if (group != null && group.containsKey('title')) {
-      return group['title'] ?? 'Không có tiêu đề';
+    if (group != null && group.containsKey('getData')) {
+      return group['getData'] ?? false;
     }
-    return 'Không có tiêu đề';
+    return false;
   }
 
   static int getMaxById(String id) {
@@ -237,7 +370,7 @@ class PhanTu_IOT {
   }
 
   static Widget Function(
-    Size size,
+    // Size size,
     Map<String, dynamic> config,
     Map<String, dynamic> value,
     Function(Map<String, dynamic>)? onSave,
@@ -250,7 +383,7 @@ class PhanTu_IOT {
     if (group != null && group.containsKey('widgetBuilder')) {
       return group['widgetBuilder']
           as Widget Function(
-            Size,
+            // Size,
             Map<String, dynamic>,
             Map<String, dynamic>,
             Function(Map<String, dynamic>)?,
@@ -262,7 +395,7 @@ class PhanTu_IOT {
     return null;
   }
 
-  static String getNoteShowKey(id) {
+  static String getNoteShowKey(BuildContext context, String id) {
     final group = controlGroups[id];
     if (group != null && group.containsKey('config')) {
       if (group['config'].isNotEmpty &&
@@ -270,7 +403,7 @@ class PhanTu_IOT {
         return group['config']['showkey'];
       }
     }
-    return "Chưa có mô tả";
+    return "No description";
   }
 
   static Widget getControlWidget({
@@ -283,7 +416,7 @@ class PhanTu_IOT {
     Function(Map<String, dynamic>)? onSave,
     VoidCallback? onDelete,
     bool lock = false,
-    bool showKey = false,
+    String? NoteshowKey,
     Future<void> Function(String msg)? sendCommand,
     Future<void> Function(String msg)? VoiceTextToCommand,
   }) {
@@ -302,8 +435,8 @@ class PhanTu_IOT {
     double height =
         (typeBox == "width" ? size.width : size.height) * yScale + yOffset;
 
-    width = width.clamp(30.0, size.width);
-    height = height.clamp(30.0, size.height);
+    width = width.clamp(50.0, size.width);
+    height = height.clamp(50.0, size.height);
 
     config ??= <String, dynamic>{};
     value ??= <String, dynamic>{};
@@ -323,14 +456,14 @@ class PhanTu_IOT {
       );
     } //trường hợp tự custom
 
-    final bool useShowKey = showKey && !inMenu && !isPreview;
+    final bool useShowKey = NoteshowKey != null && !inMenu && !isPreview;
 
     if (Customrieng != null) {
       return useShowKey
           ? ShowKeyWrapper(
             keyShowcase:
                 ShowKeyManager.getKey(id) ?? ShowKeyManager.createKey(id),
-            description: getNoteShowKey(id),
+            description: NoteshowKey,
             child: Customrieng,
           )
           : Customrieng;
@@ -339,7 +472,7 @@ class PhanTu_IOT {
     final builder = getWidgetBuilderById(id);
     if (builder != null) {
       final Widget builtWidget = builder(
-        Size(width, height),
+        // Size(width, height),
         config,
         value,
         onSave,
@@ -352,7 +485,7 @@ class PhanTu_IOT {
           ? ShowKeyWrapper(
             keyShowcase:
                 ShowKeyManager.getKey(id) ?? ShowKeyManager.createKey(id),
-            description: getNoteShowKey(id),
+            description: NoteshowKey,
             child: builtWidget,
           )
           : builtWidget;
@@ -377,7 +510,7 @@ class ShowKeyManager {
   }
 
   /// Trả về GlobalKey theo id, hoặc null nếu chưa tạo
-  static GlobalKey? getKey(String id) => _keys[id] ?? null;
+  static GlobalKey? getKey(String id) => _keys[id];
 
   /// Trả về toàn bộ GlobalKey đã tạo
   static List<GlobalKey> getAllKeys() {

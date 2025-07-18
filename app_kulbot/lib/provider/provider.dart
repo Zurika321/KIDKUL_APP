@@ -35,8 +35,9 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   void setLocale(Locale locale) async {
-    if (!L10n.all.contains(locale))
+    if (!L10n.all.contains(locale)) {
       return; // Kiểm tra xem ngôn ngữ có hỗ trợ không
+    }
     _locale = locale;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('languageCode', locale.languageCode);
@@ -46,7 +47,8 @@ class LocaleProvider extends ChangeNotifier {
   void clearLocale() async {
     //Không hiểu tại sao có hàm này ở đây luôn :)) kí tên: Kha(thực tập)
     _locale = const Locale(
-        'en'); //chỗ này cho null thì widget khác phải ?? Locale('en') nên để z lun
+      'en',
+    ); //chỗ này cho null thì widget khác phải ?? Locale('en') nên để z lun
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('languageCode', 'en');
     notifyListeners();

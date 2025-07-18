@@ -89,7 +89,7 @@ class _ControlState extends State<Control> {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (_) => ControlWidget(
+                              (_) => const ControlWidget(
                                 checkAvailability:
                                     true, // hoặc false tùy logic bạn muốn
                               ),
@@ -105,7 +105,7 @@ class _ControlState extends State<Control> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     SizedBox(
                       width: 300,
                       height: 300,
@@ -127,13 +127,13 @@ class _ControlState extends State<Control> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => CarControlScreen(),
+                              builder: (_) => const CarControlScreen(),
                             ),
                           );
                         },
                       ),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     SizedBox(
                       width: 300,
                       height: 300,
@@ -156,7 +156,7 @@ class _ControlState extends State<Control> {
                             context,
                             MaterialPageRoute(
                               builder:
-                                  (_) => ControlWidget(
+                                  (_) => const ControlWidget(
                                     checkAvailability:
                                         true, // hoặc false tùy logic bạn muốn
                                   ),
@@ -165,7 +165,7 @@ class _ControlState extends State<Control> {
                         },
                       ),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     SizedBox(
                       width: 300,
                       height: 300,
@@ -186,12 +186,14 @@ class _ControlState extends State<Control> {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => DogWidget()),
+                            MaterialPageRoute(
+                              builder: (_) => const DogWidget(),
+                            ),
                           );
                         },
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                   ],
                 ),
               ),
@@ -220,12 +222,12 @@ class CustomBox extends StatelessWidget {
   final Color backgroundColor;
 
   const CustomBox({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
     required this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'dart:async'; //báo có sử dụng chờ đợi
 import 'package:speech_to_text/speech_to_text.dart' as stt; //mic
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 
 class MicShowKeyWidget extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -29,7 +30,7 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
   String voicetotext = "";
   String _previousText = "";
   Timer? _debounce;
-  String _selectedLanguage = 'vi';
+  final String _selectedLanguage = 'vi';
   late stt.SpeechToText _speech;
   late double width;
   late double height;
@@ -81,7 +82,7 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
             _debounce?.cancel();
 
             // Khởi tạo lại timer — chỉ xử lý sau khi im lặng ~1 giây
-            _debounce = Timer(Duration(milliseconds: 500), () {
+            _debounce = Timer(const Duration(milliseconds: 500), () {
               String newPart =
                   val.recognizedWords.substring(_previousText.length).trim();
 
@@ -130,57 +131,41 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
   void _showEditDialog() {
     showDialog(
       context: context,
-      builder: (context) {
-        String tempLang = _selectedLanguage;
-        return AlertDialog(
-          title: const Text('Chọn ngôn ngữ'),
-          content: DropdownButton<String>(
-            value: tempLang,
-            items: const [
-              DropdownMenuItem(value: 'vi', child: Text('Tiếng Việt')),
-              DropdownMenuItem(value: 'en', child: Text('English')),
+      builder:
+          (_) => CustomDialog(
+            title: "Chọn ngôn ngữ",
+            dropdowns: [
+              DropdownInputField<String>(
+                label: "Ngôn ngữ",
+                key: "languageCode",
+                items: ['vi', 'en'],
+                items_name: ['Tiếng Việt', 'English'],
+                selectedValue: _selectedLanguage,
+              ),
             ],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  tempLang = value;
-                });
-              }
+            onOk: (data) {
+              final newConfig = {
+                ...widget.config,
+                'languageCode': data['languageCode'],
+              };
+              widget.onSave?.call(newConfig);
+              Navigator.of(context).pop();
             },
+            onDelete:
+                widget.onDelete != null
+                    ? () {
+                      Navigator.of(context).pop();
+                      widget.onDelete?.call();
+                    }
+                    : null,
+            onCancel: () => Navigator.of(context).pop(),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (widget.onDelete != null) widget.onDelete!();
-              },
-              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () {
-                // setState(() {
-                //   _selectedLanguage = tempLang;
-                // });//ko cần vì gửi newConfig là nó setState lại rồi
-                if (widget.onSave != null) {
-                  final newConfig = {
-                    ...widget.config,
-                    'languageCode': _selectedLanguage,
-                  };
-                  widget.onSave!(newConfig);
-                }
-                Navigator.of(context).pop();
-              },
-              child: const Text('Lưu'),
-            ),
-          ],
-        );
-      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: Stack(
@@ -222,9 +207,9 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
                     height += details.delta.dy;
                     width = width.clamp(
                       56,
-                      300,
+                      200,
                     ); // 56 là kích thước min của FAB
-                    height = height.clamp(56, 300);
+                    height = height.clamp(56, 200);
                   });
                 },
                 onPanEnd: (_) {

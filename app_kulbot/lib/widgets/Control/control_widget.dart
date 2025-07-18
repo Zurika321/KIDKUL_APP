@@ -17,7 +17,7 @@ import 'package:Kulbot/widgets/Control/Joystick360degrees.dart';
 class ControlWidget extends StatefulWidget {
   final bool checkAvailability;
 
-  const ControlWidget({this.checkAvailability = true});
+  const ControlWidget({super.key, this.checkAvailability = true});
 
   @override
   State<ControlWidget> createState() => _ControlWidgetState();
@@ -64,8 +64,8 @@ class _ControlWidgetState extends State<ControlWidget> {
   bool isPressedSound = false;
   bool isPressedLight = false;
 
-  JoystickMode _joystickModeLeft = JoystickMode.vertical;
-  JoystickMode _joystickModeRight = JoystickMode.horizontal;
+  final JoystickMode _joystickModeLeft = JoystickMode.vertical;
+  final JoystickMode _joystickModeRight = JoystickMode.horizontal;
   double _x = 0;
   double _y = 0;
 
@@ -195,7 +195,7 @@ class _ControlWidgetState extends State<ControlWidget> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<LocaleProvider>(context);
-    var locale = provider.locale ?? Locale('en');
+    var locale = provider.locale ?? const Locale('en');
 
     return ShowCaseWidget(
       builder:
@@ -208,14 +208,14 @@ class _ControlWidgetState extends State<ControlWidget> {
               backgroundColor: Colors.blueGrey[900],
               title: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.rocket,
                     color: Colors.cyanAccent,
                   ), // Biểu tượng robot
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
-                    "$connectedDeviceName",
-                    style: TextStyle(
+                    connectedDeviceName,
+                    style: const TextStyle(
                       color: Colors.cyanAccent,
                       fontWeight: FontWeight.bold,
                     ),
@@ -223,7 +223,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                 ],
               ),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.cyanAccent),
+                icon: const Icon(Icons.arrow_back, color: Colors.cyanAccent),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -233,7 +233,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                   key: _one,
                   description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
                   child: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.question_mark_rounded,
                       color: Colors.cyanAccent,
                     ),
@@ -264,9 +264,6 @@ class _ControlWidgetState extends State<ControlWidget> {
                           final flag = L10n.getflag(locale.languageCode);
 
                           return DropdownMenuItem(
-                            child: Center(
-                              child: Text(flag, style: TextStyle(fontSize: 32)),
-                            ),
                             value: locale,
                             onTap: () {
                               final provider = Provider.of<LocaleProvider>(
@@ -276,6 +273,9 @@ class _ControlWidgetState extends State<ControlWidget> {
                               provider.setLocale(locale);
                               _stopListening();
                             },
+                            child: Center(
+                              child: Text(flag, style: TextStyle(fontSize: 32)),
+                            ),
                           );
                         }).toList(),
                     onChanged: (_) {},
@@ -285,7 +285,7 @@ class _ControlWidgetState extends State<ControlWidget> {
                   key: _three,
                   description: 'Đây là nút quét mã QR để điều khiển robot',
                   child: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.qr_code_scanner_outlined,
                       color: Colors.cyanAccent,
                     ),
@@ -577,7 +577,7 @@ class _ControlWidgetState extends State<ControlWidget> {
     if (isPressedSound) {
       print('EE');
       _bluetoothService.sendMessage('EE');
-      Future.delayed(Duration(milliseconds: 200));
+      Future.delayed(const Duration(milliseconds: 200));
     }
   }
 
@@ -585,21 +585,21 @@ class _ControlWidgetState extends State<ControlWidget> {
     if (isPressedSound == false) {
       print('NN');
       _bluetoothService.sendMessage('NN');
-      Future.delayed(Duration(milliseconds: 200));
+      Future.delayed(const Duration(milliseconds: 200));
     }
   }
 
   void _light() async {
     print('O');
     _bluetoothService.sendMessage('OO');
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
   }
 
   void _endlight() {
     if (isPressedLight == false) {
       print('PP');
       _bluetoothService.sendMessage('PP');
-      Future.delayed(Duration(milliseconds: 200));
+      Future.delayed(const Duration(milliseconds: 200));
     }
   }
 
@@ -618,7 +618,7 @@ class _ControlWidgetState extends State<ControlWidget> {
 
   void _listenVoiceToText() async {
     final provider = Provider.of<LocaleProvider>(context, listen: false);
-    final locale = provider.locale ?? Locale('en');
+    final locale = provider.locale ?? const Locale('en');
     String languageCode = locale.languageCode;
 
     if (!_isListening) {
@@ -642,7 +642,7 @@ class _ControlWidgetState extends State<ControlWidget> {
             _debounce?.cancel();
 
             // Khởi tạo lại timer — chỉ xử lý sau khi im lặng ~1 giây
-            _debounce = Timer(Duration(milliseconds: 500), () {
+            _debounce = Timer(const Duration(milliseconds: 500), () {
               String newPart =
                   val.recognizedWords.substring(_previousText.length).trim();
 

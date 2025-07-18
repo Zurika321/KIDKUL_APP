@@ -132,8 +132,9 @@ class _ProgramingscreenState extends State<Programingscreen> {
                             int index = entry.key;
                             Map<String, dynamic> item = entry.value;
 
-                            if (!item["isVisible"])
+                            if (!item["isVisible"]) {
                               return const SizedBox.shrink();
+                            }
 
                             return Padding(
                               padding: const EdgeInsets.only(
@@ -159,8 +160,9 @@ class _ProgramingscreenState extends State<Programingscreen> {
                                               1) {
                                             setState(() {
                                               item["isVisible"] = false;
-                                              if (selectedItemIndex == index)
+                                              if (selectedItemIndex == index) {
                                                 selectedItemIndex = null;
+                                              }
                                               _saveItems();
                                             });
                                           } else {
@@ -338,7 +340,7 @@ class _ProgramingscreenState extends State<Programingscreen> {
   }
 
   Future<void> _saveItems() async {
-    await Future.delayed(Duration(seconds: 10)); // Đặt delay 10 giây
+    await Future.delayed(const Duration(seconds: 10)); // Đặt delay 10 giây
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('blocklyItems', json.encode(blocklyItems));
     if (selectedItemIndex != null) {
@@ -444,10 +446,8 @@ class _ProgramingscreenState extends State<Programingscreen> {
                         future: loadAddons(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
-                            Fluttertoast.showToast(
-                              msg: "Load ${_xmlworkspace}",
-                            );
-                            print("Load ${_xmlworkspace}");
+                            Fluttertoast.showToast(msg: "Load $_xmlworkspace");
+                            print("Load $_xmlworkspace");
                             return BlocklyEditorWidget(
                               workspaceConfiguration: workspaceConfiguration,
                               initial: _xmlworkspace,

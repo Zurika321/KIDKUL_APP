@@ -11,11 +11,15 @@ class SettingiotWidget extends StatefulWidget {
 }
 
 class _SettingiotWidgetState extends State<SettingiotWidget> {
-  final TextEditingController _editingControllerSwitch1_On = TextEditingController();
-  final TextEditingController _editingControllerSwitch1_Off = TextEditingController();
+  final TextEditingController _editingControllerSwitch1_On =
+      TextEditingController();
+  final TextEditingController _editingControllerSwitch1_Off =
+      TextEditingController();
 
-  final TextEditingController _editingControllerSwitch2_On = TextEditingController();
-  final TextEditingController _editingControllerSwitch2_Off = TextEditingController();
+  final TextEditingController _editingControllerSwitch2_On =
+      TextEditingController();
+  final TextEditingController _editingControllerSwitch2_Off =
+      TextEditingController();
 
   // final TextEditingController _editingControllerLight1_On = TextEditingController();
   // final TextEditingController _editingControllerLight1_Off = TextEditingController();
@@ -32,14 +36,22 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
   Future<void> _saveSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-        '_editingControllerSwitch1_On', _editingControllerSwitch1_On.text);
+      '_editingControllerSwitch1_On',
+      _editingControllerSwitch1_On.text,
+    );
     await prefs.setString(
-        '_editingControllerSwitch1_Off', _editingControllerSwitch1_Off.text);
+      '_editingControllerSwitch1_Off',
+      _editingControllerSwitch1_Off.text,
+    );
 
     await prefs.setString(
-        '_editingControllerSwitch2_On', _editingControllerSwitch2_On.text);
+      '_editingControllerSwitch2_On',
+      _editingControllerSwitch2_On.text,
+    );
     await prefs.setString(
-        '_editingControllerSwitch2_Off', _editingControllerSwitch2_Off.text);
+      '_editingControllerSwitch2_Off',
+      _editingControllerSwitch2_Off.text,
+    );
 
     // await prefs.setString(
     //     '_editingControllerLight1_On', _editingControllerLight1_On.text);
@@ -51,9 +63,13 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
     // await prefs.setString(
     //     '_editingControllerLight2_Off', _editingControllerLight2_Off.text);
 
-
-     print("Saved settings: ${_editingControllerSwitch1_On.text}, ${_editingControllerSwitch1_Off.text}");
-     Fluttertoast.showToast(msg: "Saved settings: ${_editingControllerSwitch1_On.text}, ${_editingControllerSwitch1_Off.text}");
+    print(
+      "Saved settings: ${_editingControllerSwitch1_On.text}, ${_editingControllerSwitch1_Off.text}",
+    );
+    Fluttertoast.showToast(
+      msg:
+          "Saved settings: ${_editingControllerSwitch1_On.text}, ${_editingControllerSwitch1_Off.text}",
+    );
   }
 
   Future<void> _loadSettings() async {
@@ -85,14 +101,10 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('IoT Settings'),
+        title: const Text('IoT Settings'),
         backgroundColor: Colors.amber,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 18,
-          ),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -100,26 +112,32 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0), // Add padding to prevent overflow
+          padding: const EdgeInsets.all(
+            16.0,
+          ), // Add padding to prevent overflow
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align the column to the start
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align the column to the start
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded( // Use Expanded to prevent overflow in Row
+                  Expanded(
+                    // Use Expanded to prevent overflow in Row
                     child: Padding(
-                      padding: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 20),
                       child: InputSettingIoT(
                         label: "Switch 1: ON",
                         controller: _editingControllerSwitch1_On,
                       ),
                     ),
                   ),
-                  SizedBox(width: 16), // Add spacing between the two columns
+                  const SizedBox(
+                    width: 16,
+                  ), // Add spacing between the two columns
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 20),
                       child: InputSettingIoT(
                         label: "Switch 1: Off",
                         controller: _editingControllerSwitch1_Off,
@@ -131,19 +149,22 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded( // Use Expanded to prevent overflow in Row
+                  Expanded(
+                    // Use Expanded to prevent overflow in Row
                     child: Padding(
-                      padding: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 20),
                       child: InputSettingIoT(
                         label: "Switch 2: ON",
                         controller: _editingControllerSwitch2_On,
                       ),
                     ),
                   ),
-                  SizedBox(width: 16), // Add spacing between the two columns
+                  const SizedBox(
+                    width: 16,
+                  ), // Add spacing between the two columns
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 20),
                       child: InputSettingIoT(
                         label: "Switch 2: Off",
                         controller: _editingControllerSwitch2_Off,
@@ -203,16 +224,17 @@ class _SettingiotWidgetState extends State<SettingiotWidget> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
-                    child: ElevatedButton(
-                  onPressed: () {
-                    _saveSettings();
-                    Fluttertoast.showToast(msg: "Đã Lưu");
-                    setState(() {
+                  child: ElevatedButton(
+                    onPressed: () {
                       _saveSettings();
-                    });
-                  },
-                  child: Text("Lưu"),
-                )),
+                      Fluttertoast.showToast(msg: "Đã Lưu");
+                      setState(() {
+                        _saveSettings();
+                      });
+                    },
+                    child: const Text("Lưu"),
+                  ),
+                ),
               ),
             ],
           ),
@@ -241,7 +263,7 @@ class _InputSettingIoTState extends State<InputSettingIoT> {
           Text(widget.label),
           TextField(
             controller: widget.controller,
-            decoration: InputDecoration(border: OutlineInputBorder()),
+            decoration: const InputDecoration(border: OutlineInputBorder()),
           ),
         ],
       ),

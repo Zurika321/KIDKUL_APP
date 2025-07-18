@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; //xoay màn hình
-import 'dart:math';
+// import 'dart:math';
 
 //Mẫu và Class lưu trữ file txt
 import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
@@ -13,34 +13,16 @@ import 'package:Kulbot/widgets/IOT/phantu/PhanTu_IOT.dart'; //SCSWidget – hi�
 import 'package:Kulbot/service/bluetooth_service.dart'; //bluetooth
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-// import 'package:Kulbot/widgets/IOT/Bluetooth/bluetooth_device_dialog.dart';
-// import 'package:Kulbot/widgets/IOT/Bluetooth/bluetooth_service.dart'
-// as bt_service;
-
 import 'package:showcaseview/showcaseview.dart';
 
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 // import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
-// import 'package:Kulbot/l10n/l10n.dart'; // ngôn ngữ
-import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart'; // quản lý key của showcase
+// import 'package:Kulbot/l10n/l10n.dart'; // Lấy cờ theo ngôn ngữ
+import 'package:Kulbot/l10n/localized_map.dart';
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 
-// class ControlValueManager {
-//   static final Map<String, dynamic> values = {};
-
-//   static dynamic getValue(String id) => values[id];
-
-//   static void setValue(String id, dynamic newValue) => values[id] = newValue;
-
-//   static bool hasValue(String id) => values.containsKey(id);
-
-//   static void clearAll() {
-//     values.clear();
-//   }
-
-//   static void removeValuesForRealId(String realId) {
-//     values.removeWhere((key, _) => key.startsWith('$realId\_'));
-//   }
-// }
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class ControlItem {
   final String id; // ID gốc để tạo widget (VD: "horn")
@@ -108,118 +90,111 @@ void showSaveDialog(
 
   showDialog(
     context: context,
-    builder: (_) {
-      return DefaultTabController(
-        length: 2,
-        child: AlertDialog(
-          titlePadding: const EdgeInsets.only(
-            left: 24,
-            top: 20,
-            right: 24,
-            bottom: 0,
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Lưu dự án'),
-              const SizedBox(height: 8),
-              TabBar(tabs: [Tab(text: 'Lưu mới'), Tab(text: 'Ghi đè')]),
-            ],
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 8,
-          ),
-          content: SizedBox(
-            width: 400,
-            child: SizedBox(
+    barrierDismissible: false,
+    builder:
+        (_) => DefaultTabController(
+          length: 2,
+          child: AlertDialog(
+            titlePadding: const EdgeInsets.only(
+              left: 24,
+              top: 20,
+              right: 24,
+              bottom: 0,
+            ),
+            contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+            title: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Text('Lưu dự án'),
+                // SizedBox(height: 8),
+                TabBar(tabs: [Tab(text: 'Lưu mới'), Tab(text: 'Ghi đè')]),
+              ],
+            ),
+            content: SizedBox(
+              width: 400,
               height: 300,
               child: TabBarView(
                 children: [
-                  // Tab 1: Lưu mới
-                  SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: controller,
-                          decoration: const InputDecoration(
-                            labelText: "Tên dự án",
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () {
-                            final name = controller.text.trim();
-                            if (name.isNotEmpty) {
-                              onSaveNew(name);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: const Text('Lưu'),
-                        ),
-                      ],
-                    ),
+                  /// --- TAB 1: LƯU MỚI ---
+                  CustomDialog(
+                    title: "Lưu mới",
+                    controllers: [
+                      TextInputField<String>(
+                        label: "Tên dự án",
+                        controller: controller,
+                        key: "name",
+                        minlength: 1,
+                        maxlength: 50,
+                      ),
+                    ],
+                    onOk: (data) {
+                      final name = data["name"].toString().trim();
+                      if (name.isNotEmpty) {
+                        onSaveNew(name);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    onCancel: () => Navigator.of(context).pop(),
+                    okColor: Colors.green,
                   ),
-                  // Tab 2: Ghi đè
-                  SingleChildScrollView(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: savedLayouts.length,
-                      itemBuilder: (context, index) {
-                        final name = savedLayouts[index];
-                        return ListTile(
-                          title: Text(name),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.save),
-                            onPressed: () {
-                              // Xác nhận trước khi ghi đè
-                              showDialog(
-                                context: context,
-                                builder:
-                                    (_) => AlertDialog(
-                                      title: const Text("Xác nhận"),
-                                      content: Text('Ghi đè dự án "$name"?'),
-                                      actions: [
-                                        // TextButton(
-                                        //   onPressed:
-                                        //       () => Navigator.of(context).pop(),
-                                        //   child: const Text("Huỷ"),
-                                        // ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.of(
-                                              context,
-                                            ).pop(); // xác nhận
-                                            Navigator.of(
-                                              context,
-                                            ).pop(); // dialog chính
-                                            onOverwrite(name);
-                                          },
-                                          child: const Text("Xác nhận"),
+
+                  /// --- TAB 2: GHI ĐÈ ---
+                  Builder(
+                    builder: (context) {
+                      return SingleChildScrollView(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: savedLayouts.length,
+                          itemBuilder: (context, index) {
+                            final name = savedLayouts[index];
+                            return ListTile(
+                              title: Text(name),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.save),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder:
+                                        (_) => AlertDialog(
+                                          title: const Text("Xác nhận"),
+                                          content: Text(
+                                            'Ghi đè dự án "$name"?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () => Navigator.pop(context),
+                                              child: const Text("Huỷ"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(
+                                                  context,
+                                                ); // close confirm
+                                                Navigator.pop(
+                                                  context,
+                                                ); // close main
+                                                onOverwrite(name);
+                                              },
+                                              child: const Text("Xác nhận"),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
           ),
-          // actions: [
-          //   TextButton(
-          //     onPressed: () => Navigator.pop(context),
-          //     child: const Text("Đóng"),
-          //   ),
-          // ],
         ),
-      );
-    },
   );
 }
 
@@ -363,7 +338,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     });
 
     _bluetoothService.getBondedDevices();
-    _checkBluetoothStatus();
+    // _checkBluetoothStatus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final size = MediaQuery.of(context).size;
       _initLayout(size);
@@ -376,18 +351,17 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    ControlValueManager.clearAll();
     ShowKeyManager.clear();
     super.dispose();
   }
 
-  void _checkBluetoothStatus() {
-    _bluetoothService.flutterBluetoothSerial.state.then((state) {
-      setState(() {
-        _bluetoothService.bluetoothState = state;
-      });
-    });
-  }
+  // void _checkBluetoothStatus() {
+  //   _bluetoothService.flutterBluetoothSerial.state.then((state) {
+  //     setState(() {
+  //       _bluetoothService.bluetoothState = state;
+  //     });
+  //   });
+  // }
 
   Future<void> _initLayout(Size size) async {
     setState(() {
@@ -400,6 +374,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                   ? "Untitled"
                   : widget.type);
     });
+    bool loadedFromStorage = false;
     if (widget.type.isEmpty && widget.projectName.isNotEmpty) {
       final items = await IotLayoutProvider.loadLayout(widget.projectName);
       if (items.isEmpty) {
@@ -413,26 +388,44 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         );
       } else {
         placedControls.addAll(items);
+        loadedFromStorage = true;
       }
     } else if (widget.type != "new") {
       placedControls.addAll(ControlLayoutProvider.getLayout(widget.type));
     }
-    final y = 50 / size.height;
-    final x = (size.width - 218) / size.width;
-    placedControls.add(
-      ControlItem(
-        id: 'ListBox',
-        realId: 'ListBox1',
-        relativePosition: Offset(x < 0 ? 0 : x, y),
-        config: {'height': 50, 'width': 200},
-        lock: false,
-        canMove: true,
-      ),
-    );
-    debugPrint(
-      "placedControls: ${placedControls.map((e) => e.realId).toList()}",
-    );
-    debugPrint("x : ${x} --- y : ${y}");
+
+    // Kiểm tra trước khi add ListBox1
+    if (!loadedFromStorage) {
+      final y = 50 / size.height;
+      final x = (size.width - 218) / size.width;
+      if (!placedControls.any((item) => item.realId == 'ListBox1')) {
+        placedControls.add(
+          ControlItem(
+            id: 'ListBox',
+            realId: 'ListBox1',
+            relativePosition: Offset(x < 0 ? 0 : x, y),
+            config: {'height': 50.0, 'width': 200.0},
+            lock: false,
+            canMove: true,
+          ),
+        );
+      }
+
+      // Kiểm tra trước khi add ListBoxTester1
+      // if (!placedControls.any((item) => item.realId == 'ListBoxTester1')) {
+      //   placedControls.add(
+      //     ControlItem(
+      //       id: 'ListBoxTester',
+      //       realId: 'ListBoxTester1',
+      //       relativePosition: const Offset(0, 0.5),
+      //       config: {'height': 200.0, 'width': 200.0},
+      //       lock: false,
+      //       canMove: true,
+      //     ),
+      //   );
+      // }
+    }
+
     setState(() {});
   }
 
@@ -490,22 +483,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     );
   }
 
-  // appBar: AppBar(
-  //   title: Text(nameProject),
-  //   actions: [
-  //     IconButton(
-  //       icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
-  //       onPressed:
-  //           () => setState(() {
-  //             final realId = "SCSWidget1_temp";
-  //             final datatemp1 = ControlValueManager.getValue(realId);
-  //             if (datatemp1 is num) {
-  //               ControlValueManager.setValue(realId, datatemp1 + 1);
-  //               debugPrint("✅ $realId = ${datatemp1 + 1}");
-  //             }
-  //           }),
-  //     ),
-
   PreferredSizeWidget buildTopBar(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(56),
@@ -559,40 +536,11 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               //     onPressed: scanQRcodeNormal,
               //   ),
               // ),
-              IconButton(
-                icon: const Icon(Icons.cable, color: Colors.blueAccent),
-                onPressed: () {
-                  setState(() {
-                    const String name = "CustomChart1_data";
-                    if (ControlValueManager.hasValue(name)) {
-                      final value = ControlValueManager.getValue(name);
-                      if (value is Map<String, List<double>>) {
-                        final random = Random();
-                        final updatedValue = {
-                          "data1": [
-                            ...?value["data1"],
-                            double.parse(
-                              (random.nextDouble() * 100).toStringAsFixed(1),
-                            ),
-                          ],
-                          "data2": [
-                            ...?value["data2"],
-                            double.parse(
-                              (random.nextDouble() * 100).toStringAsFixed(1),
-                            ),
-                          ],
-                        };
-                        ControlValueManager.setValue(name, updatedValue);
-                      }
-                    }
-                  });
-                },
-              ),
               Showcase(
                 key: ShowKeyManager.createKey("Huongdan"),
                 description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
                 child: IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.question_mark_rounded,
                     color: Colors.blueAccent,
                   ),
@@ -627,7 +575,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 key: ShowKeyManager.createKey("SaveProjectIOT"),
                 description: 'Đây là nút save project',
                 child: IconButton(
-                  icon: Icon(Icons.save),
+                  icon: const Icon(Icons.save),
                   color: Colors.greenAccent,
                   onPressed: () {
                     showSaveDialog(
@@ -699,6 +647,12 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     );
   }
 
+  late Map<String, dynamic> value3 = {"data": "chưa có dữ liệu"};
+  late String value2 = "";
+  late String value1 = "";
+  late String valueofid1 = "";
+  late String valueofid2 = "";
+
   Widget _buildMainStack(Size size, BuildContext context) {
     // return StreamBuilder<Map<String, dynamic>>(
     //   stream: _bluetoothService.stream,
@@ -727,18 +681,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           ),
         ),
         Positioned(top: 0, right: 0, child: buildTopBar(context)),
-        // Positioned(
-        //   right: 0,
-        //   top: 50,
-        //   child: ListBox(
-        //     height: 40,
-        //     width: 200,
-        //     value:
-        //         connectedDeviceName.isEmpty
-        //             ? "Vui lòng bât bluetooth!"
-        //             : connectedDeviceName,
-        //   ),
-        // ),
         StreamBuilder<Map<String, dynamic>>(
           stream: _bluetoothService.stream,
           builder: (context, snapshot) {
@@ -790,16 +732,55 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                   final number = int.tryParse(
                     RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
                   );
-                  final String title = PhanTu_IOT.getTitleById(control.id);
 
-                  final bool isChart = title == "Biểu đồ/đồ thị";
+                  String? NoteShowKey =
+                      number == 1
+                          ? LocalizedStringGetter.IOT_get(
+                            context,
+                            PhanTu_IOT.getNoteShowKey(context, control.id),
+                          )
+                          : null;
+                  // final String title = PhanTu_IOT.getTitleById(control.id);
+
+                  final bool havedata = PhanTu_IOT.getGetDataById(control.id);
                   // final bool bluetoothOff =
                   //     _bluetoothService.bluetoothState ==
                   //     BluetoothState.STATE_OFF;
                   // final bool notConnected = !isConnected;
 
                   Widget childWidget;
-                  if (control.id == "ListBox") {
+                  if (control.id == "ListBoxTester") {
+                    childWidget = PhanTu_IOT.getControlWidget(
+                      id: control.id,
+                      size: Size(
+                        size.width,
+                        size.height - 56.0,
+                      ), //-56 là cái bar ở trên
+                      inMenu: false,
+                      value: {
+                        "valueofid1": valueofid1,
+                        "valueofid2": valueofid2,
+                        "value1": value1,
+                        "value2": value2,
+                        "value3": value3,
+                      },
+                      config: control.config,
+                      NoteshowKey: NoteShowKey,
+                      lock: shouldLock,
+                      onSave: (newConfig) {
+                        setState(() {
+                          valueofid2 = control.id;
+                          value3 = newConfig;
+                          placedControls[index].config = newConfig;
+                        });
+                      },
+                      onDelete: () {
+                        setState(() {
+                          placedControls.removeAt(index);
+                        });
+                      },
+                    );
+                  } else if (control.id == "ListBox") {
                     childWidget = PhanTu_IOT.getControlWidget(
                       id: control.id,
                       size: Size(
@@ -814,19 +795,18 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                 : connectedDeviceName,
                       },
                       config: control.config,
-                      showKey: number == 1,
+                      NoteshowKey: NoteShowKey,
                       lock: shouldLock,
                       onSave: (newConfig) {
                         setState(() {
+                          valueofid2 = control.id;
+                          value3 = newConfig;
                           placedControls[index].config = newConfig;
                         });
                       },
                       onDelete: () {
                         setState(() {
                           placedControls.removeAt(index);
-                          ControlValueManager.removeValuesForRealId(
-                            control.realId,
-                          );
                         });
                       },
                     );
@@ -838,32 +818,38 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                         size.height - 56.0,
                       ), //-56 là cái bar ở trên
                       inMenu: false,
-                      value: isChart ? dynamicData : null,
+                      value: havedata ? dynamicData : null,
                       config: control.config,
-                      showKey: number == 1,
+                      NoteshowKey: NoteShowKey,
                       lock: shouldLock,
                       sendCommand: (msg) async {
-                        debugPrint("Thực hiện bluetooth : " + msg.toString());
-                        await Future.delayed(const Duration(milliseconds: 200));
+                        setState(() {
+                          valueofid1 = control.id;
+                          value1 = msg;
+                        });
+                        _bluetoothService.sendMessage(msg);
+                        await Future.delayed(const Duration(milliseconds: 100));
                       },
                       onSave: (newConfig) {
                         setState(() {
+                          valueofid2 = control.id;
+                          value3 = newConfig;
                           placedControls[index].config = newConfig;
                         });
                       },
                       VoiceTextToCommand: (String msg) async {
-                        if (msg.isNotEmpty) {
-                          debugPrint("Gửi lệnh qua bluetooth: $msg");
-                        } else {
-                          debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
-                        }
+                        // if (msg.isNotEmpty) {
+                        //   debugPrint("Gửi lệnh qua bluetooth: $msg");
+                        // } else {
+                        //   debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
+                        // }
+                        setState(() {
+                          value2 = msg;
+                        });
                       },
                       onDelete: () {
                         setState(() {
                           placedControls.removeAt(index);
-                          ControlValueManager.removeValuesForRealId(
-                            control.realId,
-                          );
                         });
                       },
                     );
@@ -892,7 +878,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         ),
 
         // Màn che + Menu bên phải
-        if (isEditingLayout) // && showMenu)
+        if (isEditingLayout)
           Stack(
             children: [
               // Nền mờ để tắt menu khi nhấn ra ngoài
@@ -934,7 +920,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    title,
+                                    LocalizedStringGetter.IOT_get(
+                                      context,
+                                      title,
+                                    ),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -990,7 +979,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                name,
+                                                LocalizedStringGetter.IOT_get(
+                                                  context,
+                                                  name,
+                                                ),
                                                 style: const TextStyle(
                                                   fontSize: 12,
                                                 ),

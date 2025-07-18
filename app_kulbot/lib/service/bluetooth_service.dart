@@ -56,9 +56,9 @@ class BluetoothService with ChangeNotifier {
     _name = name;
   }
 
-  final StreamController<Map<String, dynamic?>> _streamController =
+  final StreamController<Map<String, dynamic>> _streamController =
       StreamController.broadcast();
-  Stream<Map<String, dynamic?>> get stream => _streamController.stream;
+  Stream<Map<String, dynamic>> get stream => _streamController.stream;
 
   Future<void> requestLocationPermission() async {
     var status = await Permission.location.request();
@@ -88,7 +88,7 @@ class BluetoothService with ChangeNotifier {
   }
 
   void startDiscoveryWithTimeout() {
-    Timer(Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 10), () {
       flutterBluetoothSerial.cancelDiscovery();
     });
 
@@ -257,14 +257,14 @@ class BluetoothService with ChangeNotifier {
       height: screenHeight * 0.50,
       child: ListView(
         children:
-            devices.map((_device) {
+            devices.map((device) {
               Color iconColor = Colors.green;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await connectToDevice(_device.device);
+                    await connectToDevice(device.device);
                     Navigator.of(context).pop(); // Close dialog
                   },
                   style: ElevatedButton.styleFrom(
@@ -280,14 +280,14 @@ class BluetoothService with ChangeNotifier {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        _device.device.name ?? "Unknown",
+                        device.device.name ?? "Unknown",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _device.device.address,
+                            device.device.address,
                             style: const TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(width: 3),

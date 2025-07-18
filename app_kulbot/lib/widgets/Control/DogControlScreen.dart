@@ -1,12 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:flutter_joystick/flutter_joystick.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:flutter/services.dart';
-import 'dart:async';
-import 'package:showcaseview/showcaseview.dart';
 import '../../service/bluetooth_service.dart';
 
 class DogWidget extends StatefulWidget {

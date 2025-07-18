@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Kulbot/widgets/IOT/phantu/Chart/WidgetChart.dart';
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 // import 'package:fl_chart/fl_chart.dart'
 //     show
 //         LineChart,
@@ -23,7 +24,6 @@ import 'package:Kulbot/widgets/IOT/phantu/Chart/WidgetChart.dart';
 
 // Biểu đồ miền nhiều mục tiêu
 class CustomChart extends StatefulWidget {
-  final Size size;
   final Map<String, dynamic> config;
   final Map<String, dynamic> value;
   final Function(Map<String, dynamic>)? onSave;
@@ -33,7 +33,6 @@ class CustomChart extends StatefulWidget {
 
   const CustomChart({
     super.key,
-    required this.size,
     required this.config,
     required this.value,
     this.onSave,
@@ -148,12 +147,9 @@ class _CustomChartStates extends State<CustomChart> {
     final titleController = TextEditingController(
       text: widget.config['title'] ?? 'Biểu đồ',
     );
-
-    final visibleCount = widget.config['visibleCount'] ?? 10;
     final visibleCountController = TextEditingController(
-      text: visibleCount.toString(),
+      text: (widget.config['visibleCount'] ?? 10).toString(),
     );
-
     String chartType = widget.config['chartType'] ?? 'area';
     List<String> selectedDatasets = List<String>.from(
       widget.config['datasets'] ??
@@ -162,144 +158,101 @@ class _CustomChartStates extends State<CustomChart> {
               : ['None', 'None', 'None']),
     );
 
-    // Đảm bảo đủ 3 phần tử
+    // Đảm bảo luôn đủ 3 datasets
     while (selectedDatasets.length < 3) {
       selectedDatasets.add('None');
     }
 
-    final availableDatasets = ['None', ...Data.keys];
+    final dropdowns = [
+      DropdownInputField<String>(
+        label: "Loại biểu đồ",
+        key: "chartType",
+        items: ["area", "line", "column"],
+        items_name: ["Biểu đồ miền", "Biểu đồ đường", "Biểu đồ cột"],
+        selectedValue: chartType,
+      ),
+      DropdownInputField<String>(
+        label: "Cổng dữ liệu 1",
+        key: "dataset1",
+        items: Data.isNotEmpty ? ['None', ...Data.keys] : [],
+        items_name: Data.isNotEmpty ? ['Không có', ...Data.keys] : [],
+        selectedValue: selectedDatasets[0],
+      ),
+      DropdownInputField<String>(
+        label: "Cổng dữ liệu 2",
+        key: "dataset2",
+        items: Data.isNotEmpty ? ['None', ...Data.keys] : [],
+        items_name: Data.isNotEmpty ? ['Không có', ...Data.keys] : [],
+        selectedValue: selectedDatasets[1],
+      ),
+      DropdownInputField<String>(
+        label: "Cổng dữ liệu 3",
+        key: "dataset3",
+        items: Data.isNotEmpty ? ['None', ...Data.keys] : [],
+        items_name: Data.isNotEmpty ? ['Không có', ...Data.keys] : [],
+        selectedValue: selectedDatasets[2],
+      ),
+    ];
+
+    final controllers = [
+      TextInputField<String>(
+        label: "Tên biểu đồ",
+        key: "title",
+        controller: titleController,
+      ),
+      TextInputField<int>(
+        label: "Số điểm hiển thị trên 1 trang",
+        key: "visibleCount",
+        controller: visibleCountController,
+        minValue: 1,
+        maxValue: 1000,
+      ),
+    ];
 
     showDialog(
       context: context,
       builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Chỉnh sửa biểu đồ'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Tên biểu đồ',
-                      ),
-                    ),
-                    TextField(
-                      controller: visibleCountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Số điểm hiển thị trên 1 trang',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    DropdownButtonFormField<String>(
-                      value: chartType,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'area',
-                          child: Text('Biểu đồ miền'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'line',
-                          child: Text('Biểu đồ đường'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'column',
-                          child: Text('Biểu đồ cột'),
-                        ),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Loại biểu đồ',
-                      ),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            chartType = val;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    if (Data.isEmpty) ...[
-                      const Text(
-                        'Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết bluetooth!',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ] else ...[
-                      ...List.generate(3, (index) {
-                        return DropdownButtonFormField<String>(
-                          value: selectedDatasets[index],
-                          items:
-                              availableDatasets
-                                  .map(
-                                    (data) => DropdownMenuItem(
-                                      value: data,
-                                      child: Text(
-                                        data == 'None' ? 'Không có' : data,
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                          decoration: InputDecoration(
-                            labelText:
-                                'Chọn Cổng dữ liệu cho mục tiêu ${index + 1}',
-                          ),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() {
-                                selectedDatasets[index] = val;
-                              });
-                            }
-                          },
-                        );
-                      }),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    widget.onDelete?.call();
-                  },
-                  child: const Text('Xoá', style: TextStyle(color: Colors.red)),
-                ),
-                TextButton(
-                  onPressed: () {
-                    final newConfig = Map<String, dynamic>.from(widget.config);
-                    newConfig['title'] = titleController.text;
-                    newConfig['chartType'] = chartType;
+        return CustomDialog(
+          title: "Chỉnh sửa biểu đồ",
+          controllers: controllers,
+          dropdowns: dropdowns,
+          errorNotData:
+              "Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết nối bluetooth!",
+          onOk: (result) {
+            final newConfig = Map<String, dynamic>.from(widget.config);
 
-                    final parsedCount = int.tryParse(
-                      visibleCountController.text,
-                    );
-                    if (parsedCount != null && parsedCount > 0) {
-                      newConfig['visibleCount'] = parsedCount;
-                    }
+            newConfig['title'] = result['title'];
+            newConfig['chartType'] = result['chartType'];
+            newConfig['visibleCount'] = result['visibleCount'];
 
-                    if (Data.isEmpty) {
-                      newConfig['datasets'] = [];
-                    } else {
-                      if (selectedDatasets.every((ds) => ds == 'None')) {
-                        // Chỉ gán nếu Data không rỗng
-                        if (Data.keys.isNotEmpty) {
-                          selectedDatasets[0] = Data.keys.first;
-                        }
-                      }
-                      newConfig['datasets'] = selectedDatasets;
-                    }
+            // Chỉ lấy datasets nếu có trong result
+            final datasets = [
+              result.containsKey('dataset1') ? result['dataset1'] : 'None',
+              result.containsKey('dataset2') ? result['dataset2'] : 'None',
+              result.containsKey('dataset3') ? result['dataset3'] : 'None',
+            ];
 
-                    widget.onSave?.call(newConfig);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Lưu'),
-                ),
-              ],
-            );
+            // Nếu cả 3 đều 'None' và Data có dữ liệu, thì gán mặc định
+            if (Data.isNotEmpty && datasets.every((ds) => ds == 'None')) {
+              datasets[0] = Data.keys.first;
+            }
+
+            if (Data.isNotEmpty) {
+              newConfig['datasets'] = datasets;
+            }
+
+            widget.onSave?.call(newConfig);
+            Navigator.of(context).pop();
           },
+
+          onDelete:
+              widget.onDelete != null
+                  ? () {
+                    Navigator.of(context).pop();
+                    widget.onDelete?.call();
+                  }
+                  : null,
+          onCancel: () => Navigator.of(context).pop(),
         );
       },
     );
@@ -347,8 +300,15 @@ class _CustomChartStates extends State<CustomChart> {
       ),
       child: Stack(
         children: [
-          Text(chartTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Text(
+              chartTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Error.isNotEmpty
               ? SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -372,35 +332,40 @@ class _CustomChartStates extends State<CustomChart> {
                           Error.isNotEmpty
                               ? DataFake.values.first.length
                               : chartData.values.first.length,
-                      size: widget.size,
+                      size: Size(width, height),
                       isCurved: chartType == 'area',
                     ),
                   ],
                 ),
               )
-              : Scrollbar(
-                controller: scrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
+              : Positioned(
+                top: 30,
+                right: 0,
+                left: 0,
+                child: Scrollbar(
                   controller: scrollController,
-                  scrollDirection: Axis.horizontal,
-                  child:
-                      (chartType == 'area' || chartType == 'line')
-                          ? AreaOrLineChartWidgets(
-                            numberOfTargets: numberOfTargets,
-                            visibleCount: visibleCount,
-                            chartData: chartData,
-                            endIndex: chartData.values.first.length,
-                            size: widget.size,
-                            isCurved: chartType == 'area',
-                          )
-                          : ColumnChartWidget(
-                            numberOfTargets: numberOfTargets,
-                            visibleCount: visibleCount,
-                            chartData: chartData,
-                            endIndex: chartData.values.first.length,
-                            size: widget.size,
-                          ),
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child:
+                        (chartType == 'area' || chartType == 'line')
+                            ? AreaOrLineChartWidgets(
+                              numberOfTargets: numberOfTargets,
+                              visibleCount: visibleCount,
+                              chartData: chartData,
+                              endIndex: chartData.values.first.length,
+                              size: Size(width, height),
+                              isCurved: chartType == 'area',
+                            )
+                            : ColumnChartWidget(
+                              numberOfTargets: numberOfTargets,
+                              visibleCount: visibleCount,
+                              chartData: chartData,
+                              endIndex: chartData.values.first.length,
+                              size: Size(width, height),
+                            ),
+                  ),
                 ),
               ),
           if (widget.config["lock"] == false)

@@ -21,8 +21,8 @@ class ATSwitch extends StatefulWidget {
     required this.onChanged,
     required this.titleSwitchTrue,
     required this.titleSwitchFalse,
-     this.iconSwitchTrue,
-     this.iconSwitchFalse,
+    this.iconSwitchTrue,
+    this.iconSwitchFalse,
   });
   @override
   State<ATSwitch> createState() => _ATSwitchState();
@@ -32,35 +32,41 @@ class _ATSwitchState extends State<ATSwitch> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-            padding: const EdgeInsets.only(bottom: 55),
-            child: AnimatedToggleSwitch<bool>.dual(
-                    current: widget.current,
-                    first:  widget.first,
-                    second: widget.second,
-                    spacing: widget.spacing,
-                    style: const ToggleStyle(
-                      borderColor: Colors.transparent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: Offset(0, 1.5),
-                        ),
-                      ],
-                    ),
-                    borderWidth: 5.0,
-                    height: 55,
-                    onChanged: widget.onChanged,
-                    styleBuilder: (valueSwitch) => ToggleStyle(
-                        indicatorColor: valueSwitch == true ? Colors.green : Colors.red),
-                    iconBuilder: (valueSwitch) => valueSwitch == true 
-                        ?  widget.iconSwitchTrue ?? SizedBox.shrink()
-                        : widget.iconSwitchFalse ?? SizedBox.shrink(),
-                    textBuilder: (valueSwitch) => valueSwitch == true
-                        ?  Center(child: Text(widget.titleSwitchTrue))
-                        :  Center(child: Text(widget.titleSwitchFalse)),
-                  ),
-          );
+      padding: const EdgeInsets.only(bottom: 55),
+      child: AnimatedToggleSwitch<bool>.dual(
+        current: widget.current,
+        first: widget.first,
+        second: widget.second,
+        spacing: widget.spacing,
+        style: const ToggleStyle(
+          borderColor: Colors.transparent,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              spreadRadius: 1,
+              blurRadius: 2,
+              offset: Offset(0, 1.5),
+            ),
+          ],
+        ),
+        borderWidth: 5.0,
+        height: 55,
+        onChanged: widget.onChanged,
+        styleBuilder:
+            (valueSwitch) => ToggleStyle(
+              indicatorColor: valueSwitch == true ? Colors.green : Colors.red,
+            ),
+        iconBuilder:
+            (valueSwitch) =>
+                valueSwitch == true
+                    ? widget.iconSwitchTrue ?? const SizedBox.shrink()
+                    : widget.iconSwitchFalse ?? const SizedBox.shrink(),
+        textBuilder:
+            (valueSwitch) =>
+                valueSwitch == true
+                    ? Center(child: Text(widget.titleSwitchTrue))
+                    : Center(child: Text(widget.titleSwitchFalse)),
+      ),
+    );
   }
 }

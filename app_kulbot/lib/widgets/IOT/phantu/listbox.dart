@@ -150,7 +150,7 @@ class _ListBoxState extends State<ListBox> with SingleTickerProviderStateMixin {
                   setState(() {
                     width += details.delta.dx;
                     height += details.delta.dy;
-                    width = width.clamp(80, 600);
+                    width = width.clamp(80, 300);
                     height = height.clamp(32, 300);
                   });
                 },

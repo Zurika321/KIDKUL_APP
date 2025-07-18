@@ -11,6 +11,6 @@ class SettingIoT extends StatefulWidget {
 class _SettingIoTState extends State<SettingIoT> {
   @override
   Widget build(BuildContext context) {
-    return SettingiotWidget();
+    return const SettingiotWidget();
   }
 }

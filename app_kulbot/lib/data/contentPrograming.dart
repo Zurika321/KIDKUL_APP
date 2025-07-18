@@ -1,8 +1,5 @@
-import 'package:flutter/foundation.dart';
-
-const String initialXml = 
+const String initialXml =
     '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="text" x="70" y="30"><field name="TEXT">XML</field></block></xml>';
-
 
 const Map<String, dynamic> initialJson = {
   'blocks': {
@@ -22,10 +19,9 @@ const Map<String, dynamic> initialJson = {
       //   'deletable': true,
       //   'movable': true,
       // },
-    ]
+    ],
   },
 };
-
 
 const Map<String, dynamic> newState = {
   'blocks': {
@@ -35,13 +31,13 @@ const Map<String, dynamic> newState = {
         'type': 'text',
         'x': 70,
         'y': 30,
-        'fields': {'TEXT': 'JSON'}
+        'fields': {'TEXT': 'JSON'},
       },
       {
         'type': 'text',
         'x': 70,
         'y': 70,
-        'fields': {'TEXT': 'NEW'}
+        'fields': {'TEXT': 'NEW'},
       },
     ],
   },
@@ -50,76 +46,53 @@ const Map<String, dynamic> newState = {
 const Map<String, dynamic> initialToolboxJson = {
   'kind': 'categoryToolbox',
   'contents': [
-  //Events
+    //Events
     {
       "kind": "category",
       "name": "Events",
       'colour': 150,
       "contents": [
-        {
-          'kind': 'block',
-          'type': "event_program_starts"
-        },
-        {
-          'kind': 'block',
-          'type': "move"
-        },
-      ]
+        {'kind': 'block', 'type': "event_program_starts"},
+        {'kind': 'block', 'type': "move"},
+      ],
     },
-  //Control
-  {
-    'kind': 'category',
-    'name': 'Control',
-    'colour': 210,
-    'contents': [
-      {
-        "kind": "block",
-        "type": "control_wait_seconds",
-        "inputs": {
-          "TIMEOUT": {
-            "shadow": {
-              "type": "math_number",
-              "fields": {
-                "NUM": 1
+    //Control
+    {
+      'kind': 'category',
+      'name': 'Control',
+      'colour': 210,
+      'contents': [
+        {
+          "kind": "block",
+          "type": "control_wait_seconds",
+          "inputs": {
+            "TIMEOUT": {
+              "shadow": {
+                "type": "math_number",
+                "fields": {"NUM": 1},
+                "min": 1,
+                "max": 10, // Đặt giới hạn từ 1 đến 10
               },
-              "min": 1,
-              "max": 10  // Đặt giới hạn từ 1 đến 10
-            }
-          }
-        }
-      },
-      {
-        'kind': 'block',
-        'type': 'control_repeat',
-        "inputs": {
-          "TIMES": {
-            "shadow": {
-              "type": "math_number",  // Hoặc "math_integer"
-              "fields": {
-                "NUM": 10
-              }
-            }
-          }
-        }
-      },
-      {
-        'kind': 'block',
-        'type': 'control_forever'
-      },
-      {
-        'kind': 'block',
-        'type': 'control_if'
-      },
-      {
-        'kind': 'block',
-        'type': 'control_if_then_else'
-      },
-      {
-        'kind': 'block',
-        'type': 'control_repeat_until'
-      },
-
-    ]
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'control_repeat',
+          "inputs": {
+            "TIMES": {
+              "shadow": {
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 10},
+              },
+            },
+          },
+        },
+        {'kind': 'block', 'type': 'control_forever'},
+        {'kind': 'block', 'type': 'control_if'},
+        {'kind': 'block', 'type': 'control_if_then_else'},
+        {'kind': 'block', 'type': 'control_repeat_until'},
+      ],
     },
     //Operator
     {
@@ -134,20 +107,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -156,20 +125,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -178,20 +143,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -200,20 +161,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -222,20 +179,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 1
-                }
-              }
+                "fields": {"NUM": 1},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 10
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 10},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -244,20 +197,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -266,20 +215,16 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           "kind": "block",
@@ -288,34 +233,21 @@ const Map<String, dynamic> initialToolboxJson = {
             "NUM1": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "fields": {"NUM": 0},
+              },
             },
             "NUM2": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
-        {
-          'kind': 'block',
-          'type': 'operators_and'
-        },
-        {
-          'kind': 'block',
-          'type': 'operators_or'
-        },
-        {
-          'kind': 'block',
-          'type': 'operators_not'
-        },
-      ]
+        {'kind': 'block', 'type': 'operators_and'},
+        {'kind': 'block', 'type': 'operators_or'},
+        {'kind': 'block', 'type': 'operators_not'},
+      ],
     },
 
     //Led
@@ -324,31 +256,13 @@ const Map<String, dynamic> initialToolboxJson = {
       'name': 'Led',
       'colour': 120,
       'contents': [
-        {
-          'kind': 'block',
-          'type': 'set_btn_led'
-        },
-        {
-          'kind': 'block',
-          'type': 'set_ir_led'
-        },
-        {
-          'kind': 'block',
-          'type': 'turn_on_all_led'
-        },
-        {
-          'kind': 'block',
-          'type': 'turn_off_led'
-        },
-        {
-          'kind': 'block',
-          'type': 'turn_off_all_led'
-        },
-        {
-          'kind':'block',
-          'type':'led_on'
-        },
-      ]
+        {'kind': 'block', 'type': 'set_btn_led'},
+        {'kind': 'block', 'type': 'set_ir_led'},
+        {'kind': 'block', 'type': 'turn_on_all_led'},
+        {'kind': 'block', 'type': 'turn_off_led'},
+        {'kind': 'block', 'type': 'turn_off_all_led'},
+        {'kind': 'block', 'type': 'led_on'},
+      ],
     },
     //module
     {
@@ -356,88 +270,33 @@ const Map<String, dynamic> initialToolboxJson = {
       'name': 'Module',
       'colour': 140,
       'contents': [
-        {
-          'kind': 'block',
-          'type':'set_traffic_light'
-        },
-        {
-          'kind': 'block',
-          'type':'get_joystick'
-        },
-        {
-          'kind': 'block',
-          'type':'get_volume'
-        },
-        {
-          'kind': 'block',
-          'type':'get_btn_led'
-        },
-      ]
+        {'kind': 'block', 'type': 'set_traffic_light'},
+        {'kind': 'block', 'type': 'get_joystick'},
+        {'kind': 'block', 'type': 'get_volume'},
+        {'kind': 'block', 'type': 'get_btn_led'},
+      ],
     },
     //Sensor
     {
-      'kind':'category',
+      'kind': 'category',
       'name': 'Sensor',
       'colour': 130,
       'contents': [
-        {
-          'kind':'block',
-          'type':'sensor_ultrasonic'
-        },
-        {
-          'kind': 'block',
-          'type':'sensor_get_line'
-        },
-        {
-          'kind': 'block',
-          'type':'get_ir'
-        },
-        {
-          'kind': 'block',
-          'type':'get_templm75'
-        },
-        {
-          'kind': 'block',
-          'type':'get_tem'
-        },
-        {
-          'kind': 'block',
-          'type':'get_hum'
-        },
-        {
-          'kind': 'block',
-          'type':'get_soil_hum'
-        },
-        {
-          'kind': 'block',
-          'type':'get_gas'
-        },
-        {
-          'kind': 'block',
-          'type':'get_touch'
-        },
-        {
-          'kind': 'block',
-          'type':'get_gryro'
-        },
-        {
-          'kind': 'block',
-          'type':'get_color'
-        },
-        {
-          'kind': 'block',
-          'type':'get_light'
-        },
-        {
-          'kind': 'block',
-          'type':'get_lux'
-        },
-        {
-          'kind': 'block',
-          'type':'get_lux_bh1750'
-        }
-      ]
-
+        {'kind': 'block', 'type': 'sensor_ultrasonic'},
+        {'kind': 'block', 'type': 'sensor_get_line'},
+        {'kind': 'block', 'type': 'get_ir'},
+        {'kind': 'block', 'type': 'get_templm75'},
+        {'kind': 'block', 'type': 'get_tem'},
+        {'kind': 'block', 'type': 'get_hum'},
+        {'kind': 'block', 'type': 'get_soil_hum'},
+        {'kind': 'block', 'type': 'get_gas'},
+        {'kind': 'block', 'type': 'get_touch'},
+        {'kind': 'block', 'type': 'get_gryro'},
+        {'kind': 'block', 'type': 'get_color'},
+        {'kind': 'block', 'type': 'get_light'},
+        {'kind': 'block', 'type': 'get_lux'},
+        {'kind': 'block', 'type': 'get_lux_bh1750'},
+      ],
     },
 
     {
@@ -451,29 +310,23 @@ const Map<String, dynamic> initialToolboxJson = {
           "inputs": {
             "COLUMN": {
               "shadow": {
-                "type": "math_number",  // Hoặc "math_integer"
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 0},
+              },
             },
             "CELL": {
               "shadow": {
-                "type": "math_number",  // Hoặc "math_integer"
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 0},
+              },
             },
             "NUMBER": {
               "shadow": {
-                "type": "math_number",  // Hoặc "math_integer"
-                "fields": {
-                  "NUM": 0
-                }
-              }
-            }
-          }
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 0},
+              },
+            },
+          },
         },
         {
           'kind': 'block',
@@ -481,65 +334,51 @@ const Map<String, dynamic> initialToolboxJson = {
           "inputs": {
             "COLUMN": {
               "shadow": {
-                "type": "math_number",  // Hoặc "math_integer"
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 0},
+              },
             },
             "CELL": {
               "shadow": {
-                "type": "math_number",  // Hoặc "math_integer"
-                "fields": {
-                  "NUM": 0
-                }
-              }
+                "type": "math_number", // Hoặc "math_integer"
+                "fields": {"NUM": 0},
+              },
             },
             "STRING": {
               "shadow": {
                 "type": "text",
-                "fields": {
-                  "TEXT": "Hello!!!"
-                }
-              }
-            }
-          }
+                "fields": {"TEXT": "Hello!!!"},
+              },
+            },
+          },
         },
-        {
-          'kind': 'block',
-          'type': 'lcd_clear'
-        }
-      ]
+        {'kind': 'block', 'type': 'lcd_clear'},
+      ],
     },
 
-// Motions
-{
-'kind':'category',
-'name': 'Motions',
-'colour': 130,
-'contents': [
-  {
-    'kind':"block",
-    'type':"motor1",
-  },
-  {
-    'kind':"block",
-    'type':"Servo",
-  },
-  // {
-  //   'kind':"block",
-  //   'type':"SetEncoder",
-  // },
-  // {
-  //   'kind':"block",
-  //   'type':"SetTurningEncoder",
-  // },
-  // {
-  //   'kind':"block",
-  //   'type':"GetPostEncoder",
-  // },
+    // Motions
+    {
+      'kind': 'category',
+      'name': 'Motions',
+      'colour': 130,
+      'contents': [
+        {'kind': "block", 'type': "motor1"},
+        {'kind': "block", 'type': "Servo"},
 
-]},
+        // {
+        //   'kind':"block",
+        //   'type':"SetEncoder",
+        // },
+        // {
+        //   'kind':"block",
+        //   'type':"SetTurningEncoder",
+        // },
+        // {
+        //   'kind':"block",
+        //   'type':"GetPostEncoder",
+        // },
+      ],
+    },
 
     {
       'kind': 'category',
@@ -556,7 +395,7 @@ const Map<String, dynamic> initialToolboxJson = {
                     </shadow>
                   </value>
                 </block>
-            '''
+            ''',
         },
         {
           'kind': 'block',
@@ -564,7 +403,7 @@ const Map<String, dynamic> initialToolboxJson = {
                 <block type="controls_whileUntil">
                   <field name="MODE">WHILE</field>
                 </block>
-            '''
+            ''',
         },
         {
           'kind': 'block',
@@ -587,7 +426,7 @@ const Map<String, dynamic> initialToolboxJson = {
                 </shadow>
               </value>
             </block>
-          '''
+          ''',
         },
         {
           'kind': 'block',
@@ -595,7 +434,7 @@ const Map<String, dynamic> initialToolboxJson = {
             <block type="controls_forEach">
               <field name="VAR" id="Cg!CSk/ZJo2XQN3=VVrz" variabletype="">j</field>
             </block>
-            '''
+            ''',
         },
         {
           'kind': 'block',
@@ -603,7 +442,7 @@ const Map<String, dynamic> initialToolboxJson = {
             <block type="controls_flow_statements">
               <field name="FLOW">BREAK</field>
             </block>
-            '''
+            ''',
         },
       ],
     },
@@ -1140,10 +979,7 @@ const Map<String, dynamic> initialToolboxJson = {
       "name": "Variables",
       'colour': 330,
       "contents": [
-        {
-          'kind': 'block',
-          'type': "variables_create"
-        },
+        {'kind': 'block', 'type': "variables_create"},
         {
           'kind': 'block',
           'type': "variables_set",
@@ -1151,12 +987,10 @@ const Map<String, dynamic> initialToolboxJson = {
             "VALUE": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 1
-                },
-              }
-            }
-          }
+                "fields": {"NUM": 1},
+              },
+            },
+          },
         },
         {
           'kind': 'block',
@@ -1165,14 +999,12 @@ const Map<String, dynamic> initialToolboxJson = {
             "DELTA": {
               "shadow": {
                 "type": "math_number",
-                "fields": {
-                  "NUM": 1
-                },
-              }
-            }
-          }
+                "fields": {"NUM": 1},
+              },
+            },
+          },
         },
-      ]
+      ],
     },
     // {
     //   'kind': 'category',
@@ -1555,9 +1387,7 @@ const List<Map<String, dynamic>> initialToolboxCategories = [
           'TIMES': {
             'type': 'math_number',
             'shadow': true,
-            'fields': {
-              'NUM': 10,
-            },
+            'fields': {'NUM': 10},
           },
         },
         'statements': {
@@ -1568,9 +1398,7 @@ const List<Map<String, dynamic>> initialToolboxCategories = [
               'text': {
                 'type': 'text',
                 'shadow': true,
-                'fields': {
-                  'text': 'abc',
-                },
+                'fields': {'text': 'abc'},
               },
             },
           },
@@ -1588,9 +1416,7 @@ const List<Map<String, dynamic>> initialToolboxCategories = [
           'text': {
             'type': 'text',
             'shadow': true,
-            'fields': {
-              'text': 'abc',
-            },
+            'fields': {'text': 'abc'},
           },
         },
       },

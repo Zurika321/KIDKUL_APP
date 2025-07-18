@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
+// Cấu hình cho các nút trên màn hình chính
 class ButtonHomeScreenConfig {
   final IconData icon;
   final String title;
@@ -15,6 +17,7 @@ class ButtonHomeScreenConfig {
   });
 }
 
+// Widget tạo nút trên màn hình chính với thiết kế nhỏ gọn
 class ButtonHomeScreen extends StatelessWidget {
   final String imgPath;
   final String textButton;
@@ -29,47 +32,76 @@ class ButtonHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lấy màu nền và màu chữ dựa trên chế độ (dark/light mode)
-    // final backgroundColor = Theme.of(context).colorScheme.surface;
-    final textColor = Theme.of(context).colorScheme.onSurface;
-
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: navigator,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: MediaQuery.of(context).size.height * 0.45,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(20),
-                // Box shadow cái này thì chắc không cần vì làm ở bên trang home rồi, tiện hơn cho việc hiển thị thay đổi icon
-                // boxShadow: [
-                //   BoxShadow(
-                //     color: Colors.grey.shade400,
-                //     blurRadius: 20,
-                //     spreadRadius: 10,
-                //   )
-                // ]
+    return Center(
+      // 👈 Thêm Center để canh giữa dọc
+      child: GestureDetector(
+        onTap: navigator,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment:
+                MainAxisAlignment.center, // 👈 Canh giữa dọc trong Column
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Center(
+                    child: Container(
+                      width: MediaQuery.of(context).size.height * 0.55,
+                      height: MediaQuery.of(context).size.height * 0.55,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.purple[50], // 🎨 Màu nền bạn muốn
+                        shape: BoxShape.circle,
+                      ),
+                      child:
+                      // ClipOval(
+                      //   child:
+                      Image.asset(
+                        imgPath,
+                        // fit:
+                        //     BoxFit
+                        //         .cover, // 👈 Giúp ảnh đầy container mà không méo
+                      ),
+                      // ),
+                    ),
+                  ),
+                ],
               ),
-              child: Center(
-                child: Image.asset(imgPath),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      const Color(0xFFCE93D8).withOpacity(0.1),
+                      const Color.fromARGB(
+                        255,
+                        255,
+                        255,
+                        255,
+                      ).withOpacity(0.15),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  textButton,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF7B1FA2),
+                    letterSpacing: 0.1,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          textButton,
-          style: TextStyle(
-            fontSize: 30,
-            color: textColor, // Màu chữ theo theme
-          ),
-        )
-      ],
+      ),
     );
   }
 }

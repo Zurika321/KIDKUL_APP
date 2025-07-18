@@ -1,0 +1,2 @@
+D:/APP/Flutter-app/app_kulbot/android/app/.cxx/RelWithDebInfo/39574ut4/x86_64/CMakeFiles/edit_cache.dir
+D:/APP/Flutter-app/app_kulbot/android/app/.cxx/RelWithDebInfo/39574ut4/x86_64/CMakeFiles/rebuild_cache.dir

@@ -33,6 +33,7 @@ class AreaOrLineChartWidgets extends StatefulWidget {
   final bool isCurved;
 
   const AreaOrLineChartWidgets({
+    super.key,
     required this.numberOfTargets, //số mục tiêu trong biểu đồ
     required this.visibleCount, //số điểm hiển thị trên 1 trang
     required this.endIndex, //vị trí kết thúc của dữ liệu (đã kiểm tra có vượt quá mảng hay không)
@@ -91,7 +92,7 @@ class _AreaOrLineChartWidgetsState extends State<AreaOrLineChartWidgets> {
                 isCurved: widget.isCurved,
                 color: targetColors[i],
                 barWidth: 2,
-                dotData: FlDotData(show: true),
+                dotData: const FlDotData(show: true),
               ),
           ],
           lineTouchData: LineTouchData(
@@ -153,9 +154,11 @@ class _AreaOrLineChartWidgetsState extends State<AreaOrLineChartWidgets> {
                     ),
               ),
             ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
-          gridData: FlGridData(show: true),
+          gridData: const FlGridData(show: true),
           borderData: FlBorderData(
             show: true,
             border: Border.all(color: Colors.black, width: 1),
@@ -176,6 +179,7 @@ class ColumnChartWidget extends StatelessWidget {
   final Size size;
 
   ColumnChartWidget({
+    super.key,
     required this.numberOfTargets,
     required this.visibleCount,
     required this.endIndex,
@@ -260,9 +264,11 @@ class ColumnChartWidget extends StatelessWidget {
                     ),
               ),
             ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
-          gridData: FlGridData(show: true),
+          gridData: const FlGridData(show: true),
           borderData: FlBorderData(
             show: true,
             border: Border.all(color: Colors.black),

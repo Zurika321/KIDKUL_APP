@@ -1,5 +1,6 @@
 import 'package:Kulbot/widgets/IOT/phantu/SCS/SleekCircularSlider.dart';
 import 'package:flutter/material.dart';
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 
 // SCSWidget – hiển thị cảm biến
 class SCSWidget extends StatefulWidget {
@@ -7,16 +8,14 @@ class SCSWidget extends StatefulWidget {
   final dynamic value;
   final Function(Map<String, dynamic>)? onSave;
   final VoidCallback? onDelete;
-  final Size size;
   final bool inMenu;
 
-  SCSWidget({
+  const SCSWidget({
     super.key,
     required this.config,
     required this.value,
     this.onSave,
     this.onDelete,
-    required this.size,
     required this.inMenu,
   });
 
@@ -54,9 +53,12 @@ class _SCSWidgetState extends State<SCSWidget> {
   }
 
   void _showEditDialog() {
+    if (widget.onSave == null && widget.onDelete == null) return;
+
     final titleController = TextEditingController(text: _titleController.text);
     final unitController = TextEditingController(text: _unitController.text);
     String tempKey = selectedKey;
+
     final doubleKeys =
         widget.value is Map
             ? widget.value.keys.where((k) => widget.value[k] is double).toList()
@@ -65,72 +67,53 @@ class _SCSWidgetState extends State<SCSWidget> {
     showDialog(
       context: context,
       builder:
-          (_) => AlertDialog(
-            title: const Text('Cấu hình cảm biến'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Tiêu đề'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: unitController,
-                  decoration: const InputDecoration(labelText: 'Đơn vị'),
-                ),
-                const SizedBox(height: 10),
-                doubleKeys.isEmpty
-                    ? const Text(
-                      'Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết bluetooth!',
-                      style: TextStyle(color: Colors.red),
-                    )
-                    : DropdownButtonFormField<String>(
-                      value: doubleKeys.first,
-                      items:
-                          doubleKeys
-                              .map(
-                                (k) =>
-                                    DropdownMenuItem(value: k, child: Text(k)),
-                              )
-                              .toList(),
-                      onChanged: (val) {
-                        if (val != null) tempKey = val;
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Chọn Cổng dữ liệu',
-                      ),
-                    ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  widget.onDelete?.call();
-                },
-                child: const Text('Xoá', style: TextStyle(color: Colors.red)),
+          (_) => CustomDialog(
+            title: 'Cấu hình cảm biến',
+            controllers: [
+              TextInputField<String>(
+                label: "Tiêu đề",
+                controller: titleController,
+                key: "title",
+                minlength: 1,
+                maxlength: 50,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  // setState(() {
-                  //   _titleController.text = titleController.text;
-                  //   _unitController.text = unitController.text;
-                  //   selectedKey = doubleKeys.isEmpty ? "" : tempKey;
-                  // });
-                  tempKey = doubleKeys.isEmpty ? "" : tempKey;
-                  final newConfig = {
-                    ...widget.config,
-                    'title': titleController.text,
-                    'unit': unitController.text,
-                    'key': tempKey,
-                  };
-                  widget.onSave?.call(newConfig);
-                  Navigator.pop(context);
-                },
-                child: const Text('Lưu'),
+              TextInputField<String>(
+                label: "Đơn vị",
+                controller: unitController,
+                key: "unit",
+                minlength: 1,
+                maxlength: 20,
               ),
             ],
+            dropdowns: [
+              DropdownInputField<String>(
+                label: "Chọn Cổng dữ liệu",
+                key: "key",
+                items: doubleKeys,
+                selectedValue: doubleKeys.contains(tempKey) ? tempKey : "",
+              ),
+            ],
+            errorNotData:
+                "Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết nối bluetooth!",
+            onOk: (data) {
+              tempKey = doubleKeys.isEmpty ? "" : data["key"];
+              final newConfig = {
+                ...widget.config,
+                'title': data['title'],
+                'unit': data['unit'],
+                'key': tempKey,
+              };
+              widget.onSave?.call(newConfig);
+              Navigator.pop(context);
+            },
+            onCancel: () => Navigator.pop(context),
+            onDelete:
+                widget.onDelete != null
+                    ? () {
+                      Navigator.pop(context);
+                      widget.onDelete?.call();
+                    }
+                    : null,
           ),
     );
   }
@@ -200,7 +183,7 @@ class _SCSWidgetState extends State<SCSWidget> {
                       editingControllerUnit: _unitController,
                       onPress: null,
                       onDelete: null,
-                      size: widget.size,
+                      size: Size(width - 10, width - 10),
                     ),
                   ],
                 ),
@@ -219,7 +202,7 @@ class _SCSWidgetState extends State<SCSWidget> {
                 editingControllerUnit: _unitController,
                 onPress: null,
                 onDelete: null,
-                size: widget.size,
+                size: Size(width - 10, width - 10),
               ),
 
           if (widget.config["lock"] == false)

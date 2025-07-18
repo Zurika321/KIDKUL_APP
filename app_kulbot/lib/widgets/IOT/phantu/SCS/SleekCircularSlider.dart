@@ -225,7 +225,7 @@ class _InputSettingSCSState extends State<InputSettingSCS> {
           Text(widget.label),
           TextField(
             controller: widget.controller,
-            decoration: InputDecoration(border: OutlineInputBorder()),
+            decoration: const InputDecoration(border: OutlineInputBorder()),
           ),
         ],
       ),

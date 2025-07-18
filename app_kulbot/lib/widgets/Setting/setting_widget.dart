@@ -1,10 +1,10 @@
 import 'package:Kulbot/l10n/l10n.dart';
-import 'package:Kulbot/main.dart';
+// import 'package:Kulbot/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+// import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:Kulbot/provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,9 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingWidget extends StatefulWidget {
   //final Function(String) onSendMessage;
 
-  SettingWidget({
-    super.key,
-  });
+  const SettingWidget({super.key});
 
   @override
   State<SettingWidget> createState() => _SettingWidgetState();
@@ -127,7 +125,7 @@ class _SettingWidgetState extends State<SettingWidget> {
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final provider = Provider.of<LocaleProvider>(context);
-    final locale = provider.locale ?? Locale('en');
+    final locale = provider.locale ?? const Locale('en');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -156,51 +154,51 @@ class _SettingWidgetState extends State<SettingWidget> {
                   children: [
                     Text(
                       AppLocalizations.of(context)!.changelanguage,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                     DropdownButtonHideUnderline(
                       child: DropdownButton(
                         value: locale,
                         icon: Container(width: 12),
-                        items: L10n.all.map(
-                          (locale) {
-                            final flag = L10n.getflag(locale.languageCode);
+                        items:
+                            L10n.all.map((locale) {
+                              final flag = L10n.getflag(locale.languageCode);
 
-                            return DropdownMenuItem(
-                              child: Center(
-                                child: Text(
-                                  flag,
-                                  style: TextStyle(fontSize: 32),
-                                ),
-                              ),
-                              value: locale,
-                              onTap: () {
-                                final provider = Provider.of<LocaleProvider>(
+                              return DropdownMenuItem(
+                                value: locale,
+                                onTap: () {
+                                  final provider = Provider.of<LocaleProvider>(
                                     context,
-                                    listen: false);
+                                    listen: false,
+                                  );
 
-                                provider.setLocale(locale);
-                              },
-                            );
-                          },
-                        ).toList(),
+                                  provider.setLocale(locale);
+                                },
+                                child: Center(
+                                  child: Text(
+                                    flag,
+                                    style: TextStyle(fontSize: 32),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                         onChanged: (_) {},
                       ),
                     ),
                   ],
                 ),
               ),
-              Text(
+              const Text(
                 "Cài đặt chi tiết",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveForwardController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị đi tiến",
                         border: OutlineInputBorder(),
                       ),
@@ -208,13 +206,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveFLeftController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị đi tiến trái",
                         border: OutlineInputBorder(),
                       ),
@@ -222,13 +220,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveFRightController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị đi tiến phải",
                         border: OutlineInputBorder(),
                       ),
@@ -236,13 +234,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveBackwardController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị đi lùi",
                         border: OutlineInputBorder(),
                       ),
@@ -250,13 +248,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveBLeftController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị lùi trái",
                         border: OutlineInputBorder(),
                       ),
@@ -264,13 +262,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveBRightController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị lùi phải",
                         border: OutlineInputBorder(),
                       ),
@@ -278,13 +276,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveTurnLeftController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị rẽ trái",
                         border: OutlineInputBorder(),
                       ),
@@ -292,13 +290,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveTurnRightController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị rẽ phải",
                         border: OutlineInputBorder(),
                       ),
@@ -306,13 +304,13 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _moveStopController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Điền giá trị dừng",
                         border: OutlineInputBorder(),
                       ),
@@ -320,11 +318,11 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: Size(100, 50),
+                    minimumSize: const Size(100, 50),
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -334,15 +332,10 @@ class _SettingWidgetState extends State<SettingWidget> {
                     _saveSettings();
                     Fluttertoast.showToast(msg: "Đã Lưu!", fontSize: 20);
                   },
-                  child: Text(
-                    "Lưu",
-                    style: TextStyle(fontSize: 20),
-                  ),
+                  child: const Text("Lưu", style: TextStyle(fontSize: 20)),
                 ),
               ),
-              SizedBox(
-                height: 10,
-              )
+              const SizedBox(height: 10),
             ],
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 
 class Label extends StatefulWidget {
   final Map<String, dynamic> value;
@@ -53,76 +54,67 @@ class _LabelState extends State<Label> {
 
   void _showEditDialog() {
     final titleController = TextEditingController(text: title);
-    String tempKey = selectedKey;
-    final stringKeys =
+    final List<String> stringKeys =
         widget.value.keys.where((k) => widget.value[k] is String).toList();
+    String tempKey = selectedKey;
+
+    final controllers = [
+      TextInputField<String>(
+        label: "Tiêu đề",
+        key: "title",
+        controller: titleController,
+      ),
+    ];
+
+    final dropdowns = [
+      DropdownInputField<String>(
+        label: "Chọn cổng dữ liệu",
+        key: "key",
+        items: stringKeys,
+        selectedValue:
+            stringKeys.contains(tempKey)
+                ? tempKey
+                : (stringKeys.isNotEmpty ? stringKeys.first : ""),
+      ),
+    ];
 
     showDialog(
       context: context,
       builder:
-          (_) => AlertDialog(
-            title: const Text('Cấu hình Label'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Tiêu đề'),
-                ),
-                const SizedBox(height: 10),
-                stringKeys.isEmpty
-                    ? const Text(
-                      'Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết bluetooth!',
-                      style: TextStyle(color: Colors.red),
-                    )
-                    : DropdownButtonFormField<String>(
-                      value:
-                          tempKey.isNotEmpty && stringKeys.contains(tempKey)
-                              ? tempKey
-                              : (stringKeys.isNotEmpty
-                                  ? stringKeys.first
-                                  : null),
-                      items:
-                          stringKeys
-                              .map(
-                                (k) =>
-                                    DropdownMenuItem(value: k, child: Text(k)),
-                              )
-                              .toList(),
-                      onChanged: (val) {
-                        if (val != null) tempKey = val;
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Chọn key string',
+          (_) => CustomDialog(
+            title: "Cấu hình Label",
+            controllers: controllers,
+            dropdowns:
+                stringKeys.isNotEmpty
+                    ? dropdowns
+                    : [
+                      DropdownInputField<String>(
+                        label: "Chọn cổng dữ liệu",
+                        key: "key",
+                        items: [],
+                        selectedValue: "",
                       ),
-                    ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  widget.onDelete?.call();
-                },
-                child: const Text('Xóa'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // setState(() {
-                  //   title = titleController.text;
-                  //   selectedKey = tempKey;
-                  // });
-                  tempKey = stringKeys.isEmpty ? "" : tempKey;
-                  widget.onSave?.call({
-                    ...widget.config,
-                    'title': titleController.text,
-                    'key': tempKey,
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text('Lưu'),
-              ),
-            ],
+                    ],
+            errorNotData:
+                "Không có dữ liệu để hiển thị. Vui lòng kiểm tra kết nối bluetooth!",
+            onOk: (result) {
+              final newKey = result['key'];
+              final newTitle = result['title'];
+              widget.onSave?.call({
+                ...widget.config,
+                'title': newTitle,
+                'key': newKey,
+              });
+              Navigator.of(context).pop();
+            },
+            onDelete:
+                widget.onDelete != null
+                    ? () {
+                      Navigator.of(context).pop();
+                      widget.onDelete?.call();
+                    }
+                    : null,
+            onCancel: () => Navigator.of(context).pop(),
           ),
     );
   }
@@ -136,7 +128,7 @@ class _LabelState extends State<Label> {
                         widget.value[selectedKey] is String)))
             ? widget.value[selectedKey].toString()
             : (selectedKey.isEmpty ||
-                (widget.dataDouble && !(widget.value[selectedKey] is double)))
+                (widget.dataDouble && widget.value[selectedKey] is! double))
             ? "Cổng hiện tại không có dữ liệu"
             : 'Không có dữ liệu';
     return Container(

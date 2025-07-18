@@ -64,7 +64,7 @@ class Kulbot extends StatelessWidget {
           const Locale('en'), //hơi thừa ?? nhưng cho chắc
       supportedLocales:
           L10n.all, //những ngôn ngữ đc hỗ trợ - supported languages
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -86,20 +86,22 @@ class SplashState extends StatefulWidget {
 class _SplashStaKulbotate extends State<SplashState> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
-    //Hiển thị build ở dưới (logo công ty) 3 giây rồi chuyển sang trang HomeScreen
+
     WakelockPlus.enable();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
-    ]); //giữ màn hình nằm ngang - keep screen in landscape mode
+    ]);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 5), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      });
+    });
   }
 
   @override

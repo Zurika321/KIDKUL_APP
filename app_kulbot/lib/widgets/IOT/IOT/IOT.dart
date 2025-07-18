@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
-import 'package:Kulbot/provider/FileManage.dart';
 
 import 'package:flutter/foundation.dart'; //xem người dùng đang dùng web hay ko
 
@@ -67,7 +65,7 @@ class _IOTState extends State<IOT> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 221, 221, 228),
+      backgroundColor: const Color.fromARGB(255, 255, 250, 250),
       appBar: AppBar(
         title: const Text("Điều khiển Robot"),
         leading: IconButton(
@@ -217,7 +215,7 @@ class _IOTState extends State<IOT> {
                     width: 120,
                     height: 80,
                     child: CustomBox(
-                      title: "Create New",
+                      title: "",
                       icon: Icons.add,
                       onTap: () {
                         // Navigator.pop(context);
@@ -225,7 +223,7 @@ class _IOTState extends State<IOT> {
                           context,
                           MaterialPageRoute(
                             builder:
-                                (_) => RobotControlScreen(
+                                (_) => const RobotControlScreen(
                                   projectName: "",
                                   type: "new",
                                 ),
@@ -238,7 +236,7 @@ class _IOTState extends State<IOT> {
                     width: 120,
                     height: 80,
                     child: CustomBox(
-                      title: "Import",
+                      title: "",
                       icon: Icons.upload_file,
                       onTap: () {
                         // TODO
@@ -423,30 +421,42 @@ class CustomBox extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color.fromARGB(255, 0, 0, 0),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
                   blurRadius: 4,
                   offset: const Offset(2, 2),
+                  spreadRadius: 2,
                 ),
               ],
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
+                  Color.fromARGB(255, 226, 228, 255).withOpacity(0.15),
+                ],
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 32, color: Colors.blueAccent),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    title,
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
+                if (title.isNotEmpty) const SizedBox(height: 8),
+                if (title.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      title,
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

@@ -9,11 +9,11 @@ class Joystick360degrees extends StatelessWidget {
   final void Function(double angle, double strength) onMove;
 
   const Joystick360degrees({
-    Key? key,
+    super.key,
     required this.showcaseKey,
     required this.description,
     required this.onMove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +33,10 @@ class Joystick360degrees extends StatelessWidget {
           listener: (details) {
             final dx = details.x;
             final dy = details.y;
-            final angle = (dy == 0 && dx == 0)
-                ? 0.0
-                : (atan2(dy, dx) * 180 / pi + 360) % 360;
+            final angle =
+                (dy == 0 && dx == 0)
+                    ? 0.0
+                    : (atan2(dy, dx) * 180 / pi + 360) % 360;
             final strength = sqrt(dx * dx + dy * dy).clamp(0.0, 1.0);
             onMove(angle, strength);
           },
@@ -52,9 +53,7 @@ class Joystick360degrees extends StatelessWidget {
           ),
           stick: JoystickStick(
             size: 80,
-            decoration: JoystickStickDecoration(
-              color: Colors.yellowAccent,
-            ),
+            decoration: JoystickStickDecoration(color: Colors.yellowAccent),
           ),
         ),
       ),
