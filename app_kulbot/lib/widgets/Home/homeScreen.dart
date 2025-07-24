@@ -2,17 +2,18 @@
 
 //other libraries - thư viện khác
 // libraries Flutter basic
+import 'package:Kulbot/widgets/Control/Control/MenuControl.dart';
 import 'package:flutter/material.dart'; // Giao diện Material Design cơ bản
 import 'package:flutter/services.dart'; // Tương tác với hệ thống (Clipboard, SystemChrome,...)
 // Thư viện Flutter quốc tế hóa
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // 🌐 Đa ngôn ngữ (auto-generate từ l10n.yaml)
-import 'package:Kulbot/l10n/l10n.dart';
+// import 'package:Kulbot/l10n/l10n.dart';
 // Quản lý trạng thái toàn cục
-import 'package:provider/provider.dart'; // 📦 Quản lý trạng thái (Provider pattern, IsDarkMode)
-import 'package:Kulbot/provider/provider.dart';
+// import 'package:provider/provider.dart'; // 📦 Quản lý trạng thái (Provider pattern, IsDarkMode)
+// import 'package:Kulbot/provider/provider.dart';
 // Thư viện tiện ích khác
 import 'package:carousel_slider/carousel_slider.dart'; // Tạo carousel/slider cuộn ngang
-import 'package:lottie/lottie.dart'; // Thêm import Lottie
+// import 'package:lottie/lottie.dart'; // Thêm import Lottie
 // import 'package:path_provider/path_provider.dart'; // Lấy đường dẫn thư mục nội bộ (dùng để lưu file local)
 import 'package:wakelock_plus/wakelock_plus.dart'; //giữ màn hình sáng - keep screen on
 
@@ -22,8 +23,8 @@ import 'package:Kulbot/widgets/Home/ButtonHomeScreen.dart';
 //get page - lấy trang
 import 'package:Kulbot/widgets/IOT/IOT/IOT.dart';
 import 'package:Kulbot/widgets/Control/Control.dart';
-import 'package:Kulbot/widgets/Setting/settingScreen.dart';
-
+import 'package:Kulbot/widgets/Control/Control/ControlSrceen.dart';
+// import 'package:Kulbot/widgets/Setting/settingScreen.dart';
 import 'package:Kulbot/widgets/programing/MenuPrograning.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -110,9 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
+    // bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
     // final provider = Provider.of<LocaleProvider>(context);
     // final locale = provider.locale ?? const Locale('en');
+    final Size size = MediaQuery.of(context).size;
 
     final List<ButtonHomeScreenConfig> buttonConfigs = [
       ButtonHomeScreenConfig(
@@ -120,19 +122,29 @@ class _HomeScreenState extends State<HomeScreen> {
         title: AppLocalizations.of(context)!.control,
         imgPath: 'lib/assets/images/steering-wheel.png',
         navigator: Control(),
+        color: Color.fromARGB(247, 164, 217, 255),
+      ),
+      ButtonHomeScreenConfig(
+        icon: Icons.control_camera,
+        title: AppLocalizations.of(context)!.control + " new",
+        imgPath: 'lib/assets/images/steering-wheel.png',
+        navigator: Menucontrol(),
+        color: Color.fromARGB(247, 164, 217, 255),
       ),
       ButtonHomeScreenConfig(
         icon: Icons.code,
-        title: AppLocalizations.of(context)!.programming + " new",
+        title: AppLocalizations.of(context)!.programming,
         imgPath: 'lib/assets/images/program.png',
         // imgPath: 'lib/assets/animations/programming_animation.json',
         navigator: const Menuprograning(),
+        color: Color.fromARGB(255, 255, 221, 136),
       ),
       ButtonHomeScreenConfig(
         icon: Icons.devices,
-        title: AppLocalizations.of(context)!.iot + " 2",
+        title: AppLocalizations.of(context)!.iot,
         imgPath: 'lib/assets/images/iot.png',
         navigator: IOT(),
+        color: Color.fromARGB(255, 129, 218, 129),
       ),
       // ButtonHomeScreenConfig(
       //   icon:
@@ -149,7 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
               (btn) => ButtonHomeScreen(
                 imgPath: btn.imgPath,
                 textButton: btn.title,
+                color: btn.color,
                 navigator: () => _navigateToScreen(context, btn.navigator),
+                sizeheight: size.height,
               ),
             )
             .toList();
@@ -170,13 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         int index = entry.key;
                         final btn = entry.value;
                         final selected = _currentPage == index;
+                        var colorselect = btn.color;
 
-                        final color =
-                            selected
-                                ? const Color.fromARGB(255, 67, 224, 255)
-                                : (isDarkMode
-                                    ? const Color.fromARGB(255, 150, 150, 150)
-                                    : Colors.grey);
+                        final color = selected ? colorselect : Colors.grey;
 
                         return Material(
                           color: Colors.transparent,
@@ -222,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: constraints.maxHeight,
                     child:
                         _initCarousel
-                            ? _buildCarousel(items, buttonConfigs)
+                            ? _buildCarousel(items, buttonConfigs, size)
                             : const Center(child: CircularProgressIndicator()),
                   );
                 },
@@ -237,6 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCarousel(
     List<Widget> items,
     List<ButtonHomeScreenConfig> configs,
+    Size size,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -245,9 +256,9 @@ class _HomeScreenState extends State<HomeScreen> {
             carouselController: _carouselController,
             itemCount: items.length,
             options: CarouselOptions(
-              height: MediaQuery.of(context).size.height,
-              viewportFraction: 0.4,
-              enlargeCenterPage: false,
+              height: size.height,
+              viewportFraction: 0.3,
+              enlargeCenterPage: true,
               enableInfiniteScroll: true,
               scrollPhysics: BouncingScrollPhysics(),
               padEnds: true,
@@ -269,41 +280,22 @@ class _HomeScreenState extends State<HomeScreen> {
               //         : _currentPage == index
               //         ? 0
               //         : 10; // Xoay theo hướng cuộn
-              // double scale = _currentPage == index ? 1 : 0.95;
+              double scale = _currentPage == index ? 1 : 0.85;
 
-              return
-              // Transform(
-              //   alignment: Alignment.center,
-              //   transform:
-              //       Matrix4.identity()
-              //         // ..setEntry(3, 2, 0.001)
-              //         // ..rotateY(rotationY)
-              //         ..scale(scale),
-              //   child:
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    // decoration: BoxDecoration(
-                    //   color: const Color.fromARGB(255, 255, 255, 255),
-                    //   // boxShadow: [
-                    //   //   BoxShadow(
-                    //   //     color:
-                    //   //         _currentPage == index
-                    //   //             ? Color(0xFF3D5BFF)
-                    //   //             : Colors.black12,
-                    //   //     // blurRadius: 10,
-                    //   //     spreadRadius: 2,
-                    //   //     // offset: Offset(0, 5),
-                    //   //   ),
-                    //   // ],
-                    //   // borderRadius: BorderRadius.circular(20),
-                    // ),
-                    child: items[index],
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                // ),
+              return Transform(
+                alignment: Alignment.center,
+                transform:
+                    Matrix4.identity()
+                      // ..setEntry(3, 2, 0.001)
+                      // ..rotateY(rotationY)
+                      ..scale(scale),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(child: items[index]),
+                    const SizedBox(height: 10),
+                  ],
+                ),
               );
             },
           ),
@@ -312,119 +304,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// Thay thế hàm _showLanguageDialog bằng _showSettingsDialog
-// void _showSettingsDialog(BuildContext context, Locale locale) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text('Cài đặt / Settings'),
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             ListTile(
-//               leading: Icon(Icons.language),
-//               title: Text('Ngôn ngữ / Language'),
-//               onTap: () {
-//                 Navigator.pop(context);
-//                 _showLanguageDialog(context, locale);
-//               },
-//             ),
-//             ListTile(
-//               leading: Icon(Icons.login),
-//               title: Text('Đăng nhập / Login'),
-//               onTap: () {
-//                 Navigator.pop(context);
-//                 _showLoginDialog(context);
-//               },
-//             ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
-
-// void _showLanguageDialog(BuildContext context, Locale locale) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text('Chọn ngôn ngữ / Select Language'),
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             DropdownButtonHideUnderline(
-//               child: DropdownButton(
-//                 value: locale,
-//                 icon: Container(width: 12),
-//                 items:
-//                     L10n.all.map((locale) {
-//                       final flag = L10n.getflag(locale.languageCode);
-
-//                       return DropdownMenuItem(
-//                         value: locale,
-//                         onTap: () {
-//                           final provider = Provider.of<LocaleProvider>(
-//                             context,
-//                             listen: false,
-//                           );
-
-//                           provider.setLocale(locale);
-//                         },
-//                         child: Center(
-//                           child: Text(flag, style: TextStyle(fontSize: 32)),
-//                         ),
-//                       );
-//                     }).toList(),
-//                 onChanged: (_) {},
-//               ),
-//             ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
-
-// void _showLoginDialog(BuildContext context) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text('Đăng nhập / Login'),
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             TextField(
-//               decoration: InputDecoration(
-//                 labelText: 'Email',
-//                 border: OutlineInputBorder(),
-//               ),
-//             ),
-//             SizedBox(height: 16),
-//             TextField(
-//               obscureText: true,
-//               decoration: InputDecoration(
-//                 labelText: 'Mật khẩu / Password',
-//                 border: OutlineInputBorder(),
-//               ),
-//             ),
-//             SizedBox(height: 24),
-//             ElevatedButton(
-//               onPressed: () {
-//                 // TODO: Xử lý đăng nhập
-//                 Navigator.pop(context);
-//               },
-//               child: Text('Đăng nhập / Login'),
-//               style: ElevatedButton.styleFrom(
-//                 minimumSize: Size(double.infinity, 45),
-//               ),
-//             ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }

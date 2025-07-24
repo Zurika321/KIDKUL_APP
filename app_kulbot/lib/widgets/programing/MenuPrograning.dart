@@ -40,14 +40,26 @@ class _MenuprograningState extends State<Menuprograning> {
     }
   }
 
+  final List<Color> customColors = [
+    Color.fromARGB(247, 164, 217, 255),
+    Color.fromARGB(255, 255, 221, 136),
+    Color.fromARGB(255, 129, 218, 129),
+    Color.fromARGB(255, 255, 153, 153),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 250, 250),
       appBar: AppBar(
-        title: const Text("Điều khiển Robot"),
+        // backgroundColor: Colors.blueAccent,
+        // title: const Text("Điều khiển Robot"),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            size: 40.0,
+            color: Color.fromARGB(255, 190, 190, 190),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -88,49 +100,67 @@ class _MenuprograningState extends State<Menuprograning> {
           children: [
             if (searchQuery.trim().isEmpty) ...[
               // PHẦN 1: Dự án đã lưu
-              const Text(
-                "Chọn bảng điều khiển đã lưu",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              // const Text(
+              //   "Chọn bảng điều khiển đã lưu",
+              //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              // ),
 
-              const SizedBox(height: 12),
-
+              // const SizedBox(height: 12),
               Wrap(
                 spacing: 16,
                 runSpacing: 16,
                 children: [
                   SizedBox(
-                    width: 120,
-                    height: 80,
+                    width: 200,
+                    height: 120,
                     child: CustomBox(
+                      size: const Size(200, 120),
                       title: "",
-                      icon: Icons.add,
-                      onTap: () {
-                        // Navigator.pop(context);
-                        Navigator.push(
+                      color: customColors[3],
+                      icon: Icons.add_circle_sharp,
+                      onTap: () async {
+                        final shouldReload = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const WebViewApp(projectName: null),
                           ),
                         );
+
+                        if (shouldReload == true) {
+                          _loadSavedProjects(); // <- đã có sẵn rồi, gọi lại để reload
+                        }
                       },
                     ),
                   ),
                   if (allProjects.isNotEmpty) ...[
-                    ...allProjects.map((name) {
+                    ...allProjects.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final name = entry.value;
+
+                      final color =
+                          customColors[index %
+                              customColors
+                                  .length]; // Lặp lại màu nếu ít hơn số project
+
                       return SizedBox(
-                        width: 120,
-                        height: 80,
+                        width: 200,
+                        height: 120,
                         child: CustomBox(
+                          size: const Size(200, 120),
                           title: name,
                           icon: Icons.folder,
-                          onTap: () {
-                            Navigator.push(
+                          color: color,
+                          onTap: () async {
+                            final shouldReload = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => WebViewApp(projectName: name),
                               ),
                             );
+
+                            if (shouldReload == true) {
+                              _loadSavedProjects();
+                            }
                           },
                           onDelete: () async {
                             final success = await showDeleteDialog(
@@ -174,10 +204,10 @@ class _MenuprograningState extends State<Menuprograning> {
                                   ),
                                 );
                                 setState(() {
-                                  final index = allProjects.indexOf(name);
-                                  if (index != -1) {
-                                    allProjects.removeAt(index);
-                                    allProjects.insert(index, newName);
+                                  final idx = allProjects.indexOf(name);
+                                  if (idx != -1) {
+                                    allProjects.removeAt(idx);
+                                    allProjects.insert(idx, newName);
                                   }
                                 });
                               }
@@ -201,20 +231,29 @@ class _MenuprograningState extends State<Menuprograning> {
                 spacing: 16,
                 runSpacing: 16,
                 children: [
-                  ...filteredProjects.map(
-                    (name) => SizedBox(
-                      width: 120,
-                      height: 80,
+                  ...filteredProjects.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final name = entry.value;
+                    final color = customColors[index % customColors.length];
+
+                    return SizedBox(
+                      width: 200,
+                      height: 120,
                       child: CustomBox(
+                        size: const Size(200, 120),
                         title: name,
                         icon: Icons.folder,
-                        onTap: () {
-                          Navigator.push(
+                        color: color,
+                        onTap: () async {
+                          final shouldReload = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => WebViewApp(projectName: name),
                             ),
                           );
+                          if (shouldReload == true) {
+                            _loadSavedProjects();
+                          }
                         },
                         onDelete: () async {
                           final success = await showDeleteDialog(context, name);
@@ -237,7 +276,6 @@ class _MenuprograningState extends State<Menuprograning> {
                             context,
                             controller,
                           );
-
                           if (newName != null && newName != name) {
                             final success =
                                 await ProgamingLayoutProvider.renameLayout(
@@ -253,10 +291,10 @@ class _MenuprograningState extends State<Menuprograning> {
                                 ),
                               );
                               setState(() {
-                                final index = allProjects.indexOf(name);
-                                if (index != -1) {
-                                  allProjects.removeAt(index);
-                                  allProjects.insert(index, newName);
+                                final idx = allProjects.indexOf(name);
+                                if (idx != -1) {
+                                  allProjects.removeAt(idx);
+                                  allProjects.insert(idx, newName);
                                 }
                               });
                             }
@@ -264,8 +302,8 @@ class _MenuprograningState extends State<Menuprograning> {
                         },
                         showMenuIcon: true,
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ],
@@ -283,6 +321,8 @@ class CustomBox extends StatelessWidget {
   final bool showMenuIcon;
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
+  final Size size;
+  final Color color;
 
   const CustomBox({
     super.key,
@@ -292,6 +332,8 @@ class CustomBox extends StatelessWidget {
     this.showMenuIcon = false,
     this.onRename,
     this.onDelete,
+    required this.size,
+    required this.color,
   });
 
   @override
@@ -301,12 +343,14 @@ class CustomBox extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            width: double.infinity,
-            height: double.infinity,
+            width: size.width,
+            height: size.height,
+            padding: const EdgeInsets.all(8),
+
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 0, 0, 0),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+              color: color.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(30),
+              // border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -315,19 +359,24 @@ class CustomBox extends StatelessWidget {
                   spreadRadius: 2,
                 ),
               ],
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
-                  Color.fromARGB(255, 226, 228, 255).withOpacity(0.15),
-                ],
-              ),
+
+              // gradient: LinearGradient(
+              //   begin: Alignment.centerLeft,
+              //   end: Alignment.centerRight,
+              //   colors: [
+              //     Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
+              //     Color.fromARGB(255, 226, 228, 255).withOpacity(0.15),
+              //   ],
+              // ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 32, color: Colors.blueAccent),
+                Icon(
+                  icon,
+                  size: 50,
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                ),
                 if (title.isNotEmpty) const SizedBox(height: 8),
                 if (title.isNotEmpty)
                   Padding(
@@ -348,18 +397,28 @@ class CustomBox extends StatelessWidget {
               top: 4,
               right: 4,
               child: PopupMenuButton<String>(
+                color: Colors.indigo[20],
                 icon: const Icon(Icons.more_vert, size: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30), // 👈 Bo tròn 10px
+                ),
                 onSelected: (value) {
-                  if (value == 'rename') onRename?.call();
-                  if (value == 'delete') onDelete?.call();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (value == 'rename') onRename?.call();
+                    if (value == 'delete') onDelete?.call();
+                  });
                 },
+
                 itemBuilder:
                     (context) => [
                       const PopupMenuItem(
                         value: 'rename',
-                        child: Text('Đổi tên'),
+                        child: Text('Rename'),
                       ),
-                      const PopupMenuItem(value: 'delete', child: Text('Xoá')),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Delete'),
+                      ),
                     ],
               ),
             ),

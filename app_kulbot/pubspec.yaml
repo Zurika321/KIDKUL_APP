@@ -41,7 +41,7 @@ dependencies:
   mobile_scanner: ^3.5.2 #^7.0.0
   showcaseview: ^3.0.0
   # audioplayers: ^6.0.0
-  shared_preferences: ^2.2.3 #^2.5.3
+  # shared_preferences: ^2.2.3 #^2.5.3
   fluttertoast: ^8.2.6
   #webview_flutter_plus: ^0.4.7
   sleek_circular_slider: ^2.0.1

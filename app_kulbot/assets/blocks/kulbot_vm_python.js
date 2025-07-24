@@ -1,76 +1,92 @@
 let setup = "def setup():\n";
 let loop = "while (1):\n";
 //------
+
 function checkConnectedToStart(block) {
-  let parent = block.getParent();
-  while (parent) {
-    if (parent.type === "event_program_starts") {
+  let current = block;
+
+  while (current) {
+    if (current.type === "event_program_starts") {
       block.setWarningText(null);
       return true;
     }
-    parent = parent.getParent();
+    current = current.getSurroundParent(); // CHÍNH XÁC PHẢI DÙNG HÀM NÀY
   }
-  block.setWarningText(
-    'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
-  );
+
+  const msg = 'Khối này phải được nối với "when Kulbot starts" để hoạt động.';
+  block.setWarningText(msg);
   return false;
 }
 
-//----------------event_program_starts----
-//--- codetong = python.pythonGenerator.forBlock["event_program_starts"](block)
+// const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
+
+// customBlocks.forEach((blockType) => {
+//   // Lua
+//
+
+// (typeof lua !== "undefined" && lua.luaGenerator) {
+//     lua.luaGenerator.forBlock[blockType] = () => "";
+//   }
+
+//   // Dart
+//   if (typeof dart !== "undefined" && dart.dartGenerator) {
+//     dart.dartGenerator.forBlock[blockType] = () => "";
+//   }
+
+//   // PHP
+//   if (typeof php !== "undefined" && php.phpGenerator) {
+//     php.phpGenerator.forBlock[blockType] = () => "";
+//   }
+
+//   // JavaScript
+//   if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
+//     javascript.javascriptGenerator.forBlock[blockType] = () => "";
+//   }
+// });
+// ----------------event_program_starts----
+
 python.pythonGenerator.forBlock["event_program_starts"] = function (block) {
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") || "";
-  let foreverCode = "";
-  let otherCode = "";
-  let lines = statements_do.split("\n");
-  let inForever = false;
-
-  lines.forEach((line) => {
-    if (line.trim().startsWith("while (1):")) {
-      inForever = true;
-      foreverCode += line.trimStart() + "\n";
-    } else if (
-      inForever &&
-      (line.startsWith("    ") || line.startsWith("\t"))
-    ) {
-      foreverCode += "\t" + line.replace(/^((\s{4}|\t){1,2})/, "") + "\n";
-    } else {
-      if (line.trim() !== "") otherCode += "\t" + line.trim() + "\n"; // dùng tab
-      inForever = false;
-    }
-  });
-
   let code =
-    setup +
-    // +
-    // "\tRob.KULBOT_INIT()\n" +
-    // "\tRob.KULBOT_SENSOR_INIT()\n" +
-    otherCode +
+    "def setup():\n" +
+    // "  Rob.KULBOT_INIT()\n" +
+    "  Rob.KULBOT_SENSOR_INIT()\n" +
+    statements_do +
     "\n";
-  code += foreverCode;
   return code;
 };
 
-const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
+// python.pythonGenerator.forBlock["event_program_starts"] = function (block) {
+//   const statements_do =
+//     python.pythonGenerator.statementToCode(block, "DO") || "";
+//   let code = setup + "\tRob.KULBOT_INIT()\n" + "\tRob.KULBOT_SENSOR_INIT()\n";
+//   code += statements_do;
+//   return code;
+// };
+//----------------delay-------------------
+python.pythonGenerator.forBlock["delay"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const number =
+    python.pythonGenerator.valueToCode(
+      block,
+      "number",
+      python.pythonGenerator.ORDER_NONE
+    ) || "1";
+  return `time.sleep(${number})\n`;
+};
 
-customBlocks.forEach((blockType) => {
-  // Lua
-  if (typeof lua !== "undefined" && lua.luaGenerator) {
-    lua.luaGenerator.forBlock[blockType] = () => "";
-  }
-
-  // Dart
-  if (typeof dart !== "undefined" && dart.dartGenerator) {
-    dart.dartGenerator.forBlock[blockType] = () => "";
-  }
-
-  // PHP
-  if (typeof php !== "undefined" && php.phpGenerator) {
-    php.phpGenerator.forBlock[blockType] = () => "";
-  }
-});
-
+//----------------delay_until-------------------
+python.pythonGenerator.forBlock["delay_until"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const condition =
+    python.pythonGenerator.valueToCode(
+      block,
+      "condition",
+      python.pythonGenerator.ORDER_NONE
+    ) || "False";
+  return `while (!${condition})\n`;
+};
 //----------------loop_times--------------
 python.pythonGenerator.forBlock["loop_times"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
@@ -92,7 +108,7 @@ python.pythonGenerator.forBlock["loop_until"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "condition",
-      python.pythonGenerator.ORDER_NONE
+      python.pythonGenerator.ORDER_ATOMIC
     ) || "False";
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") ||
@@ -114,7 +130,7 @@ python.pythonGenerator.forBlock["if"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "CONDITION",
-      python.pythonGenerator.ORDER_NONE
+      python.pythonGenerator.ORDER_ATOMIC
     ) || "False";
 
   const statements_do =
@@ -130,7 +146,7 @@ python.pythonGenerator.forBlock["if_else"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "CONDITION",
-      python.pythonGenerator.ORDER_NONE
+      python.pythonGenerator.ORDER_ATOMIC
     ) || "False";
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") ||
@@ -155,7 +171,7 @@ python.pythonGenerator.forBlock["operators"] = function (block) {
       block,
       "number2",
       python.pythonGenerator.ORDER_ATOMIC
-    ) || "0";
+    ) || "50";
   return [`${n1} ${op} ${n2}`, python.pythonGenerator.ORDER_NONE];
 };
 
@@ -203,7 +219,7 @@ python.pythonGenerator.forBlock["compare"] = function (block) {
       "number2",
       python.pythonGenerator.ORDER_ATOMIC
     ) || "0";
-  return [`(${n1} ${op} ${n2})`, python.pythonGenerator.ORDER_NONE];
+  return [`${n1} ${op} ${n2}`, python.pythonGenerator.ORDER_NONE];
 };
 
 python.pythonGenerator.forBlock["compare_and"] = function (block) {
@@ -261,7 +277,7 @@ python.pythonGenerator.forBlock["random"] = function (block) {
       "TO",
       python.pythonGenerator.ORDER_ATOMIC
     ) || "100";
-  return [`random.randint(${from}, ${to})`, python.pythonGenerator.ORDER_NONE];
+  return [`random(${from}, ${to})`, python.pythonGenerator.ORDER_NONE];
 };
 //-----------------led-------------------
 
@@ -313,71 +329,99 @@ python.pythonGenerator.forBlock["init_sensor"] = function (block) {
 // Ultrasonic
 python.pythonGenerator.forBlock["ultrasonic"] = function (block) {
   const port = block.getFieldValue("Ultrasonic");
-  return `Rob.KULBOT_ULTRASONIC_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_ULTRASONIC(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Line Sensor
 python.pythonGenerator.forBlock["line_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const line = block.getFieldValue("line");
-  return `Rob.KULBOT_LINE_SENSOR_GET(${port}, ${line})`;
+  return [
+    `Rob.KULBOT_GET_LINE_SENSOR(${port}, ${line})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // IR Sensor
 python.pythonGenerator.forBlock["ir_sensor"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_IR_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_IR_SENSOR_GET(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Touch Sensor
 python.pythonGenerator.forBlock["touch_sensor"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_TOUCH_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_TOUCH_SENSOR(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Temp/Hum Sensor
 python.pythonGenerator.forBlock["temp_sensor"] = function (block) {
   const type = block.getFieldValue("type");
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_DHT_SENSOR_GET(${port}, ${type})`;
+  return [
+    `Rob.KULBOT_GET_TEMP_SENSOR(${port}, ${type})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Soil Humidity Sensor
 python.pythonGenerator.forBlock["soil_hum_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_SOIL_HUM_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_SOIL_HUM_SENSOR(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Gas Sensor
 python.pythonGenerator.forBlock["gas_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_GAS_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_GAS_SENSOR(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Gryro Sensor
 python.pythonGenerator.forBlock["gryro_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const data = block.getFieldValue("data");
-  return `Rob.KULBOT_GRYRO_SENSOR_GET(${port}, ${data})`;
+  return [
+    `Rob.KULBOT_GET_GYRO_SENSOR(${port}, ${data})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Color Sensor
 python.pythonGenerator.forBlock["color_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const color = block.getFieldValue("color");
-  return `Rob.KULBOT_COLOR_SENSOR_GET(${port}, "${color}")`;
+  return [
+    `Rob.KULBOT_GET_COLOR_SENSOR(${port}, "${color}")`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Lux Sensor
 python.pythonGenerator.forBlock["lux_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_LUX_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_LUX_SENSOR(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Light Sensor
 python.pythonGenerator.forBlock["light_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_LIGHT_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_LIGHT_SENSOR(${port})`,
+    python.pythonGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 //---------modules----------
 python.pythonGenerator.forBlock["init_module"] = function (block) {
@@ -421,7 +465,6 @@ python.pythonGenerator.forBlock["init_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   return `Rob.KULBOT_${SENSOR}_INIT(${port})\n`;
 };
-
 //------------------lcd-------------------
 python.pythonGenerator.forBlock["lcd_init"] = function (block) {
   if (!checkConnectedToStart(block)) return "";

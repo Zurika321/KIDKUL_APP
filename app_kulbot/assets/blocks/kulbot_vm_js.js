@@ -1,18 +1,63 @@
 //------
-function checkConnectedToStart(block) {
-  let parent = block.getParent();
-  while (parent) {
-    if (parent.type === "event_program_starts") {
-      block.setWarningText(null);
-      return true;
-    }
-    parent = parent.getParent();
-  }
-  block.setWarningText(
-    'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
-  );
-  return false;
-}
+// function checkConnectedToStart(block) {
+//   let parent = block.getParent();
+//   while (parent) {
+//     if (parent.type === "event_program_starts") {
+//       block.setWarningText(null);
+//       return true;
+//     }
+//     parent = parent.getParent();
+//   }
+//   block.setWarningText(
+//     'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
+//   );
+//   return false;
+// }
+
+// function checkConnectedToStart(block) {
+//   let current = block.getSurroundParent(); // Sử dụng surround thay vì parent
+
+//   while (current) {
+//     if (current.type === "event_program_starts") {
+//       block.setWarningText(null);
+//       return true;
+//     }
+//     current = current.getSurroundParent();
+//   }
+
+//   const msg = 'Khối này phải được nối với "when Kulbot starts" để hoạt động.';
+//   block.setWarningText(msg);
+//   return false;
+// }
+
+// const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
+
+// customBlocks.forEach((blockType) => {
+//   // Python
+//   if (typeof python !== "undefined" && javascript.javascriptGenerator) {
+//     javascript.javascriptGenerator.forBlock[blockType] = () => "";
+//   }
+
+// // Lua
+// if (typeof lua !== "undefined" && lua.luaGenerator) {
+//   lua.luaGenerator.forBlock[blockType] = () => "";
+// }
+
+// // Dart
+// if (typeof dart !== "undefined" && dart.dartGenerator) {
+//   dart.dartGenerator.forBlock[blockType] = () => "";
+// }
+
+// // PHP
+// if (typeof php !== "undefined" && php.phpGenerator) {
+//   php.phpGenerator.forBlock[blockType] = () => "";
+// }
+
+// // JavaScript
+// if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
+//   javascript.javascriptGenerator.forBlock[blockType] = () => "";
+// }
+// });
 //----------------INIT----
 javascript.javascriptGenerator.forBlock["initialize"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
@@ -305,77 +350,105 @@ javascript.javascriptGenerator.forBlock["led_IR_on"] = function (block) {
 javascript.javascriptGenerator.forBlock["init_sensor"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  const sensor = block.getFieldValue("SENSOR");
-  return `Rob.KULBOT_${sensor}_INIT(${port})\n`;
+  const SENSOR = block.getFieldValue("SENSOR");
+  return `Rob.KULBOT_${SENSOR}_INIT(${port})\n`;
 };
 // Ultrasonic
 javascript.javascriptGenerator.forBlock["ultrasonic"] = function (block) {
   const port = block.getFieldValue("Ultrasonic");
-  return `Rob.KULBOT_ULTRASONIC_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_ULTRASONIC(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Line Sensor
 javascript.javascriptGenerator.forBlock["line_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const line = block.getFieldValue("line");
-  return `Rob.KULBOT_LINE_SENSOR_GET(${port}, "${line}")`;
+  return [
+    `Rob.KULBOT_GET_LINE_SENSOR(${port}, ${line})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // IR Sensor
 javascript.javascriptGenerator.forBlock["ir_sensor"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_IR_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_IR_SENSOR_GET(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Touch Sensor
 javascript.javascriptGenerator.forBlock["touch_sensor"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_TOUCH_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_TOUCH_SENSOR(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Temp/Hum Sensor
 javascript.javascriptGenerator.forBlock["temp_sensor"] = function (block) {
   const type = block.getFieldValue("type");
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_DHT_SENSOR_GET(${port}, "${type}")`;
+  return [
+    `Rob.KULBOT_GET_TEMP_SENSOR(${port}, ${type})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Soil Humidity Sensor
 javascript.javascriptGenerator.forBlock["soil_hum_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_SOIL_HUM_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_SOIL_HUM_SENSOR(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 
 // Gas Sensor
 javascript.javascriptGenerator.forBlock["gas_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_GAS_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_GAS_SENSOR(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Gryro Sensor
 javascript.javascriptGenerator.forBlock["gryro_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const data = block.getFieldValue("data");
-  return `Rob.KULBOT_GRYRO_SENSOR_GET(${port}, ${data})`;
+  return [
+    `Rob.KULBOT_GET_GYRO_SENSOR(${port}, ${data})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Color Sensor
 javascript.javascriptGenerator.forBlock["color_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const color = block.getFieldValue("color");
-  return `Rob.KULBOT_COLOR_SENSOR_GET(${port}, "${color}")`;
+  return [
+    `Rob.KULBOT_GET_COLOR_SENSOR(${port}, "${color}")`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Lux Sensor
 javascript.javascriptGenerator.forBlock["lux_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_LUX_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_LUX_SENSOR(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
-
 // Light Sensor
 javascript.javascriptGenerator.forBlock["light_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return `Rob.KULBOT_LIGHT_SENSOR_GET(${port})`;
+  return [
+    `Rob.KULBOT_GET_LIGHT_SENSOR(${port})`,
+    javascript.javascriptGenerator.ORDER_FUNCTION_CALL,
+  ];
 };
 //-----------------module_init-------------------
 javascript.javascriptGenerator.forBlock["init_module"] = function (block) {

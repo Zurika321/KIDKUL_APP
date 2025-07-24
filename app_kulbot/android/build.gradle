@@ -1,6 +1,11 @@
 buildscript {
-//    ext.kotlin_version = '1.7.10'
     ext.kotlin_version = '1.8.22'
+
+    ext {
+        compileSdkVersion = 33
+        targetSdkVersion = 33
+    }
+
 
     repositories {
         google()
@@ -8,7 +13,6 @@ buildscript {
     }
 
     dependencies {
-        // classpath 'com.android.tools.build:gradle:8.1.0'
         classpath 'com.android.tools.build:gradle:8.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -32,4 +36,3 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
-

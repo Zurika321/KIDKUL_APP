@@ -1,19 +1,26 @@
-import 'package:Kulbot/widgets/IOT/IOT/IOTSrceen.dart';
+import 'package:Kulbot/widgets/Control/Control/ControlSrceen.dart';
 import 'package:flutter/material.dart';
 
 class ControlLayoutProvider {
   // Danh sách các mẫu và layout tương ứng
   static final Map<String, List<ControlItem>> _layouts = {
-    'IOT1': [
+    'Car Robot': [
       ControlItem(
-        id: 'Button_light',
-        realId: 'Button_light1',
+        id: 'JoyStickH',
+        realId: 'JoyStickH1',
+        relativePosition: const Offset(0.1, 0.7),
+        lock: true,
+        canMove: true,
+      ),
+      ControlItem(
+        id: 'JoyStickV',
+        realId: 'JoyStickV1',
         relativePosition: const Offset(0.8, 0.7),
         lock: true,
-        canMove: false,
+        canMove: true,
       ),
     ],
-    'IOT2': [
+    'Human Robot': [
       ControlItem(
         id: 'SCSWidget',
         realId: 'SCSWidget1',
@@ -27,14 +34,14 @@ class ControlLayoutProvider {
         realId: 'Button_light1',
         relativePosition: const Offset(0.7, 0.7),
         lock: true,
-        canMove: false,
+        canMove: true,
       ),
       ControlItem(
         id: 'HoldLight',
         realId: 'HoldLight1',
         relativePosition: const Offset(0.85, 0.7),
         lock: true,
-        canMove: false,
+        canMove: true,
       ),
     ],
   };

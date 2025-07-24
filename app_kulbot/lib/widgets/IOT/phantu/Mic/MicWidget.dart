@@ -165,103 +165,106 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Stack(
-        children: [
-          Center(
-            child: SizedBox(
-              width: width - 16, // chừa chỗ cho nút kéo
-              height: height - 16,
-              child: AvatarGlow(
-                animate: _isListening,
-                glowColor: Colors.cyanAccent,
-                duration: const Duration(milliseconds: 2000),
-                repeat: true,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.cyanAccent,
-                  onPressed: !widget.lock ? _listenVoiceToText : null,
-                  tooltip:
-                      voicetotext.isNotEmpty
-                          ? voicetotext
-                          : _isListening
-                          ? "Đang lắng nghe..."
-                          : "Nhấn để nói",
-                  child: Icon(
-                    _isListening ? Icons.mic : Icons.mic_none,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (widget.config["lock"] == false)
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  setState(() {
-                    width += details.delta.dx;
-                    height += details.delta.dy;
-                    width = width.clamp(
-                      56,
-                      200,
-                    ); // 56 là kích thước min của FAB
-                    height = height.clamp(56, 200);
-                  });
-                },
-                onPanEnd: (_) {
-                  widget.onSave?.call({
-                    ...widget.config,
-                    'width': width,
-                    'height': height,
-                  });
-                },
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.7),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(8),
+    return GestureDetector(
+      onTap: !widget.lock ? _listenVoiceToText : null,
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: width - 16, // chừa chỗ cho nút kéo
+                height: height - 16,
+                child: AvatarGlow(
+                  animate: _isListening,
+                  glowColor: Colors.cyanAccent,
+                  duration: const Duration(milliseconds: 2000),
+                  repeat: true,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.cyanAccent,
+                    onPressed: null,
+                    tooltip:
+                        voicetotext.isNotEmpty
+                            ? voicetotext
+                            : _isListening
+                            ? "Đang lắng nghe..."
+                            : "Nhấn để nói",
+                    child: Icon(
+                      _isListening ? Icons.mic : Icons.mic_none,
+                      color: Colors.black,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.open_in_full,
-                    size: 16,
-                    color: Colors.white,
-                  ),
                 ),
               ),
             ),
-          if (widget.config["lock"] == false)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: GestureDetector(
-                onTap: _showEditDialog,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.7),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(8),
+            if (widget.config["lock"] == false)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      width += details.delta.dx;
+                      height += details.delta.dy;
+                      width = width.clamp(
+                        56,
+                        200,
+                      ); // 56 là kích thước min của FAB
+                      height = height.clamp(56, 200);
+                    });
+                  },
+                  onPanEnd: (_) {
+                    widget.onSave?.call({
+                      ...widget.config,
+                      'width': width,
+                      'height': height,
+                    });
+                  },
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.7),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(8),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.open_in_full,
+                      size: 16,
+                      color: Colors.white,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.settings,
-                    size: 16,
-                    color: Colors.white,
+                ),
+              ),
+            if (widget.config["lock"] == false)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: GestureDetector(
+                  onTap: _showEditDialog,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.7),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(8),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.settings,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

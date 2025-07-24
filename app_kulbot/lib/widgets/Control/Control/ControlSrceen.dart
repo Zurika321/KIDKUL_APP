@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; //xoay màn hình
 // import 'dart:math';
 
 //Mẫu và Class lưu trữ file txt
-import 'package:Kulbot/widgets/IOT/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
-import 'package:Kulbot/widgets/IOT/Sample%26Data/IotLayoutProvider.dart'; //Lưu Layout
-
+import 'package:Kulbot/widgets/Control/Sample%26Data/ControlLayoutProvider.dart'; //Mẫu Layout
 //class phần tử
-import 'package:Kulbot/widgets/IOT/phantu/PhanTu_IOT.dart'; //SCSWidget – hiển thị cảm biến
+import 'package:Kulbot/widgets/Control/phantu/PhanTu_Control.dart'; //SCSWidget – hiển thị cảm biến
 
 //class dịch vụ
 import 'package:Kulbot/service/bluetooth_service.dart'; //bluetooth
@@ -20,7 +17,6 @@ import 'package:showcaseview/showcaseview.dart';
 // import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 // import 'package:Kulbot/l10n/l10n.dart'; // Lấy cờ theo ngôn ngữ
 import 'package:Kulbot/l10n/localized_map.dart';
-import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 
 // import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,30 +37,30 @@ class ControlItem {
     this.canMove = true,
   }) : config = config != null ? Map<String, dynamic>.from(config) : {};
 
-  factory ControlItem.fromJson(Map<String, dynamic> json) {
-    return ControlItem(
-      id: json['id'],
-      realId: json['realId'] ?? json['id'],
-      relativePosition: Offset(
-        (json['x'] as num).toDouble(),
-        (json['y'] as num).toDouble(),
-      ),
-      config: Map<String, dynamic>.from(json['config'] ?? {}),
-      lock: json['lock'] ?? false,
-      canMove:
-          json['canMove'] ?? true, // <- Thêm dòng này để đọc canMove từ JSON
-    );
-  }
+  // factory ControlItem.fromJson(Map<String, dynamic> json) {
+  //   return ControlItem(
+  //     id: json['id'],
+  //     realId: json['realId'] ?? json['id'],
+  //     relativePosition: Offset(
+  //       (json['x'] as num).toDouble(),
+  //       (json['y'] as num).toDouble(),
+  //     ),
+  //     config: Map<String, dynamic>.from(json['config'] ?? {}),
+  //     lock: json['lock'] ?? false,
+  //     canMove:
+  //         json['canMove'] ?? true, // <- Thêm dòng này để đọc canMove từ JSON
+  //   );
+  // }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'realId': realId,
-    'x': relativePosition.dx,
-    'y': relativePosition.dy,
-    'config': config,
-    'lock': lock,
-    'canMove': canMove, // <- Thêm dòng này để ghi canMove ra JSON
-  };
+  // Map<String, dynamic> toJson() => {
+  //   'id': id,
+  //   'realId': realId,
+  //   'x': relativePosition.dx,
+  //   'y': relativePosition.dy,
+  //   'config': config,
+  //   'lock': lock,
+  //   'canMove': canMove, // <- Thêm dòng này để ghi canMove ra JSON
+  // };
 
   ControlItem clone() {
     return ControlItem(
@@ -73,156 +69,17 @@ class ControlItem {
       relativePosition: Offset(relativePosition.dx, relativePosition.dy),
       config: Map<String, dynamic>.from(config),
       lock: lock,
-      canMove: canMove, // <- Clone luôn canMove
+      canMove: canMove,
     );
   }
 }
 
-void showSaveDialog(
-  BuildContext context, {
-  required Function(String) onSaveNew,
-  required Function(String) onOverwrite,
-}) async {
-  final savedLayouts = await IotLayoutProvider.getSavedLayoutNames();
-  final TextEditingController controller = TextEditingController(
-    text: "United",
-  );
-
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder:
-        (_) => MediaQuery.removeViewInsets(
-          context: context,
-          removeBottom: true,
-          child: DefaultTabController(
-            length: 2,
-            child: AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              insetPadding: const EdgeInsets.all(
-                16,
-              ), // giới hạn kích thước dialog
-              contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              title: const TabBar(
-                tabs: [Tab(text: 'Lưu mới'), Tab(text: 'Ghi đè')],
-              ),
-              content: SingleChildScrollView(
-                child: SizedBox(
-                  width: 400,
-                  height: 300,
-                  child: TabBarView(
-                    children: [
-                      // ===== TAB 1: LƯU MỚI =====
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Tên dự án",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: controller,
-                            maxLength: 50,
-                            decoration: const InputDecoration(
-                              hintText: "Nhập tên dự án...",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text("Huỷ"),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                ),
-                                onPressed: () {
-                                  final name = controller.text.trim();
-                                  if (name.isNotEmpty) {
-                                    onSaveNew(name);
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                                child: const Text("Lưu"),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      // ===== TAB 2: GHI ĐÈ =====
-                      SingleChildScrollView(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: savedLayouts.length,
-                          itemBuilder: (context, index) {
-                            final name = savedLayouts[index];
-                            return ListTile(
-                              title: Text(name),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.save),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder:
-                                        (_) => AlertDialog(
-                                          title: const Text("Xác nhận"),
-                                          content: Text(
-                                            'Ghi đè dự án "$name"?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed:
-                                                  () => Navigator.pop(context),
-                                              child: const Text("Huỷ"),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.pop(
-                                                  context,
-                                                ); // close confirm
-                                                Navigator.pop(
-                                                  context,
-                                                ); // close main dialog
-                                                onOverwrite(name);
-                                              },
-                                              child: const Text("Xác nhận"),
-                                            ),
-                                          ],
-                                        ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-  );
-}
-
 class RobotControlScreen extends StatefulWidget {
-  final String projectName;
   final String type;
   final bool checkAvailability;
 
   const RobotControlScreen({
     super.key,
-    required this.projectName,
     required this.type,
     this.checkAvailability = true,
   });
@@ -234,12 +91,10 @@ class RobotControlScreen extends StatefulWidget {
 class _RobotControlScreenState extends State<RobotControlScreen> {
   bool isEditingLayout = false;
   bool showMenu = false;
-  late String nameProject;
   final Map<String, Map<String, dynamic>> controlGroups =
-      PhanTu_IOT.controlGroups;
+      PhanTu_Control.controlGroups;
   final List<ControlItem> placedControls = [];
   final BluetoothService _bluetoothService = BluetoothService();
-  bool haveSave = false;
 
   String voicetotext = "";
 
@@ -263,7 +118,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
   void handleDrop(String id, Offset position, Size screenSize) {
     final currentCount = getPlacedCountById(id);
-    final maxCount = PhanTu_IOT.getMaxById(id);
+    final maxCount = PhanTu_Control.getMaxById(id);
 
     if (currentCount >= maxCount) {
       ScaffoldMessenger.of(
@@ -297,12 +152,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
     isEditingLayout = widget.type == "new";
     showMenu = isEditingLayout;
 
@@ -375,10 +224,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
     ShowKeyManager.clear();
     _bluetoothService.stopDiscovery();
     super.dispose();
@@ -393,69 +238,35 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   // }
 
   Future<void> _initLayout(Size size) async {
-    setState(() {
-      nameProject =
-          widget.projectName.isNotEmpty
-              ? widget.projectName
-              : (widget.type.isEmpty
-                  ? "Untitled"
-                  : widget.type == "new"
-                  ? "Untitled"
-                  : widget.type);
-    });
-    bool loadedFromStorage = false;
-    if (widget.type.isEmpty && widget.projectName.isNotEmpty) {
-      final items = await IotLayoutProvider.loadLayout(widget.projectName);
-      if (items.isEmpty) {
-        // Nếu không có layout nào được tải, thông báo cho người dùng
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Không tìm thấy dữ liệu từ project: ${widget.projectName}.',
-            ),
-          ),
-        );
-      } else {
-        placedControls.addAll(items);
-        haveSave = true;
-        loadedFromStorage = true;
-      }
-    } else if (widget.type != "new") {
-      placedControls.addAll(ControlLayoutProvider.getLayout(widget.type));
-    }
+    placedControls.addAll(ControlLayoutProvider.getLayout(widget.type));
+    // final y = 50 / size.height;
+    // final x = (size.width - 218) / size.width;
+    // if (!placedControls.any((item) => item.realId == 'ListBox1')) {
+    //   placedControls.add(
+    //     ControlItem(
+    //       id: 'ListBox',
+    //       realId: 'ListBox1',
+    //       relativePosition: Offset(x < 0 ? 0 : x, y),
+    //       config: {'height': 50.0, 'width': 200.0},
+    //       lock: false,
+    //       canMove: true,
+    //     ),
+    //   );
+    // }
 
-    // Kiểm tra trước khi add ListBox1
-    if (!loadedFromStorage) {
-      final y = 50 / size.height;
-      final x = (size.width - 218) / size.width;
-      if (!placedControls.any((item) => item.realId == 'ListBox1')) {
-        placedControls.add(
-          ControlItem(
-            id: 'ListBox',
-            realId: 'ListBox1',
-            relativePosition: Offset(x < 0 ? 0 : x, y),
-            config: {'height': 50.0, 'width': 200.0},
-            lock: false,
-            canMove: true,
-          ),
-        );
-      }
-
-      // Kiểm tra trước khi add ListBoxTester1
-      // if (!placedControls.any((item) => item.realId == 'ListBoxTester1')) {
-      //   placedControls.add(
-      //     ControlItem(
-      //       id: 'ListBoxTester',
-      //       realId: 'ListBoxTester1',
-      //       relativePosition: const Offset(0, 0.5),
-      //       config: {'height': 200.0, 'width': 200.0},
-      //       lock: false,
-      //       canMove: true,
-      //     ),
-      //   );
-      // }
-    }
-
+    // Kiểm tra trước khi add ListBoxTester1
+    // if (!placedControls.any((item) => item.realId == 'ListBoxTester1')) {
+    //   placedControls.add(
+    //     ControlItem(
+    //       id: 'ListBoxTester',
+    //       realId: 'ListBoxTester1',
+    //       relativePosition: const Offset(0, 0.5),
+    //       config: {'height': 200.0, 'width': 200.0},
+    //       lock: false,
+    //       canMove: true,
+    //     ),
+    //   );
+    // }
     setState(() {});
   }
 
@@ -603,63 +414,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 ),
               ),
               Showcase(
-                key: ShowKeyManager.createKey("SaveProjectIOT"),
-                description: 'Đây là nút save project',
-                child: IconButton(
-                  icon: const Icon(Icons.save),
-                  color: Colors.greenAccent,
-                  onPressed: () {
-                    showSaveDialog(
-                      context,
-                      onSaveNew: (String name) async {
-                        final savedName = await IotLayoutProvider.saveLayout(
-                          name,
-                          placedControls,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '✅ Đã lưu layout "$savedName" thành công!',
-                            ),
-                          ),
-                        );
-                        setState(() {
-                          nameProject = savedName;
-                          haveSave = true;
-                        });
-                      },
-                      onOverwrite: (String name) async {
-                        final success = await IotLayoutProvider.updateLayout(
-                          name,
-                          placedControls,
-                        );
-                        if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '✅ Đã ghi đè layout "$name" thành công!',
-                              ),
-                            ),
-                          );
-                          setState(() {
-                            nameProject = name;
-                            haveSave = true;
-                          });
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '❌ Không thể ghi đè layout "$name"!',
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-              Showcase(
                 key: ShowKeyManager.createKey("EditMode"),
                 description: "Bật/tắt chế độ edit",
                 child: IconButton(
@@ -707,85 +461,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           child: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
             onPressed: () {
-              final _navigator = Navigator.of(context);
-              if (haveSave) {
-                if (_navigator.mounted) {
-                  _navigator.pop();
-                  _navigator.pop();
-                }
-              } else {
-                showDialog(
-                  context: context, // Sử dụng context của IconButton
-                  builder:
-                      (ctx) => AlertDialog(
-                        title: const Text("Chưa lưu layout"),
-                        content: const Text(
-                          "Bạn có muốn lưu layout trước khi thoát không?",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(ctx).pop();
-                              if (_navigator.mounted) {
-                                _navigator.pop();
-                                _navigator.pop();
-                              }
-                            },
-                            child: const Text("Không"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(ctx).pop(); // Đóng dialog xác nhận
-                              showSaveDialog(
-                                context, // Sử dụng context của IconButton thay vì _navigator.context
-                                onSaveNew: (String name) async {
-                                  final savedName =
-                                      await IotLayoutProvider.saveLayout(
-                                        name,
-                                        placedControls,
-                                      );
-                                  if (!mounted)
-                                    return; // Kiểm tra mounted của State
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        '✅ Đã lưu layout "$savedName" thành công!',
-                                      ),
-                                    ),
-                                  );
-                                  _navigator.pop();
-                                  _navigator.pop();
-                                },
-                                onOverwrite: (String name) async {
-                                  final success =
-                                      await IotLayoutProvider.updateLayout(
-                                        name,
-                                        placedControls,
-                                      );
-                                  if (!mounted)
-                                    return; // Kiểm tra mounted của State
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        success
-                                            ? '✅ Ghi đè layout "$name" thành công!'
-                                            : '❌ Không thể ghi đè layout "$name"!',
-                                      ),
-                                    ),
-                                  );
-                                  if (success) {
-                                    _navigator.pop();
-                                    _navigator.pop();
-                                  }
-                                },
-                              );
-                            },
-                            child: const Text("Có"),
-                          ),
-                        ],
-                      ),
-                );
-              }
+              Navigator.of(context).pop();
             },
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
@@ -811,16 +487,17 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                   final index = entry.key;
                   final control = entry.value;
 
-                  final List<double> sizeInfo = PhanTu_IOT.getControlSizeById(
-                    control.id,
-                  );
+                  final List<double> sizeInfo =
+                      PhanTu_Control.getControlSizeById(control.id);
 
                   final double xOffset =
                       control.relativePosition.dx * size.width;
                   final double yOffset =
                       control.relativePosition.dy * size.height;
 
-                  final String typeBox = PhanTu_IOT.getTypeBoxById(control.id);
+                  final String typeBox = PhanTu_Control.getTypeBoxById(
+                    control.id,
+                  );
 
                   double width =
                       control.config["width"] ??
@@ -848,12 +525,14 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       number == 1
                           ? LocalizedStringGetter.IOT_get(
                             context,
-                            PhanTu_IOT.getNoteShowKey(context, control.id),
+                            PhanTu_Control.getNoteShowKey(context, control.id),
                           )
                           : null;
-                  // final String title = PhanTu_IOT.getTitleById(control.id);
+                  // final String title = PhanTu_Control.getTitleById(control.id);
 
-                  final bool havedata = PhanTu_IOT.getGetDataById(control.id);
+                  final bool havedata = PhanTu_Control.getGetDataById(
+                    control.id,
+                  );
                   // final bool bluetoothOff =
                   //     _bluetoothService.bluetoothState ==
                   //     BluetoothState.STATE_OFF;
@@ -861,7 +540,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
                   Widget childWidget;
                   if (control.id == "ListBoxTester") {
-                    childWidget = PhanTu_IOT.getControlWidget(
+                    childWidget = PhanTu_Control.getControlWidget(
                       id: control.id,
                       size: Size(
                         size.width,
@@ -892,7 +571,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       },
                     );
                   } else if (control.id == "ListBox") {
-                    childWidget = PhanTu_IOT.getControlWidget(
+                    childWidget = PhanTu_Control.getControlWidget(
                       id: control.id,
                       size: Size(
                         size.width,
@@ -922,7 +601,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       },
                     );
                   } else {
-                    childWidget = PhanTu_IOT.getControlWidget(
+                    childWidget = PhanTu_Control.getControlWidget(
                       id: control.id,
                       size: Size(
                         size.width,
@@ -934,12 +613,12 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       NoteshowKey: NoteShowKey,
                       lock: shouldLock,
                       sendCommand: (msg) async {
-                        setState(() {
-                          valueofid1 = control.id;
-                          value1 = msg;
-                        });
-                        _bluetoothService.sendMessage(msg);
-                        await Future.delayed(const Duration(milliseconds: 100));
+                        // setState(() {
+                        //   valueofid1 = control.id;
+                        //   value1 = msg;
+                        // });
+                        // _bluetoothService.sendMessage(msg);
+                        // await Future.delayed(const Duration(milliseconds: 100));
                       },
                       onSave: (newConfig) {
                         setState(() {
@@ -1066,7 +745,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                                 // hoặc Draggable<String>( nếu muốn chạm vào là kéo lun
                                                 data: id,
                                                 feedback:
-                                                    PhanTu_IOT.getControlWidget(
+                                                    PhanTu_Control.getControlWidget(
                                                       id: id,
                                                       size: size,
                                                       config: config,
@@ -1081,7 +760,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                                 child: AbsorbPointer(
                                                   absorbing: true,
                                                   child:
-                                                      PhanTu_IOT.getControlWidget(
+                                                      PhanTu_Control.getControlWidget(
                                                         id: id,
                                                         size: size,
                                                         config: config,

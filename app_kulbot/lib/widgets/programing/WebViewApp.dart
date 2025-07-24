@@ -2,6 +2,7 @@
 import 'dart:async';
 
 // import 'package:Kulbot/service/bluetooth_service.dart';
+import 'package:Kulbot/widgets/Home/CustomInputField.dart';
 import 'package:Kulbot/widgets/programing/ShowDiaglog/showBluetoothScanDialog.dart';
 import 'package:Kulbot/widgets/programing/ShowDiaglog/showUploadDialog.dart';
 // import 'package:Kulbot/widgets/programing/screen/Terminal.dart';
@@ -161,6 +162,8 @@ class _WebViewAppState extends State<WebViewApp> {
   bool bluetoothOn = false;
   BluetoothDevice? selectedDevice;
   Timer? _debounce;
+  late Future<List<String>> _addonsFuture;
+  bool haveSave = false;
 
   @override
   void initState() {
@@ -169,6 +172,7 @@ class _WebViewAppState extends State<WebViewApp> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    _addonsFuture = loadAddons();
     _initLayout(widget.projectName);
   }
 
@@ -194,6 +198,7 @@ class _WebViewAppState extends State<WebViewApp> {
       _xmlworkspace = initialXml;
     }
     setState(() {
+      haveSave = name != null;
       _editorKey = UniqueKey();
     });
   }
@@ -205,8 +210,9 @@ class _WebViewAppState extends State<WebViewApp> {
       builder: (context) {
         final size = MediaQuery.of(context).size;
         return Dialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(30), // bo tròn nhiều hơn
           ),
           child: SafeArea(
             child: Padding(
@@ -214,33 +220,53 @@ class _WebViewAppState extends State<WebViewApp> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minWidth: size.width * 0.5,
-                  maxWidth: size.width * 0.85,
+                  maxWidth: size.width * 0.6,
                 ),
                 child: Stack(
                   children: [
-                    // Nội dung cuộn (chừa chỗ cho nút Close)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 70,
-                      ), // chừa khoảng cho nút Close
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 70),
+                      color: Colors.white,
                       child: SingleChildScrollView(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const Text(
-                              "Block list",
+                              "Blockly List",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                                fontSize: 22,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 20),
 
+                            // Nút NEW
                             SizedBox(
                               width: double.infinity,
+                              height: 50,
                               child: ElevatedButton.icon(
-                                icon: const Icon(Icons.add),
-                                label: const Text("New"),
+                                icon: const Icon(
+                                  Icons.add_circle_outline,
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  "New",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color.fromARGB(
+                                    255,
+                                    109,
+                                    188,
+                                    255,
+                                  ),
+                                  shape:
+                                      const StadiumBorder(), // bo tròn hoàn toàn
+                                ),
                                 onPressed: () {
                                   setState(() {
                                     work_area.add(
@@ -255,28 +281,104 @@ class _WebViewAppState extends State<WebViewApp> {
                               ),
                             ),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 20),
 
-                            // Duyệt danh sách block
+                            // Danh sách block
                             ...work_area.asMap().entries.map((entry) {
                               final index = entry.key;
                               final area = entry.value;
 
-                              return Card(
-                                color:
-                                    work_area_index == index
-                                        ? Colors.greenAccent
-                                        : Colors.white,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      work_area_index == index
+                                          ? Color.fromARGB(255, 244, 244, 244)
+                                          : const Color(0xFFF2F2F2),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                                 child: ListTile(
-                                  title: Text(
-                                    "${index + 1}. ${area.name} ${work_area_index == index ? "✅" : ""}",
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(30),
+                                    ),
                                   ),
+                                  title: Text(
+                                    "${area.name}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  leading:
+                                      work_area_index == index
+                                          ? const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                          )
+                                          : null,
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      // COPY
+                                      IconButton(
+                                        icon: const Icon(Icons.copy),
+                                        color: Color.fromARGB(
+                                          255,
+                                          109,
+                                          188,
+                                          255,
+                                        ),
+                                        tooltip: "Copy",
+                                        onPressed: () {
+                                          _showEditCopyModal(
+                                            context,
+                                            title: "Copy as",
+                                            initialValue: "${area.name} Copy",
+                                            onOk: (newName) {
+                                              if (newName.isEmpty) return;
+                                              final nameExists = work_area.any(
+                                                (e) => e.name == newName,
+                                              );
+                                              if (nameExists) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Project name already exists!",
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                setState(() {
+                                                  work_area.add(
+                                                    BlockList(
+                                                      name: newName,
+                                                      xml: area.xml,
+                                                    ),
+                                                  );
+                                                });
+                                              }
+                                            },
+                                            okColor: Colors.blue,
+                                            cancelColor: Colors.grey,
+                                          );
+                                        },
+                                      ),
+
+                                      // EDIT
                                       IconButton(
                                         icon: const Icon(Icons.edit),
-                                        tooltip: "Edit",
+                                        color: Color.fromARGB(
+                                          255,
+                                          109,
+                                          188,
+                                          255,
+                                        ),
+                                        tooltip: "Rename",
                                         onPressed: () {
                                           _showEditCopyModal(
                                             context,
@@ -297,9 +399,6 @@ class _WebViewAppState extends State<WebViewApp> {
                                                     content: Text(
                                                       "Project name already exists!",
                                                     ),
-                                                    duration: Duration(
-                                                      seconds: 2,
-                                                    ),
                                                   ),
                                                 );
                                               } else {
@@ -317,45 +416,67 @@ class _WebViewAppState extends State<WebViewApp> {
                                         },
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.copy),
-                                        tooltip: "Copy",
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        tooltip: "Delete",
                                         onPressed: () {
-                                          _showEditCopyModal(
-                                            context,
-                                            title: "Copy as",
-                                            initialValue: "${area.name} Copy",
-                                            onOk: (newName) {
-                                              if (newName.isEmpty) return;
-                                              final nameExists = work_area.any(
-                                                (e) => e.name == newName,
-                                              );
-                                              if (nameExists) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
+                                          if (work_area.length > 1) {
+                                            showDialog(
+                                              context: context,
+                                              builder:
+                                                  (ctx) => AlertDialog(
+                                                    title: const Text(
+                                                      "Xoá dự án",
+                                                    ),
                                                     content: Text(
-                                                      "Project name already exists!",
+                                                      'Bạn có chắc muốn xoá "${area.name}"?',
                                                     ),
-                                                    duration: Duration(
-                                                      seconds: 2,
-                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed:
+                                                            () =>
+                                                                Navigator.of(
+                                                                  ctx,
+                                                                ).pop(),
+                                                        child: const Text(
+                                                          "Huỷ",
+                                                        ),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            work_area.removeAt(
+                                                              index,
+                                                            );
+
+                                                            if (work_area_index ==
+                                                                index) {
+                                                              _xmlworkspace =
+                                                                  work_area[0]
+                                                                      .xml;
+                                                              work_area_index =
+                                                                  0;
+                                                              _editorKey =
+                                                                  UniqueKey();
+                                                            }
+                                                          });
+                                                          Navigator.of(
+                                                            ctx,
+                                                          ).pop();
+                                                          Navigator.of(
+                                                            context,
+                                                          ).pop();
+                                                        },
+                                                        child: const Text(
+                                                          "Xoá",
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                );
-                                              } else {
-                                                setState(() {
-                                                  work_area.add(
-                                                    BlockList(
-                                                      name: newName,
-                                                      xml: area.xml,
-                                                    ),
-                                                  );
-                                                });
-                                              }
-                                            },
-                                            okColor: Colors.blue,
-                                            cancelColor: Colors.grey,
-                                          );
+                                            );
+                                          }
                                         },
                                       ),
                                     ],
@@ -363,7 +484,7 @@ class _WebViewAppState extends State<WebViewApp> {
                                   onTap: () {
                                     setState(() {
                                       work_area_index = index;
-                                      _xmlworkspace = work_area[index].xml;
+                                      _xmlworkspace = area.xml;
                                       _editorKey = UniqueKey();
                                     });
                                     Navigator.of(context).pop();
@@ -376,7 +497,7 @@ class _WebViewAppState extends State<WebViewApp> {
                       ),
                     ),
 
-                    // Nút Close cố định ở dưới cùng
+                    // Nút CLOSE
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -385,11 +506,10 @@ class _WebViewAppState extends State<WebViewApp> {
                         color: Colors.white,
                         padding: const EdgeInsets.all(10),
                         child: Center(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.close),
-                            label: const Text("Close"),
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
+                              backgroundColor: Colors.grey.shade600,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -398,7 +518,12 @@ class _WebViewAppState extends State<WebViewApp> {
                                 vertical: 12,
                               ),
                             ),
-                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text(
+                              "Close",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ), // << Màu trắng
+                            ),
                           ),
                         ),
                       ),
@@ -413,7 +538,6 @@ class _WebViewAppState extends State<WebViewApp> {
     );
   }
 
-  // edit and copy
   void _showEditCopyModal(
     BuildContext context, {
     required String title,
@@ -422,14 +546,30 @@ class _WebViewAppState extends State<WebViewApp> {
     Color? okColor,
     Color? cancelColor,
   }) {
+    final controller = TextEditingController(text: initialValue);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return EditCopyModal(
+        return CustomDialog(
           title: title,
-          initialValue: initialValue,
-          onOk: onOk,
+          controllers: [
+            TextInputField<String>(
+              label: "Tên mới",
+              controller: controller,
+              minlength: 1,
+              maxlength: 50,
+            ),
+          ],
+          onOk: (result) {
+            final name = result["Tên mới"] as String;
+            onOk(name);
+            Navigator.of(context).pop();
+          },
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
           okColor: okColor,
           cancelColor: cancelColor,
         );
@@ -466,7 +606,7 @@ class _WebViewAppState extends State<WebViewApp> {
     'zoom': {
       'controls': true,
       'wheel': true,
-      'startScale': 0.5,
+      'startScale': 1,
       'maxScale': 1,
       'minScale': 0.2,
       'scaleSpeed': 1.1,
@@ -481,7 +621,9 @@ class _WebViewAppState extends State<WebViewApp> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       var codenew = "";
       if (data.js != null && data.js!.isNotEmpty && data.python != null) {
-        const importHeader = "import kulbot\n\nRob = kulbot.KULBOT() \n\n";
+        const importHeader =
+            "import kulbot\nimport time\n\nRob = kulbot.KULBOT()\n\n";
+
         codenew = importHeader + data.python!;
       }
 
@@ -529,8 +671,96 @@ class _WebViewAppState extends State<WebViewApp> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 45,
-        // title: const Icon(Icons.house, size: 30, color: Colors.white),
-        backgroundColor: Color(0xFF6DBCFF),
+        backgroundColor: const Color.fromARGB(255, 109, 188, 255),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (isSwitched) {
+              setState(() {
+                isSwitched = false;
+              });
+            } else {
+              if (haveSave) {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              } else {
+                // Hiện dialog xác nhận lưu
+                showDialog(
+                  context: context,
+                  builder:
+                      (ctx) => AlertDialog(
+                        title: const Text("Chưa lưu layout"),
+                        content: const Text(
+                          "Bạn có muốn lưu layout trước khi thoát không?",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop(); // đóng dialog xác nhận
+                              Navigator.of(context).pop(); // thoát mà không lưu
+                            },
+                            child: const Text("Không"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop(); // đóng dialog xác nhận
+
+                              showSaveDialog(
+                                context,
+                                onSaveNew: (String name) async {
+                                  final savedName =
+                                      await ProgamingLayoutProvider.saveLayout(
+                                        name,
+                                        work_area,
+                                      );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '✅ Đã lưu layout "$savedName" thành công!',
+                                      ),
+                                    ),
+                                  );
+
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                },
+                                onOverwrite: (String name) async {
+                                  final success =
+                                      await ProgamingLayoutProvider.updateLayout(
+                                        name,
+                                        work_area,
+                                      );
+                                  if (success) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '✅ Đã ghi đè layout "$name" thành công!',
+                                        ),
+                                      ),
+                                    );
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '❌ Không thể ghi đè layout "$name"!',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                            child: const Text("Có"),
+                          ),
+                        ],
+                      ),
+                );
+              }
+            }
+          },
+        ),
         actions: [
           Switch(
             value: isSwitched,
@@ -567,6 +797,9 @@ class _WebViewAppState extends State<WebViewApp> {
                       content: Text('✅ Đã lưu layout "$savedName" thành công!'),
                     ),
                   );
+                  setState(() {
+                    haveSave = true;
+                  });
                 },
                 onOverwrite: (String name) async {
                   final success = await ProgamingLayoutProvider.updateLayout(
@@ -579,6 +812,9 @@ class _WebViewAppState extends State<WebViewApp> {
                         content: Text('✅ Đã ghi đè layout "$name" thành công!'),
                       ),
                     );
+                    setState(() {
+                      haveSave = true;
+                    });
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -637,24 +873,18 @@ class _WebViewAppState extends State<WebViewApp> {
         children: [
           // Blockly Editor - luôn hiển thị dưới cùng
           FutureBuilder<List<String>>(
-            future: loadAddons(),
+            future: _addonsFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return RepaintBoundary(
-                  child: BlocklyEditorWidget(
-                    key: _editorKey,
-                    workspaceConfiguration: workspaceConfiguration,
-                    initial: _xmlworkspace,
-                    onChange: onChange,
-                    onError: onError,
-                    addons: snapshot.data!,
-                    debug: false,
-                  ),
-                );
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData) {
+                return const SizedBox.shrink();
               }
-              return const SizedBox.shrink();
+
+              // ✅ Tách widget lớn ra khỏi FutureBuilder
+              return _buildBlockly(snapshot.data!);
             },
           ),
 
@@ -699,7 +929,8 @@ class _WebViewAppState extends State<WebViewApp> {
                                           MediaQuery.of(context).size.width -
                                           60,
                                     ),
-                                    child: SelectableText(
+                                    // child: SelectableText(
+                                    child: Text(
                                       _generatedCode,
                                       style: const TextStyle(
                                         fontSize: 14,
@@ -718,200 +949,225 @@ class _WebViewAppState extends State<WebViewApp> {
                         : const SizedBox.shrink(),
               ),
             ),
+          if (isSwitched)
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: _generatedCode));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("✅ Đã copy code thành công")),
+                  );
+                },
+                label: const Text("Copy Code"),
+                icon: const Icon(Icons.copy),
+                backgroundColor: Colors.blueAccent,
+              ),
+            ),
         ],
       ),
     );
   }
-}
 
-class EditCopyModal extends StatefulWidget {
-  final String title;
-  final String initialValue;
-  final void Function(String) onOk;
-  final Color? okColor;
-  final Color? cancelColor;
-
-  const EditCopyModal({
-    super.key,
-    required this.title,
-    required this.initialValue,
-    required this.onOk,
-    this.okColor,
-    this.cancelColor,
-  });
-
-  @override
-  State<EditCopyModal> createState() => _EditCopyModalState();
-}
-
-class _EditCopyModalState extends State<EditCopyModal>
-    with WidgetsBindingObserver {
-  late TextEditingController controller;
-  final FocusNode focusNode = FocusNode();
-  bool isInputFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    controller = TextEditingController(text: widget.initialValue);
-
-    focusNode.addListener(() {
-      setState(() {
-        isInputFocused = focusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    controller.dispose();
-    focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeMetrics() {
-    final bottomInset = WidgetsBinding.instance.window.viewInsets.bottom;
-    final isKeyboardOpen = bottomInset > 0;
-
-    // Đây mới là logic đúng, kết hợp bàn phím và trạng thái focus
-    final shouldBeFocused = focusNode.hasFocus && isKeyboardOpen;
-
-    if (shouldBeFocused != isInputFocused) {
-      setState(() {
-        isInputFocused = shouldBeFocused;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.zero,
-      child: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Stack(
-            children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: size.width * 0.4,
-                          maxWidth: size.width * 0.6,
-                          maxHeight:
-                              constraints.maxHeight -
-                              80, // chừa chỗ cho bàn phím
-                        ),
-                        child: Material(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  widget.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                const SizedBox(height: 60),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        shape: const StadiumBorder(),
-                                        backgroundColor: widget.cancelColor,
-                                      ),
-                                      onPressed:
-                                          () => Navigator.of(context).pop(),
-                                      child: const Text("Cancel"),
-                                    ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        shape: const StadiumBorder(),
-                                        backgroundColor: widget.okColor,
-                                      ),
-                                      onPressed: () {
-                                        widget.onOk(controller.text.trim());
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("OK"),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              // Input nổi khi có focus
-              Positioned(
-                top: isInputFocused ? 0 : size.height / 2 - 80,
-                left: isInputFocused ? 0 : size.width / 2 - 120,
-                right: isInputFocused ? 0 : null,
-                child: Material(
-                  color: Colors.white,
-                  elevation: 8,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: isInputFocused ? size.width - 100 : 200,
-                        height: 40,
-                        child: TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          autofocus: true,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      if (isInputFocused)
-                        SizedBox(
-                          width: 50,
-                          height: 40,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                            ),
-                            onPressed: () {
-                              FocusScope.of(context).unfocus();
-                            },
-                            child: const Icon(Icons.keyboard_hide),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+  Widget _buildBlockly(List<String> addons) {
+    return RepaintBoundary(
+      child: BlocklyEditorWidget(
+        key: _editorKey,
+        workspaceConfiguration: workspaceConfiguration,
+        initial: _xmlworkspace,
+        onChange: onChange,
+        onError: onError,
+        addons: addons,
+        debug: false,
       ),
     );
   }
 }
+
+// class EditCopyModal extends StatefulWidget {
+//   final String title;
+//   final String initialValue;
+//   final void Function(String) onOk;
+//   final Color? okColor;
+//   final Color? cancelColor;
+
+//   const EditCopyModal({
+//     super.key,
+//     required this.title,
+//     required this.initialValue,
+//     required this.onOk,
+//     this.okColor,
+//     this.cancelColor,
+//   });
+
+//   @override
+//   State<EditCopyModal> createState() => _EditCopyModalState();
+// }
+
+// class _EditCopyModalState extends State<EditCopyModal>
+//     with WidgetsBindingObserver {
+//   late TextEditingController controller;
+//   final FocusNode focusNode = FocusNode();
+//   bool isInputFocused = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addObserver(this);
+//     controller = TextEditingController(text: widget.initialValue);
+
+//     focusNode.addListener(() {
+//       setState(() {
+//         isInputFocused = focusNode.hasFocus;
+//       });
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     WidgetsBinding.instance.removeObserver(this);
+//     controller.dispose();
+//     focusNode.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   void didChangeMetrics() {
+//     final bottomInset = WidgetsBinding.instance.window.viewInsets.bottom;
+//     final isKeyboardOpen = bottomInset > 0;
+
+//     // Đây mới là logic đúng, kết hợp bàn phím và trạng thái focus
+//     final shouldBeFocused = focusNode.hasFocus && isKeyboardOpen;
+
+//     if (shouldBeFocused != isInputFocused) {
+//       setState(() {
+//         isInputFocused = shouldBeFocused;
+//       });
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final size = MediaQuery.of(context).size;
+
+//     return Dialog(
+//       backgroundColor: Colors.transparent,
+//       insetPadding: EdgeInsets.zero,
+//       child: SizedBox(
+//         width: size.width,
+//         height: size.height,
+//         child: GestureDetector(
+//           onTap: () => FocusScope.of(context).unfocus(),
+//           child: Stack(
+//             children: [
+//               // Hộp nội dung chính
+//               Center(
+//                 child: RepaintBoundary(
+//                   child: ConstrainedBox(
+//                     constraints: BoxConstraints(
+//                       minWidth: size.width * 0.4,
+//                       maxWidth: size.width * 0.6,
+//                       maxHeight: size.height - 100,
+//                     ),
+//                     child: Material(
+//                       color: Colors.white,
+//                       borderRadius: BorderRadius.circular(12),
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(20),
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             Text(
+//                               widget.title,
+//                               style: const TextStyle(
+//                                 fontWeight: FontWeight.bold,
+//                                 fontSize: 20,
+//                               ),
+//                             ),
+//                             const SizedBox(height: 60),
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                               children: [
+//                                 ElevatedButton(
+//                                   style: ElevatedButton.styleFrom(
+//                                     shape: const StadiumBorder(),
+//                                     backgroundColor: widget.cancelColor,
+//                                   ),
+//                                   onPressed: () => Navigator.of(context).pop(),
+//                                   child: const Text("Cancel"),
+//                                 ),
+//                                 ElevatedButton(
+//                                   style: ElevatedButton.styleFrom(
+//                                     shape: const StadiumBorder(),
+//                                     backgroundColor: widget.okColor,
+//                                   ),
+//                                   onPressed: () {
+//                                     widget.onOk(controller.text.trim());
+//                                     Navigator.of(context).pop();
+//                                   },
+//                                   child: const Text("OK"),
+//                                 ),
+//                               ],
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+
+//               // Input nổi khi có focus
+//               AnimatedPositioned(
+//                 duration: const Duration(milliseconds: 300),
+//                 curve: Curves.easeInOut,
+//                 top: isInputFocused ? 20 : size.height / 2 - 80,
+//                 left: isInputFocused ? 20 : size.width / 2 - 120,
+//                 right: isInputFocused ? 20 : null,
+//                 child: Material(
+//                   color: Colors.white,
+//                   elevation: 8,
+//                   borderRadius: BorderRadius.circular(8),
+//                   child: Row(
+//                     children: [
+//                       SizedBox(
+//                         width: isInputFocused ? size.width - 100 : 200,
+//                         height: 40,
+//                         child: TextField(
+//                           controller: controller,
+//                           focusNode: focusNode,
+//                           autofocus: true,
+//                           decoration: const InputDecoration(
+//                             contentPadding: EdgeInsets.symmetric(
+//                               horizontal: 12,
+//                             ),
+//                             border: OutlineInputBorder(),
+//                           ),
+//                         ),
+//                       ),
+//                       if (isInputFocused)
+//                         SizedBox(
+//                           width: 50,
+//                           height: 40,
+//                           child: ElevatedButton(
+//                             style: ElevatedButton.styleFrom(
+//                               padding: EdgeInsets.zero,
+//                             ),
+//                             onPressed: () {
+//                               FocusScope.of(context).unfocus();
+//                             },
+//                             child: const Icon(Icons.keyboard_hide),
+//                           ),
+//                         ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

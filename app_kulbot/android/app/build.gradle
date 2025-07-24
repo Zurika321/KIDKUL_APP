@@ -1,8 +1,6 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
-}
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+apply plugin: "dev.flutter.flutter-gradle-plugin"
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -25,7 +23,7 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.app_kulbot"
 //    namespace "com.example.kulbot"
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion = "27.0.12077973"
     // ndkVersion flutter.ndkVersion
 
@@ -50,7 +48,7 @@ android {
         minSdkVersion 23
         //targetSdkVersion flutter.targetSdkVersion
         targetSdkVersion 35
-        compileSdkVersion 34
+        compileSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         ndk {
@@ -68,7 +66,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '30.0.0'
+    buildToolsVersion '35.0.0'
 //     splits {
 //     abi {
 //       enable true

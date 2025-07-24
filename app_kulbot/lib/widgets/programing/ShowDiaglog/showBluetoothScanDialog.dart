@@ -206,7 +206,7 @@ class _BluetoothScanDialogState extends State<_BluetoothScanDialog> {
     return AlertDialog(
       titlePadding: const EdgeInsets.fromLTRB(24, 20, 8, 0),
       title: Container(
-        height: 20,
+        height: 40,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

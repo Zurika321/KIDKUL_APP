@@ -90,7 +90,7 @@ class _UploadDialogState extends State<_UploadDialog> {
         if (msg == ".") {
           setState(() {
             upload_progress += msg;
-            log[log.length - 1] = upload_progress;
+            log[log.length - 2] = upload_progress;
           });
         } else {
           setState(() => log.add("📥 esp phản hồi: $msg"));

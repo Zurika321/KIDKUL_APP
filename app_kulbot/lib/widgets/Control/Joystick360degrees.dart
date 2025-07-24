@@ -25,7 +25,7 @@ class Joystick360degrees extends StatelessWidget {
         height: 200,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.cyanAccent),
+          // border: Border.all(color: Colors.cyanAccent),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Joystick(

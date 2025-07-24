@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:Kulbot/widgets/IOT/Sample&Data/ControlValueManager.dart';
 
 enum _DeviceAvailability { no, maybe, yes }
 
@@ -101,6 +100,12 @@ class BluetoothService with ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  void stopDiscovery() {
+    flutterBluetoothSerial.cancelDiscovery();
+    devices.clear();
+    notifyListeners();
   }
 
   void getBondedDevices() async {

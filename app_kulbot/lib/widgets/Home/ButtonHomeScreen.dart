@@ -8,12 +8,14 @@ class ButtonHomeScreenConfig {
   final String title;
   final String imgPath;
   final Widget navigator;
+  final Color color;
 
   ButtonHomeScreenConfig({
     required this.icon,
     required this.title,
     required this.imgPath,
     required this.navigator,
+    required this.color,
   });
 }
 
@@ -22,12 +24,16 @@ class ButtonHomeScreen extends StatelessWidget {
   final String imgPath;
   final String textButton;
   final VoidCallback navigator;
+  final Color color;
+  final double sizeheight;
 
   ButtonHomeScreen({
     super.key,
     required this.imgPath,
     required this.textButton,
     required this.navigator,
+    required this.color,
+    required this.sizeheight,
   });
 
   @override
@@ -48,22 +54,31 @@ class ButtonHomeScreen extends StatelessWidget {
                 children: [
                   Center(
                     child: Container(
-                      width: MediaQuery.of(context).size.height * 0.55,
-                      height: MediaQuery.of(context).size.height * 0.55,
-                      padding: const EdgeInsets.all(20),
+                      width: sizeheight - 150,
+                      height: sizeheight - 150,
+                      padding: EdgeInsets.all(sizeheight * 0.1),
                       decoration: BoxDecoration(
-                        color: Colors.purple[50], // 🎨 Màu nền bạn muốn
+                        color: color,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            offset: Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: color.withOpacity(0.25),
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                            spreadRadius: 1,
+                          ),
+                        ],
                       ),
                       child:
                       // ClipOval(
                       //   child:
-                      Image.asset(
-                        imgPath,
-                        // fit:
-                        //     BoxFit
-                        //         .cover, // 👈 Giúp ảnh đầy container mà không méo
-                      ),
+                      Image.asset(imgPath),
                       // ),
                     ),
                   ),
@@ -72,28 +87,27 @@ class ButtonHomeScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      const Color(0xFFCE93D8).withOpacity(0.1),
-                      const Color.fromARGB(
-                        255,
-                        255,
-                        255,
-                        255,
-                      ).withOpacity(0.15),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                // decoration: BoxDecoration(
+                //   gradient: LinearGradient(
+                //     begin: Alignment.centerLeft,
+                //     end: Alignment.centerRight,
+                //     colors: [
+                //       const Color(0xFFCE93D8).withOpacity(0.1),
+                //       const Color.fromARGB(
+                //         255,
+                //         255,
+                //         255,
+                //         255,
+                //       ).withOpacity(0.15),
+                //     ],
+                //   ),
+                //   borderRadius: BorderRadius.circular(10),
+                // ),
                 child: Text(
                   textButton,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF7B1FA2),
+                    fontWeight: FontWeight.w900,
                     letterSpacing: 0.1,
                   ),
                 ),
