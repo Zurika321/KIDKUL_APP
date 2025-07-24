@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:Kulbot/provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingWidget extends StatefulWidget {
   //final Function(String) onSendMessage;
@@ -39,75 +39,75 @@ class _SettingWidgetState extends State<SettingWidget> {
   //   }
   // }
 
-  final TextEditingController _moveForwardController = TextEditingController();
-  final TextEditingController _moveFLeftController = TextEditingController();
-  final TextEditingController _moveFRightController = TextEditingController();
+  // final TextEditingController _moveForwardController = TextEditingController();
+  // final TextEditingController _moveFLeftController = TextEditingController();
+  // final TextEditingController _moveFRightController = TextEditingController();
 
-  final TextEditingController _moveBackwardController = TextEditingController();
-  final TextEditingController _moveBLeftController = TextEditingController();
-  final TextEditingController _moveBRightController = TextEditingController();
+  // final TextEditingController _moveBackwardController = TextEditingController();
+  // final TextEditingController _moveBLeftController = TextEditingController();
+  // final TextEditingController _moveBRightController = TextEditingController();
 
-  final TextEditingController _moveTurnLeftController = TextEditingController();
-  final TextEditingController _moveTurnRightController =
-      TextEditingController();
+  // final TextEditingController _moveTurnLeftController = TextEditingController();
+  // final TextEditingController _moveTurnRightController =
+  //     TextEditingController();
 
-  final TextEditingController _moveStopController = TextEditingController();
+  // final TextEditingController _moveStopController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    // _loadSettings();
   }
 
-  Future<void> _loadSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _moveForwardController.text = prefs.getString('moveForward') ?? 'FF';
-      _moveFLeftController.text = prefs.getString('moveFLeft') ?? 'GG';
-      _moveFRightController.text = prefs.getString('moveFRight') ?? 'II';
+  // Future<void> _loadSettings() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _moveForwardController.text = prefs.getString('moveForward') ?? 'FF';
+  //     _moveFLeftController.text = prefs.getString('moveFLeft') ?? 'GG';
+  //     _moveFRightController.text = prefs.getString('moveFRight') ?? 'II';
 
-      _moveBackwardController.text = prefs.getString('moveBackward') ?? 'BB';
-      _moveBLeftController.text = prefs.getString('moveBLeft') ?? 'JJ';
-      _moveBRightController.text = prefs.getString('moveBRight') ?? 'HH';
+  //     _moveBackwardController.text = prefs.getString('moveBackward') ?? 'BB';
+  //     _moveBLeftController.text = prefs.getString('moveBLeft') ?? 'JJ';
+  //     _moveBRightController.text = prefs.getString('moveBRight') ?? 'HH';
 
-      _moveTurnLeftController.text = prefs.getString('moveTurnLeft') ?? 'LL';
-      _moveTurnRightController.text = prefs.getString('moveTurnRight') ?? 'RR';
+  //     _moveTurnLeftController.text = prefs.getString('moveTurnLeft') ?? 'LL';
+  //     _moveTurnRightController.text = prefs.getString('moveTurnRight') ?? 'RR';
 
-      _moveStopController.text = prefs.getString('moveStop') ?? 'SS';
-    });
-  }
+  //     _moveStopController.text = prefs.getString('moveStop') ?? 'SS';
+  //   });
+  // }
 
-  Future<void> _saveSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  // Future<void> _saveSettings() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final settingsMap = {
-      'moveForward': _moveForwardController.text,
-      'moveFLeft': _moveFLeftController.text,
-      'moveFRight': _moveFRightController.text,
-      'moveBackward': _moveBackwardController.text,
-      'moveBLeft': _moveBLeftController.text,
-      'moveBRight': _moveBRightController.text,
-      'moveTurnLeft': _moveTurnLeftController.text,
-      'moveTurnRight': _moveTurnRightController.text,
-      'moveStop': _moveStopController.text,
-    };
+  //   final settingsMap = {
+  //     'moveForward': _moveForwardController.text,
+  //     'moveFLeft': _moveFLeftController.text,
+  //     'moveFRight': _moveFRightController.text,
+  //     'moveBackward': _moveBackwardController.text,
+  //     'moveBLeft': _moveBLeftController.text,
+  //     'moveBRight': _moveBRightController.text,
+  //     'moveTurnLeft': _moveTurnLeftController.text,
+  //     'moveTurnRight': _moveTurnRightController.text,
+  //     'moveStop': _moveStopController.text,
+  //   };
 
-    final defaultValues = {
-      'moveForward': 'FF',
-      'moveFLeft': 'GG',
-      'moveFRight': 'II',
-      'moveBackward': 'BB',
-      'moveBLeft': 'JJ',
-      'moveBRight': 'HH',
-      'moveTurnLeft': 'LL',
-      'moveTurnRight': 'RR',
-      'moveStop': 'SS',
-    };
+  //   final defaultValues = {
+  //     'moveForward': 'FF',
+  //     'moveFLeft': 'GG',
+  //     'moveFRight': 'II',
+  //     'moveBackward': 'BB',
+  //     'moveBLeft': 'JJ',
+  //     'moveBRight': 'HH',
+  //     'moveTurnLeft': 'LL',
+  //     'moveTurnRight': 'RR',
+  //     'moveStop': 'SS',
+  //   };
 
-    settingsMap.forEach((key, value) {
-      prefs.setString(key, value.isNotEmpty ? value : defaultValues[key]!);
-    });
-  }
+  //   settingsMap.forEach((key, value) {
+  //     prefs.setString(key, value.isNotEmpty ? value : defaultValues[key]!);
+  //   });
+  // }
 
   // void _sendMessage() {
   //   String message;
@@ -188,154 +188,154 @@ class _SettingWidgetState extends State<SettingWidget> {
                   ],
                 ),
               ),
-              const Text(
-                "Cài đặt chi tiết",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveForwardController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị đi tiến",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveFLeftController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị đi tiến trái",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveFRightController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị đi tiến phải",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveBackwardController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị đi lùi",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveBLeftController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị lùi trái",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveBRightController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị lùi phải",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveTurnLeftController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị rẽ trái",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveTurnRightController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị rẽ phải",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _moveStopController,
-                      decoration: const InputDecoration(
-                        labelText: "Điền giá trị dừng",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Container(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(100, 50),
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    _saveSettings();
-                    Fluttertoast.showToast(msg: "Đã Lưu!", fontSize: 20);
-                  },
-                  child: const Text("Lưu", style: TextStyle(fontSize: 20)),
-                ),
-              ),
-              const SizedBox(height: 10),
+              // const Text(
+              //   "Cài đặt chi tiết",
+              //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              // ),
+              // const SizedBox(height: 10),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveForwardController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị đi tiến",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveFLeftController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị đi tiến trái",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveFRightController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị đi tiến phải",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveBackwardController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị đi lùi",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveBLeftController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị lùi trái",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveBRightController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị lùi phải",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveTurnLeftController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị rẽ trái",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveTurnRightController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị rẽ phải",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextField(
+              //         controller: _moveStopController,
+              //         decoration: const InputDecoration(
+              //           labelText: "Điền giá trị dừng",
+              //           border: OutlineInputBorder(),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 10),
+              // Container(
+              //   child: ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //       minimumSize: const Size(100, 50),
+              //       backgroundColor: Colors.blue,
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(10),
+              //       ),
+              //     ),
+              //     onPressed: () {
+              //       _saveSettings();
+              //       Fluttertoast.showToast(msg: "Đã Lưu!", fontSize: 20);
+              //     },
+              //     child: const Text("Lưu", style: TextStyle(fontSize: 20)),
+              //   ),
+              // ),
+              // const SizedBox(height: 10),
             ],
           ),
         ),

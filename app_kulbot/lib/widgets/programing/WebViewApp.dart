@@ -15,6 +15,9 @@ import './SaveProjectPrograming.dart'; //class lưu project , lấy tất cả p
 
 import 'package:Kulbot/widgets//programing/content.dart';
 
+import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+
 void showSaveDialog(
   BuildContext context, {
   required Function(String) onSaveNew,
@@ -578,7 +581,7 @@ class _WebViewAppState extends State<WebViewApp> {
   }
 
   final BlocklyOptions workspaceConfiguration = BlocklyOptions.fromJson(const {
-    'grid': {'spacing': 0, 'length': 0, 'colour': '#ccc', 'snap': true},
+    'grid': {'spacing': 0, 'length': 0, 'colour': '#cc1', 'snap': true},
     'toolbox': initialToolboxJson,
     // null safety example
     'collapse': null,
@@ -971,10 +974,35 @@ class _WebViewAppState extends State<WebViewApp> {
   }
 
   Widget _buildBlockly(List<String> addons) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final isDarkMode = themeNotifier.isDarkMode;
     return RepaintBoundary(
       child: BlocklyEditorWidget(
         key: _editorKey,
         workspaceConfiguration: workspaceConfiguration,
+        style:
+            isDarkMode
+                ? '''
+.blocklyWorkspace { background-color: #202125 !important; }               
+.blocklyToolboxDiv { background-color: #888 !important; }           
+.blocklyFlyoutBackground { background-color: #888 !important; color: #fff !important; } 
+.blocklyFlyoutBackground * { color: #fff !important; }                   
+.blocklyScrollbarHorizontal, .blocklyScrollbarVertical { background: #444 !important; } 
+.blocklyScrollbarHandle { background: #888 !important; }                  
+.blocklyScrollbarBackground { background: #333 !important; }               
+.blocklyScrollbarCorner { background: #eae !important; }         
+'''
+                : /* tương tự nhưng dùng màu sáng */ '''
+.blocklyWorkspace { background-color: #ffffff !important; }             
+.blocklyToolboxDiv { background-color: #f0f0f0 !important; }              
+.blocklyFlyoutBackground { background-color: #f0f0f0 !important; color: #000 !important; }  
+.blocklyFlyoutBackground * { color: #000 !important; }                   
+.blocklyScrollbarHorizontal, .blocklyScrollbarVertical { background: #ccc !important; }  
+.blocklyScrollbarHandle { background: #888 !important; }                 
+.blocklyScrollbarBackground { background: #888 !important; }             
+.blocklyScrollbarCorner { background: transparent !important; }         
+''',
+
         initial: _xmlworkspace,
         onChange: onChange,
         onError: onError,

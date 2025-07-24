@@ -15,6 +15,10 @@ class LocalizedStringGetter {
       'carcontrol': loc.carControl,
       'changelanguage': loc.changelanguage,
       'control': loc.control,
+      'control_jt': loc.control_jt,
+      'control_jt360': loc.control_jt360,
+      'control_jth': loc.control_jth,
+      'control_jtv': loc.control_jtv,
       'darkmode': loc.darkMode,
       'dogcontrol': loc.dogControl,
       'home': loc.home,
@@ -41,12 +45,40 @@ class LocalizedStringGetter {
       'lightmode': loc.lightMode,
       'programming': loc.programming,
       'setting': loc.setting,
+      'sk_editmode': loc.sk_EditMode,
+      'sk_huongdan': loc.sk_Huongdan,
+      'sk_saveprojectiot': loc.sk_SaveProjectIOT,
+      'sk_tonglebluetooth': loc.sk_TongLeBluetooth,
+      'sk_button': loc.sk_button,
+      'sk_chart': loc.sk_chart,
+      'sk_hold_button': loc.sk_hold_button,
+      'sk_jt360': loc.sk_jt360,
+      'sk_jth': loc.sk_jth,
+      'sk_jtv': loc.sk_jtv,
+      'sk_label_double': loc.sk_label_double,
+      'sk_label_string': loc.sk_label_string,
+      'sk_light': loc.sk_light,
+      'sk_listbox': loc.sk_listbox,
+      'sk_listbox_tester': loc.sk_listbox_tester,
+      'sk_mic': loc.sk_mic,
+      'sk_scs': loc.sk_scs,
+      'sk_switch_button': loc.sk_switch_button,
+      'sk_volume': loc.sk_volume,
     };
 
     return localizedMap[formattedKey] ?? key;
   }
 
   static String IOT_get(BuildContext context, String key) {
-    return get(context, "iot_" + key);
+    String newKey = get(context, "iot_" + key);
+    return newKey == "iot_" + key ? key : newKey;
+  }
+  static String Control_get(BuildContext context, String key) {
+    String newKey = get(context, "control_" + key);
+    return newKey == "control_" + key ? key : newKey;
+  }
+  static String showkey_get(BuildContext context, String key) {
+    String newKey = get(context, "sk_" + key);
+    return newKey == "sk_" + key ? key : newKey;
   }
 }

@@ -98,13 +98,13 @@ class _JoystickHorizontalState extends State<JoystickHorizontal> {
     final strength = dx.abs().clamp(0.0, 1.0);
 
     if (strength < 0.2) {
-      print("stop");
+      // print("stop");
       widget.sendCommand?.call(stop.text);
     } else if (dx > 0) {
-      print("right");
+      // print("right");
       widget.sendCommand?.call(phai.text);
     } else {
-      print("left");
+      // print("left");
       widget.sendCommand?.call(trai.text);
     }
   }

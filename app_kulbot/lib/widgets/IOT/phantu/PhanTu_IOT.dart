@@ -40,7 +40,7 @@ class PhanTu_IOT {
         'title': 'Light',
         'on': 'OO',
         'off': 'PP',
-        "showkey": "sk_button",
+        "showkey": "button",
       },
       'widgetBuilder':
           (
@@ -66,7 +66,7 @@ class PhanTu_IOT {
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
-      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_hold_button"},
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "hold_button"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -91,7 +91,7 @@ class PhanTu_IOT {
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
-      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_switch_button"},
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "switch_button"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -117,7 +117,7 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 210, 0, 60],
       'max': 1,
       'getData': true,
-      'config': {'title': 'Volume', "showkey": "sk_volume"},
+      'config': {'title': 'Volume', "showkey": "volume"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -143,7 +143,7 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 1,
-      'config': {"showkey": "sk_mic"},
+      'config': {"showkey": "mic"},
     },
     'ListBox': {
       'title': 'Status',
@@ -152,7 +152,7 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 200, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': "sk_listbox"},
+      'config': {'showkey': "listbox"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -175,7 +175,7 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 210, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {"showkey": "sk_listbox_tester"},
+      'config': {"showkey": "listbox_tester"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -199,7 +199,7 @@ class PhanTu_IOT {
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
       'getData': true,
-      'config': {"showkey": "sk_light"},
+      'config': {"showkey": "light"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -224,7 +224,7 @@ class PhanTu_IOT {
       'typeBox': "height",
       'max': 1,
       'getData': true,
-      'config': {"showkey": "sk_label_string"},
+      'config': {"showkey": "label_string"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -250,7 +250,7 @@ class PhanTu_IOT {
       'typeBox': "height",
       'max': 1,
       'getData': true,
-      'config': {"showkey": "sk_label_double"},
+      'config': {"showkey": "label_double"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -276,7 +276,7 @@ class PhanTu_IOT {
       'typeBox': "width",
       'max': 3,
       'getData': true,
-      'config': {'title': 'Temp', 'unit': '˚C', "showkey": "sk_scs"},
+      'config': {'title': 'Temp', 'unit': '˚C', "showkey": "scs"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -301,7 +301,7 @@ class PhanTu_IOT {
       'typeBox': "width",
       'max': 3,
       'getData': true,
-      'config': {"visibleCount": 10, "showkey": "sk_chart"},
+      'config': {"visibleCount": 10, "showkey": "chart"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,

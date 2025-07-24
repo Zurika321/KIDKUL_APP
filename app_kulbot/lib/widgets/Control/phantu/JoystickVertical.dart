@@ -99,13 +99,13 @@ class _JoystickVerticalState extends State<JoystickVertical> {
     final strength = dy.abs().clamp(0.0, 1.0);
 
     if (strength < 0.2) {
-      print("stop");
+      // print("stop");
       widget.sendCommand?.call(stop.text);
     } else if (dy > 0) {
-      print("forward");
+      // print("forward");
       widget.sendCommand?.call(tien.text);
     } else {
-      print("backward");
+      // print("backward");
       widget.sendCommand?.call(lui.text);
     }
   }

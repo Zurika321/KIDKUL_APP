@@ -498,7 +498,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     return ShowCaseWidget(
       builder:
           (context) => Scaffold(
-            backgroundColor: const Color.fromARGB(255, 230, 231, 237),
+            backgroundColor: Theme.of(context).colorScheme.background,
 
             // appBar: _buildAppBar(context, isDarkMode), //ko sài appbar nữa anh Kha bảo thế !!!
             floatingActionButton:
@@ -568,7 +568,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               // ),
               Showcase(
                 key: ShowKeyManager.createKey("Huongdan"),
-                description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "Huongdan",
+                ),
                 child: IconButton(
                   icon: const Icon(
                     Icons.question_mark_rounded,
@@ -584,7 +587,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               ),
               Showcase(
                 key: ShowKeyManager.createKey("TongLeBluetooth"),
-                description: 'Bật / tắt Bluetooth và kết nối robot',
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "TongLeBluetooth",
+                ),
                 child: IconButton(
                   icon: Icon(
                     _bluetoothService.bluetoothState.isEnabled
@@ -604,7 +610,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               ),
               Showcase(
                 key: ShowKeyManager.createKey("SaveProjectIOT"),
-                description: 'Đây là nút save project',
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "SaveProjectIOT",
+                ),
                 child: IconButton(
                   icon: const Icon(Icons.save),
                   color: Colors.greenAccent,
@@ -661,7 +670,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               ),
               Showcase(
                 key: ShowKeyManager.createKey("EditMode"),
-                description: "Bật/tắt chế độ edit",
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "EditMode",
+                ),
                 child: IconButton(
                   icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
                   color: Colors.blueAccent,
@@ -846,7 +858,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
                   String? NoteShowKey =
                       number == 1
-                          ? LocalizedStringGetter.IOT_get(
+                          ? LocalizedStringGetter.showkey_get(
                             context,
                             PhanTu_IOT.getNoteShowKey(context, control.id),
                           )
@@ -880,7 +892,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       lock: shouldLock,
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
+                          valueofid2 = "${control.id} - ${control.realId}";
                           value3 = newConfig;
                           placedControls[index].config = newConfig;
                         });
@@ -910,8 +922,12 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       lock: shouldLock,
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
-                          value3 = newConfig;
+                          if (placedControls.any(
+                            (item) => item.id == 'ListBoxTester',
+                          )) {
+                            valueofid2 = "${control.id} - ${control.realId}";
+                            value3 = newConfig;
+                          }
                           placedControls[index].config = newConfig;
                         });
                       },
@@ -934,17 +950,31 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       NoteshowKey: NoteShowKey,
                       lock: shouldLock,
                       sendCommand: (msg) async {
-                        setState(() {
-                          valueofid1 = control.id;
-                          value1 = msg;
-                        });
-                        _bluetoothService.sendMessage(msg);
-                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (placedControls.any(
+                          (item) => item.id == 'ListBoxTester',
+                        )) {
+                          setState(() {
+                            valueofid1 = "${control.id} - ${control.realId}";
+                            value1 = msg;
+                          });
+                        }
+
+                        if (connectedDeviceName != "Chưa kết nối với robot") {
+                          _bluetoothService.sendMessage(msg);
+                          await Future.delayed(
+                            const Duration(milliseconds: 100),
+                          );
+                        }
                       },
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
-                          value3 = newConfig;
+                          if (placedControls.any(
+                            (item) => item.id == 'ListBoxTester',
+                          )) {
+                            valueofid2 = "${control.id} - ${control.realId}";
+                            value3 = newConfig;
+                          }
+
                           placedControls[index].config = newConfig;
                         });
                       },
@@ -956,9 +986,13 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                 // } else {
                                 //   debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
                                 // }
-                                setState(() {
-                                  value2 = msg;
-                                });
+                                if (placedControls.any(
+                                  (item) => item.id == 'ListBoxTester',
+                                )) {
+                                  setState(() {
+                                    value2 = msg;
+                                  });
+                                }
                               }
                               : null,
                       onDelete: () {
@@ -1009,7 +1043,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 right: showMenu ? 0 : -250,
                 width: 250,
                 child: Container(
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   padding: const EdgeInsets.all(12),
                   child: SingleChildScrollView(
                     child: Builder(

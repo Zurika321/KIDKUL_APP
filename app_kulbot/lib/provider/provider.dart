@@ -66,10 +66,73 @@ class ThemeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  ThemeData get currentTheme =>
+      isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme;
+
   void toggleTheme() async {
     isDarkMode = !isDarkMode;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isDarkMode', isDarkMode);
     notifyListeners();
   }
+}
+
+class AppTheme {
+  static const Color primaryColor = Color(0xFF0066CC);
+  static const Color secondaryColor = Color(0xFF00CC99);
+  static const Color backgroundLight = Color(0xFFF5F5F5);
+  static const Color backgroundDark = Color(0xFF121212);
+  static const Color surfaceLight = Colors.white;
+  static const Color surfaceDark = Color(0xFF1E1E1E);
+  static const Color errorColor = Colors.redAccent;
+
+  static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    primaryColor: primaryColor,
+    scaffoldBackgroundColor: backgroundLight,
+    colorScheme: ColorScheme.light(
+      primary: primaryColor,
+      secondary: secondaryColor,
+      background: Color.fromARGB(255, 230, 231, 237),
+      surface: surfaceLight,
+      error: errorColor,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      elevation: 1,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+    ),
+    iconTheme: const IconThemeData(color: Colors.black),
+    textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
+  );
+
+  static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    primaryColor: primaryColor,
+    scaffoldBackgroundColor: backgroundDark,
+    colorScheme: ColorScheme.dark(
+      primary: primaryColor,
+      secondary: secondaryColor,
+      background: Color.fromARGB(255, 71, 71, 72),
+      surface: surfaceDark,
+      error: errorColor,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF1E1E1E),
+      foregroundColor: Colors.white,
+      elevation: 0,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+    ),
+    iconTheme: const IconThemeData(color: Colors.white70),
+    textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white)),
+  );
 }

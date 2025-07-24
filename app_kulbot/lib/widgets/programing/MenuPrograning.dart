@@ -50,9 +50,9 @@ class _MenuprograningState extends State<Menuprograning> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 250, 250),
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        // backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.background,
         // title: const Text("Điều khiển Robot"),
         leading: IconButton(
           icon: const Icon(
@@ -75,7 +75,8 @@ class _MenuprograningState extends State<Menuprograning> {
               ),
               child: TextField(
                 decoration: const InputDecoration(
-                  hintText: 'Tìm kiếm...',
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.black),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,

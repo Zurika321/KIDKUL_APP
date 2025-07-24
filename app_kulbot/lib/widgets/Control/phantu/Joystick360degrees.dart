@@ -165,33 +165,33 @@ class _Joystick360degreesState extends State<Joystick360degrees> {
     double adjustedAngle = (angle + 90) % 360;
 
     if (strength < 0.2) {
-      print("🛑 Dừng");
-      widget.sendCommand?.call("stop");
+      // print("🛑 Dừng");
+      widget.sendCommand?.call(stop.text);
     } else {
       if (adjustedAngle >= 337.5 || adjustedAngle < 22.5) {
-        print("⬆️ Tiến");
-        widget.sendCommand?.call("forward");
+        // print("⬆️ Tiến");
+        widget.sendCommand?.call(tien.text);
       } else if (adjustedAngle >= 22.5 && adjustedAngle < 67.5) {
-        print("↗️ Tiến Phải");
-        widget.sendCommand?.call("forwardRight");
+        // print("↗️ Tiến Phải");
+        widget.sendCommand?.call(tientrai.text);
       } else if (adjustedAngle >= 67.5 && adjustedAngle < 112.5) {
-        print("➡️ Xoay Phải");
-        widget.sendCommand?.call("turnRight");
+        // print("➡️ Xoay Phải");
+        widget.sendCommand?.call(phai.text);
       } else if (adjustedAngle >= 112.5 && adjustedAngle < 157.5) {
-        print("↘️ Lùi Phải");
-        widget.sendCommand?.call("backwardRight");
+        // print("↘️ Lùi Phải");
+        widget.sendCommand?.call(luiphai.text);
       } else if (adjustedAngle >= 157.5 && adjustedAngle < 202.5) {
-        print("⬇️ Lùi");
-        widget.sendCommand?.call("backward");
+        // print("⬇️ Lùi");
+        widget.sendCommand?.call(lui.text);
       } else if (adjustedAngle >= 202.5 && adjustedAngle < 247.5) {
-        print("↙️ Lùi Trái");
-        widget.sendCommand?.call("backwardLeft");
+        // print("↙️ Lùi Trái");
+        widget.sendCommand?.call(luitrai.text);
       } else if (adjustedAngle >= 247.5 && adjustedAngle < 292.5) {
-        print("⬅️ Xoay Trái");
-        widget.sendCommand?.call("turnLeft");
+        // print("⬅️ Xoay Trái");
+        widget.sendCommand?.call(trai.text);
       } else if (adjustedAngle >= 292.5 && adjustedAngle < 337.5) {
-        print("↖️ Tiến Trái");
-        widget.sendCommand?.call("forwardLeft");
+        // print("↖️ Tiến Trái");
+        widget.sendCommand?.call(tientrai.text);
       }
     }
   }

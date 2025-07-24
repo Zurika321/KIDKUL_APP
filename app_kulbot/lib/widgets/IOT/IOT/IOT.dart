@@ -73,8 +73,9 @@ class _IOTState extends State<IOT> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 250, 250),
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.background,
         // title: const Text("Điều khiển Robot"),
         leading: IconButton(
           icon: const Icon(
@@ -98,6 +99,7 @@ class _IOTState extends State<IOT> {
               child: TextField(
                 decoration: const InputDecoration(
                   hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.black),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,

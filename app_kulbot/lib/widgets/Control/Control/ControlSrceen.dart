@@ -13,54 +13,39 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
-// import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
-// import 'package:Kulbot/l10n/l10n.dart'; // Lấy cờ theo ngôn ngữ
+import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+import 'package:Kulbot/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+import 'package:Kulbot/l10n/l10n.dart'; // Lấy cờ theo ngôn ngữ
 import 'package:Kulbot/l10n/localized_map.dart';
 
 // import 'package:shared_preferences/shared_preferences.dart';
 
 class ControlItem {
-  final String id; // ID gốc để tạo widget (VD: "horn")
-  String realId; // ID thực tế để phân biệt giữa nhiều bản sao (VD: "horn1")
+  final String id;
+  String realId;
   Offset relativePosition;
   Map<String, dynamic> config;
   bool lock;
   bool canMove;
 
+  /// Tọa độ pixel tuyệt đối ban đầu (chỉ sử dụng để convert)
+  double? top;
+  double? bottom;
+  double? left;
+  double? right;
+
   ControlItem({
     required this.id,
     required this.realId,
-    required this.relativePosition,
+    this.relativePosition = Offset.zero,
+    this.top,
+    this.bottom,
+    this.left,
+    this.right,
     Map<String, dynamic>? config,
     this.lock = false,
     this.canMove = true,
   }) : config = config != null ? Map<String, dynamic>.from(config) : {};
-
-  // factory ControlItem.fromJson(Map<String, dynamic> json) {
-  //   return ControlItem(
-  //     id: json['id'],
-  //     realId: json['realId'] ?? json['id'],
-  //     relativePosition: Offset(
-  //       (json['x'] as num).toDouble(),
-  //       (json['y'] as num).toDouble(),
-  //     ),
-  //     config: Map<String, dynamic>.from(json['config'] ?? {}),
-  //     lock: json['lock'] ?? false,
-  //     canMove:
-  //         json['canMove'] ?? true, // <- Thêm dòng này để đọc canMove từ JSON
-  //   );
-  // }
-
-  // Map<String, dynamic> toJson() => {
-  //   'id': id,
-  //   'realId': realId,
-  //   'x': relativePosition.dx,
-  //   'y': relativePosition.dy,
-  //   'config': config,
-  //   'lock': lock,
-  //   'canMove': canMove, // <- Thêm dòng này để ghi canMove ra JSON
-  // };
 
   ControlItem clone() {
     return ControlItem(
@@ -70,6 +55,10 @@ class ControlItem {
       config: Map<String, dynamic>.from(config),
       lock: lock,
       canMove: canMove,
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
     );
   }
 }
@@ -229,89 +218,27 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     super.dispose();
   }
 
-  // void _checkBluetoothStatus() {
-  //   _bluetoothService.flutterBluetoothSerial.state.then((state) {
-  //     setState(() {
-  //       _bluetoothService.bluetoothState = state;
-  //     });
-  //   });
-  // }
-
   Future<void> _initLayout(Size size) async {
-    placedControls.addAll(ControlLayoutProvider.getLayout(widget.type));
-    // final y = 50 / size.height;
-    // final x = (size.width - 218) / size.width;
-    // if (!placedControls.any((item) => item.realId == 'ListBox1')) {
-    //   placedControls.add(
-    //     ControlItem(
-    //       id: 'ListBox',
-    //       realId: 'ListBox1',
-    //       relativePosition: Offset(x < 0 ? 0 : x, y),
-    //       config: {'height': 50.0, 'width': 200.0},
-    //       lock: false,
-    //       canMove: true,
-    //     ),
-    //   );
-    // }
-
-    // Kiểm tra trước khi add ListBoxTester1
-    // if (!placedControls.any((item) => item.realId == 'ListBoxTester1')) {
-    //   placedControls.add(
-    //     ControlItem(
-    //       id: 'ListBoxTester',
-    //       realId: 'ListBoxTester1',
-    //       relativePosition: const Offset(0, 0.5),
-    //       config: {'height': 200.0, 'width': 200.0},
-    //       lock: false,
-    //       canMove: true,
-    //     ),
-    //   );
-    // }
+    placedControls.addAll(ControlLayoutProvider.getLayout(widget.type, size));
     setState(() {});
   }
 
-  // final String _moveForwardCommand = "";
-  // final String _moveBackwardCommand = "";
-  // final String _moveTurnLeftCommand = "";
-  // final String _moveTurnRightCommand = "";
-  // final String _moveStopCommand = "";
   bool get isConnected => (_bluetoothService.connection?.isConnected ?? false);
-
-  // void moveMotor() {
-  //   if (!isConnected) return;
-  //   final voice = voicetotext.toLowerCase();
-  //   if (voice.contains('tiến') ||
-  //       voice.contains('lên') ||
-  //       voice.contains('forward')) {
-  //     _bluetoothService.sendMessage(_moveForwardCommand);
-  //   } else if (voice.contains('lui') ||
-  //       voice.contains('lùi') ||
-  //       voice.contains('back')) {
-  //     _bluetoothService.sendMessage(_moveBackwardCommand);
-  //   } else if (voice.contains('trái') || voice.contains('left')) {
-  //     _bluetoothService.sendMessage(_moveTurnLeftCommand);
-  //   } else if (voice.contains('phải') || voice.contains('right')) {
-  //     _bluetoothService.sendMessage(_moveTurnRightCommand);
-  //   } else if (voice.contains('dừng') || voice.contains('stop')) {
-  //     _bluetoothService.sendMessage(_moveStopCommand);
-  //   } else {
-  //     print("Không nhận diện được lệnh thoại: $voicetotext");
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // final isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
+    // final themeNotifier = Provider.of<ThemeNotifier>(context);
+    // final isDarkMode = themeNotifier.isDarkMode;
+
     // final provider = Provider.of<LocaleProvider>(context);
     // var locale = provider.locale ?? Locale('en');
 
     return ShowCaseWidget(
       builder:
           (context) => Scaffold(
-            backgroundColor: const Color.fromARGB(255, 230, 231, 237),
+            backgroundColor: Theme.of(context).colorScheme.background,
 
-            // appBar: _buildAppBar(context, isDarkMode), //ko sài appbar nữa anh Kha bảo thế !!!
             floatingActionButton:
                 isEditingLayout && !showMenu
                     ? FloatingActionButton(
@@ -324,7 +251,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     );
   }
 
-  PreferredSizeWidget buildTopBar(BuildContext context) {
+  PreferredSizeWidget buildTopBar(BuildContext context, Locale locale) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(56),
       child: SafeArea(
@@ -339,47 +266,39 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(width: 8),
-              // Showcase(
-              //   key: ShowKeyManager.createKey("LanguageSelector"),
-              //   description: "Đây là nút chọn ngôn ngữ",
-              //   child: DropdownButton(
-              //     value: locale,
-              //     icon: Container(width: 12),
-              //     items:
-              //         L10n.all.map((locale) {
-              //           final flag = L10n.getflag(locale.languageCode);
+              Showcase(
+                key: ShowKeyManager.createKey("LanguageSelector"),
+                description: "Đây là nút chọn ngôn ngữ",
+                child: DropdownButton(
+                  value: locale,
+                  icon: Container(width: 12),
+                  items:
+                      L10n.all.map((locale) {
+                        final flag = L10n.getflag(locale.languageCode);
 
-              //           return DropdownMenuItem(
-              //             child: Center(
-              //               child: Text(flag, style: TextStyle(fontSize: 32)),
-              //             ),
-              //             value: locale,
-              //             onTap: () {
-              //               final provider = Provider.of<LocaleProvider>(
-              //                 context,
-              //                 listen: false,
-              //               );
-              //               provider.setLocale(locale);
-              //             },
-              //           );
-              //         }).toList(),
-              //     onChanged: (_) {},
-              //   ),
-              // ),
-              // Showcase(
-              //   key: ShowKeyManager.createKey("ScanQRcode"),
-              //   description: 'Đây là nút quét mã QR để điều khiển robot',
-              //   child: IconButton(
-              //     icon: Icon(
-              //       Icons.qr_code_scanner_outlined,
-              //       color: Colors.cyanAccent,
-              //     ),
-              //     onPressed: scanQRcodeNormal,
-              //   ),
-              // ),
+                        return DropdownMenuItem(
+                          child: Center(
+                            child: Text(flag, style: TextStyle(fontSize: 32)),
+                          ),
+                          value: locale,
+                          onTap: () {
+                            final provider = Provider.of<LocaleProvider>(
+                              context,
+                              listen: false,
+                            );
+                            provider.setLocale(locale);
+                          },
+                        );
+                      }).toList(),
+                  onChanged: (_) {},
+                ),
+              ),
               Showcase(
                 key: ShowKeyManager.createKey("Huongdan"),
-                description: 'Đây là nút hướng dẫn sử dụng điều khiển robot',
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "Huongdan",
+                ),
                 child: IconButton(
                   icon: const Icon(
                     Icons.question_mark_rounded,
@@ -395,7 +314,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               ),
               Showcase(
                 key: ShowKeyManager.createKey("TongLeBluetooth"),
-                description: 'Bật / tắt Bluetooth và kết nối robot',
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "TongLeBluetooth",
+                ),
                 child: IconButton(
                   icon: Icon(
                     _bluetoothService.bluetoothState.isEnabled
@@ -415,7 +337,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
               ),
               Showcase(
                 key: ShowKeyManager.createKey("EditMode"),
-                description: "Bật/tắt chế độ edit",
+                description: LocalizedStringGetter.showkey_get(
+                  context,
+                  "EditMode",
+                ),
                 child: IconButton(
                   icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
                   color: Colors.blueAccent,
@@ -453,6 +378,8 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     //             )
     //             : <String, dynamic>{};
     //     debugPrint("Dữ liệu động: $dynamicData");
+    final provider = Provider.of<LocaleProvider>(context);
+    var locale = provider.locale ?? Locale('en');
     return Stack(
       children: [
         Positioned(
@@ -467,7 +394,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
             highlightColor: Colors.transparent,
           ),
         ),
-        Positioned(top: 0, right: 0, child: buildTopBar(context)),
+        Positioned(top: 0, right: 0, child: buildTopBar(context, locale)),
         StreamBuilder<Map<String, dynamic>>(
           stream: _bluetoothService.stream,
           builder: (context, snapshot) {
@@ -523,7 +450,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
                   String? NoteShowKey =
                       number == 1
-                          ? LocalizedStringGetter.IOT_get(
+                          ? LocalizedStringGetter.showkey_get(
                             context,
                             PhanTu_Control.getNoteShowKey(context, control.id),
                           )
@@ -559,7 +486,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       lock: shouldLock,
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
+                          valueofid2 = "${control.id} - ${control.realId}";
                           value3 = newConfig;
                           placedControls[index].config = newConfig;
                         });
@@ -589,8 +516,12 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       lock: shouldLock,
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
-                          value3 = newConfig;
+                          if (placedControls.any(
+                            (item) => item.id == 'ListBoxTester',
+                          )) {
+                            valueofid2 = "${control.id} - ${control.realId}";
+                            value3 = newConfig;
+                          }
                           placedControls[index].config = newConfig;
                         });
                       },
@@ -613,17 +544,31 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                       NoteshowKey: NoteShowKey,
                       lock: shouldLock,
                       sendCommand: (msg) async {
-                        // setState(() {
-                        //   valueofid1 = control.id;
-                        //   value1 = msg;
-                        // });
-                        // _bluetoothService.sendMessage(msg);
-                        // await Future.delayed(const Duration(milliseconds: 100));
+                        if (placedControls.any(
+                          (item) => item.id == 'ListBoxTester',
+                        )) {
+                          setState(() {
+                            valueofid1 = "${control.id} - ${control.realId}";
+                            value1 = msg;
+                          });
+                        }
+
+                        if (connectedDeviceName != "Chưa kết nối với robot") {
+                          _bluetoothService.sendMessage(msg);
+                          await Future.delayed(
+                            const Duration(milliseconds: 100),
+                          );
+                        }
                       },
                       onSave: (newConfig) {
                         setState(() {
-                          valueofid2 = control.id;
-                          value3 = newConfig;
+                          if (placedControls.any(
+                            (item) => item.id == 'ListBoxTester',
+                          )) {
+                            valueofid2 = "${control.id} - ${control.realId}";
+                            value3 = newConfig;
+                          }
+
                           placedControls[index].config = newConfig;
                         });
                       },
@@ -635,9 +580,13 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                 // } else {
                                 //   debugPrint("Lệnh rỗng, không gửi qua bluetooth.");
                                 // }
-                                setState(() {
-                                  value2 = msg;
-                                });
+                                if (placedControls.any(
+                                  (item) => item.id == 'ListBoxTester',
+                                )) {
+                                  setState(() {
+                                    value2 = msg;
+                                  });
+                                }
                               }
                               : null,
                       onDelete: () {
@@ -688,7 +637,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 right: showMenu ? 0 : -250,
                 width: 250,
                 child: Container(
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   padding: const EdgeInsets.all(12),
                   child: SingleChildScrollView(
                     child: Builder(
@@ -713,10 +662,15 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    LocalizedStringGetter.IOT_get(
-                                      context,
-                                      title,
-                                    ),
+                                    title == "jt"
+                                        ? LocalizedStringGetter.Control_get(
+                                          context,
+                                          title,
+                                        )
+                                        : LocalizedStringGetter.IOT_get(
+                                          context,
+                                          title,
+                                        ),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -772,10 +726,15 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                LocalizedStringGetter.IOT_get(
-                                                  context,
-                                                  name,
-                                                ),
+                                                (name.contains("jt")
+                                                    ? LocalizedStringGetter.Control_get(
+                                                      context,
+                                                      name,
+                                                    )
+                                                    : LocalizedStringGetter.IOT_get(
+                                                      context,
+                                                      name,
+                                                    )),
                                                 style: const TextStyle(
                                                   fontSize: 12,
                                                 ),

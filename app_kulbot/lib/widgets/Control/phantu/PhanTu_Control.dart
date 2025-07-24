@@ -31,19 +31,14 @@ import 'package:Kulbot/widgets/Control/phantu/JoystickVertical.dart';
 class PhanTu_Control {
   static Map<String, Map<String, dynamic>> controlGroups = {
     //Đừng để id bắt đầu giống nhau vd: mic và micshowkey
-    'JoyStick360': {
-      'title': 'JoyStick',
-      'name': "JoyStick360",
+    'JoyStick360_': {
+      'title': 'jt',
+      'name': "jt360",
       'size': [0, 125, 0, 125],
       'sizeInMenu': [0, 105, 0, 105],
       // 'typeBox': "height",
       'max': 1,
-      'config': {
-        'title': 'Light',
-        'on': 'OO',
-        'off': 'PP',
-        "showkey": "sk_button",
-      },
+      'config': {'title': 'Light', 'on': 'OO', 'off': 'PP', "showkey": "jt360"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -62,18 +57,13 @@ class PhanTu_Control {
           ),
     },
     'JoyStickH': {
-      'title': 'JoyStick',
-      'name': "JoyStickH",
+      'title': 'jt',
+      'name': "jth",
       'size': [0, 125, 0, 125],
       'sizeInMenu': [0, 105, 0, 105],
       // 'typeBox': "height",
       'max': 1,
-      'config': {
-        'title': 'Light',
-        'on': 'OO',
-        'off': 'PP',
-        "showkey": "sk_button",
-      },
+      'config': {'title': 'Light', 'on': 'OO', 'off': 'PP', "showkey": "jth"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -92,18 +82,13 @@ class PhanTu_Control {
           ),
     },
     'JoyStickV': {
-      'title': 'JoyStick',
-      'name': "JoyStickV",
+      'title': 'jt',
+      'name': "jtv",
       'size': [0, 125, 0, 125],
       'sizeInMenu': [0, 105, 0, 105],
       // 'typeBox': "height",
       'max': 1,
-      'config': {
-        'title': 'Light',
-        'on': 'OO',
-        'off': 'PP',
-        "showkey": "sk_button",
-      },
+      'config': {'title': 'Light', 'on': 'OO', 'off': 'PP', "showkey": "jtv"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -132,7 +117,7 @@ class PhanTu_Control {
         'title': 'Light',
         'on': 'OO',
         'off': 'PP',
-        "showkey": "sk_button",
+        "showkey": "button",
       },
       'widgetBuilder':
           (
@@ -158,7 +143,7 @@ class PhanTu_Control {
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
-      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_hold_button"},
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "hold_button"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -183,7 +168,7 @@ class PhanTu_Control {
       'size': [0.1, 0, 0.1, 0],
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
-      'config': {'on': 'OO', 'off': 'PP', "showkey": "sk_switch_button"},
+      'config': {'on': 'OO', 'off': 'PP', "showkey": "switch_button"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -209,7 +194,7 @@ class PhanTu_Control {
       'sizeInMenu': [0, 210, 0, 60],
       'max': 1,
       'getData': true,
-      'config': {'title': 'Volume', "showkey": "sk_volume"},
+      'config': {'title': 'Volume', "showkey": "volume"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -235,7 +220,7 @@ class PhanTu_Control {
       'sizeInMenu': [0, 50, 0, 50],
       'typeBox': "height",
       'max': 1,
-      'config': {"showkey": "sk_mic"},
+      'config': {"showkey": "mic"},
     },
     'ListBox': {
       'title': 'Status',
@@ -244,7 +229,7 @@ class PhanTu_Control {
       'sizeInMenu': [0, 200, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {'showkey': "sk_listbox"},
+      'config': {'showkey': "listbox"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -267,7 +252,7 @@ class PhanTu_Control {
       'sizeInMenu': [0, 210, 0, 100],
       'typeBox': "height",
       'max': 1,
-      'config': {"showkey": "sk_listbox_tester"},
+      'config': {"showkey": "listbox_tester"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -291,7 +276,7 @@ class PhanTu_Control {
       'sizeInMenu': [0, 50, 0, 50],
       'max': 4,
       'getData': true,
-      'config': {"showkey": "sk_light"},
+      'config': {"showkey": "light"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -316,7 +301,7 @@ class PhanTu_Control {
       'typeBox': "height",
       'max': 1,
       'getData': true,
-      'config': {"showkey": "sk_label_string"},
+      'config': {"showkey": "label_string"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -342,7 +327,7 @@ class PhanTu_Control {
       'typeBox': "height",
       'max': 1,
       'getData': true,
-      'config': {"showkey": "sk_label_double"},
+      'config': {"showkey": "label_double"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -368,7 +353,7 @@ class PhanTu_Control {
       'typeBox': "width",
       'max': 3,
       'getData': true,
-      'config': {'title': 'Temp', 'unit': '˚C', "showkey": "sk_scs"},
+      'config': {'title': 'Temp', 'unit': '˚C', "showkey": "scs"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,
@@ -393,7 +378,7 @@ class PhanTu_Control {
       'typeBox': "width",
       'max': 3,
       'getData': true,
-      'config': {"visibleCount": 10, "showkey": "sk_chart"},
+      'config': {"visibleCount": 10, "showkey": "chart"},
       'widgetBuilder':
           (
             Map<String, dynamic> config,

@@ -23,8 +23,8 @@ import 'package:Kulbot/widgets/Home/ButtonHomeScreen.dart';
 //get page - lấy trang
 import 'package:Kulbot/widgets/IOT/IOT/IOT.dart';
 import 'package:Kulbot/widgets/Control/Control.dart';
-import 'package:Kulbot/widgets/Control/Control/ControlSrceen.dart';
-// import 'package:Kulbot/widgets/Setting/settingScreen.dart';
+// import 'package:Kulbot/widgets/Control/Control/ControlSrceen.dart';
+import 'package:Kulbot/widgets/Setting/settingScreen.dart';
 import 'package:Kulbot/widgets/programing/MenuPrograning.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -146,13 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
         navigator: IOT(),
         color: Color.fromARGB(255, 129, 218, 129),
       ),
-      // ButtonHomeScreenConfig(
-      //   icon:
-      //       Icons.settings,
-      //   title: AppLocalizations.of(context)!.setting,
-      //   imgPath: 'lib/assets/images/setting.png',
-      //   navigator: SettingScreen(),
-      // ),
+      ButtonHomeScreenConfig(
+        icon: Icons.settings,
+        title: AppLocalizations.of(context)!.setting,
+        imgPath: 'lib/assets/images/setting.png',
+        navigator: SettingScreen(),
+        color: Color.fromARGB(255, 255, 153, 153),
+      ),
     ];
 
     final items =
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
             )
             .toList();
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 250, 250),
+      // backgroundColor: const Color.fromARGB(255, 255, 250, 250),
       body: SafeArea(
         bottom: true,
         child: Column(

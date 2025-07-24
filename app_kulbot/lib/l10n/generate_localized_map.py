@@ -48,7 +48,16 @@ class LocalizedStringGetter {{
 
 {generate_dart_map(keys)}
   static String IOT_get(BuildContext context, String key) {{
-    return get(context, "iot_" + key);
+    String newKey = get(context, "iot_" + key);
+    return newKey == "iot_" + key ? key : newKey;
+  }}
+  static String Control_get(BuildContext context, String key) {{
+    String newKey = get(context, "control_" + key);
+    return newKey == "control_" + key ? key : newKey;
+  }}
+  static String showkey_get(BuildContext context, String key) {{
+    String newKey = get(context, "sk_" + key);
+    return newKey == "sk_" + key ? key : newKey;
   }}
 }}
 '''.strip()

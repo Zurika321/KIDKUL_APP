@@ -54,11 +54,9 @@ class Kulbot extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'KulBot',
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness:
-            themeNotifier.isDarkMode ? Brightness.dark : Brightness.light,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       locale:
           localeProvider.locale ??
           const Locale('en'), //hơi thừa ?? nhưng cho chắc
@@ -75,6 +73,39 @@ class Kulbot extends StatelessWidget {
     );
   }
 }
+
+// class Kulbot extends StatelessWidget {
+//   const Kulbot({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final themeNotifier = Provider.of<ThemeNotifier>(context);
+//     final localeProvider = Provider.of<LocaleProvider>(context);
+
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'KulBot',
+//       theme: ThemeData(
+//         useMaterial3: true,
+//         brightness:
+//             themeNotifier.isDarkMode ? Brightness.dark : Brightness.light,
+//       ),
+//       locale:
+//           localeProvider.locale ??
+//           const Locale('en'), //hơi thừa ?? nhưng cho chắc
+//       supportedLocales:
+//           L10n.all, //những ngôn ngữ đc hỗ trợ - supported languages
+//       localizationsDelegates: const [
+//         AppLocalizations.delegate,
+//         GlobalMaterialLocalizations.delegate,
+//         GlobalCupertinoLocalizations.delegate,
+//         GlobalWidgetsLocalizations.delegate,
+//       ],
+//       home:
+//           const SplashState(), //hiển thị khi vừa bật ứng dụng - show when just turn on the app
+//     );
+//   }
+// }
 
 class SplashState extends StatefulWidget {
   const SplashState({super.key});
