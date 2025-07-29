@@ -28,6 +28,7 @@
   "iot_area_chart": "Area Chart",
   "iot_control_buttons": "Control Buttons",
   "iot_status": "Status",
+  "iot_tester": "Tester",
   "iot_data_tables": "Data Tables",
   "control_jt360": "JoyStick360",
   "control_jth": "JoyStickH",
@@ -51,5 +52,7 @@
   "sk_Huongdan": "This is the button for robot control instructions",
   "sk_TongLeBluetooth": "Toggle Bluetooth and connect to robot",
   "sk_SaveProjectIOT": "This is the save project button",
-  "sk_EditMode": "Toggle edit mode"
+  "sk_EditMode": "Toggle edit mode",
+  "sk_ScanQRcode": "This button scans the QR code for robot control commands",
+  "sk_LanguageSelector": "This button changes the language"
 }

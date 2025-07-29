@@ -893,7 +893,7 @@ Blockly.defineBlocksWithJsonArray([
     nextStatement: true,
     colour: "#7CF3A0",
     inputsInline: true,
-    message0: "Init MotorEncoder       ",
+    message0: "Init MotorEncoder",
   },
   {
     type: "motor",
@@ -1010,24 +1010,16 @@ Blockly.defineBlocksWithJsonArray([
   },
   //--------Serial---------
   {
-    type: "print_serial",
+    type: "serial_print",
     colour: "9966FF",
     previousStatement: null,
     nextStatement: true,
     inputsInline: true,
-    message0: "Serial Print %1 %2",
+    message0: "Serial Print %1",
     args0: [
       {
         type: "input_value",
         name: "TEXT",
-      },
-      {
-        type: "field_dropdown",
-        name: "type",
-        options: [
-          ["wrap", "0"],
-          ["no-wrap", "1"],
-        ],
       },
     ],
   },
@@ -1155,21 +1147,21 @@ Blockly.defineBlocksWithJsonArray([
     ],
   },
   //-------bluetooth--------
-  {
-    type: "bluetooth_initialize",
-    message0: "Initialize Bluetooth: Name %1",
-    args0: [
-      {
-        type: "field_input",
-        name: "BLUETOOTH",
-        text: "Bluetooth name",
-      },
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: "#CC0000",
-  },
+  // {
+  //   type: "bluetooth_initialize",
+  //   message0: "Initialize Bluetooth: Name %1",
+  //   args0: [
+  //     {
+  //       type: "field_input",
+  //       name: "BLUETOOTH",
+  //       text: "Bluetooth name",
+  //     },
+  //   ],
+  //   inputsInline: true,
+  //   previousStatement: null,
+  //   nextStatement: null,
+  //   colour: "#CC0000",
+  // },
   {
     type: "bluetooth_print",
     message0: "Bluetooth Print %1",
@@ -1184,17 +1176,28 @@ Blockly.defineBlocksWithJsonArray([
     nextStatement: null,
     colour: "#CC0000",
   },
+  // {
+  //   type: "bluetooth_available",
+  //   message0: "Bluetooth Available",
+  //   output: "Boolean",
+  //   colour: "#CC0000",
+  // },
+  // {
+  //   type: "bluetooth_read",
+  //   message0: "Bluetooth Read",
+  //   output: "String",
+  //   colour: "#CC0000",
+  // },
   {
-    type: "bluetooth_available",
-    message0: "Bluetooth Available",
-    output: "Boolean",
+    type: "on_receive_bluetooth",
+    message0: "when receive bluetooth \n %1",
     colour: "#CC0000",
-  },
-  {
-    type: "bluetooth_read",
-    message0: "Bluetooth Read",
-    output: "String",
-    colour: "#CC0000",
+    args0: [
+      {
+        type: "input_statement",
+        name: "DO",
+      },
+    ],
   },
   //-----wifi
   {

@@ -28,6 +28,7 @@
   "iot_area_chart": "エリアチャート",
   "iot_control_buttons": "制御ボタン",
   "iot_status": "状態",
+  "iot_tester": "テスター",
   "iot_data_tables": "データテーブル",
   "control_jt360": "ジョイスティック360",
   "control_jth": "ジョイスティック横",
@@ -51,5 +52,7 @@
   "sk_Huongdan": "これはロボット操作ガイドボタンです",
   "sk_TongLeBluetooth": "Bluetoothのオン/オフとロボットへの接続",
   "sk_SaveProjectIOT": "これはプロジェクト保存ボタンです",
-  "sk_EditMode": "編集モードをオン/オフにします"
+  "sk_EditMode": "編集モードをオン/オフにします",
+  "sk_ScanQRcode": "これはロボット操作コマンドのQRコードを読み取るボタンです",
+  "sk_LanguageSelector": "これは言語を変更するボタンです"
 }

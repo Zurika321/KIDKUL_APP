@@ -28,6 +28,7 @@
   "iot_area_chart": "Biểu đồ miền",
   "iot_control_buttons": "Các nút điều khiển",
   "iot_status": "Trạng thái",
+  "iot_tester": "Tester",
   "iot_data_tables": "Bảng dữ liệu",
   "control_jt360": "Joystick 360",
   "control_jth": "Joystick ngang",
@@ -51,5 +52,7 @@
   "sk_Huongdan": "Đây là nút hướng dẫn sử dụng điều khiển robot",
   "sk_TongLeBluetooth": "Bật / tắt Bluetooth và kết nối robot",
   "sk_SaveProjectIOT": "Đây là nút save project",
-  "sk_EditMode": "Bật/tắt chế độ edit"
+  "sk_EditMode": "Bật/tắt chế độ edit",
+  "sk_ScanQRcode": "Đây là nút quét mã QR lệnh điều khiển Robot",
+  "sk_LanguageSelector": "Đây là nút thay đổi ngôn ngữ"
 }

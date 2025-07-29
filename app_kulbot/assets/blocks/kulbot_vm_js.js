@@ -544,8 +544,7 @@ javascript.javascriptGenerator.forBlock["lcd_clear"] = function (block) {
 // Motions
 javascript.javascriptGenerator.forBlock["motor_init"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
-  const motor = block.getFieldValue("MOTOR");
-  return `Rob.KULBOT_${motor}_INIT()\n`;
+  return `Rob.KULBOT_MOTORENCODER_INIT()\n`;
 };
 // motor
 javascript.javascriptGenerator.forBlock["motor"] = function (block) {
@@ -622,7 +621,7 @@ javascript.javascriptGenerator.forBlock["posi_encoder"] = function (block) {
 // serial
 
 // print_serial
-javascript.javascriptGenerator.forBlock["print_serial"] = function (block) {
+javascript.javascriptGenerator.forBlock["serial_print"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const text =
     javascript.javascriptGenerator.valueToCode(
@@ -630,26 +629,44 @@ javascript.javascriptGenerator.forBlock["print_serial"] = function (block) {
       "TEXT",
       javascript.javascriptGenerator.ORDER_ATOMIC
     ) || '""';
-  const type = block.getFieldValue("type");
-  if (type === "wrap" || type === "0") {
-    return `Rob.KULBOT_SERIAL_PRINTLN(${text})\n`;
-  } else {
-    return `Rob.KULBOT_SERIAL_PRINT(${text})\n`;
-  }
+  return `print(${text})\n`;
 };
-// data_length_serial
-javascript.javascriptGenerator.forBlock["data_length_serial"] = function (
+// // data_length_serial
+// javascript.javascriptGenerator.forBlock["data_length_serial"] = function (
+//   block
+// ) {
+//   if (!checkConnectedToStart(block)) return "";
+//   return "Serial.available()\n";
+// };
+
+// // read_data_serial
+// javascript.javascriptGenerator.forBlock["read_data_serial"] = function (block) {
+//   if (!checkConnectedToStart(block)) return "";
+//   return "Serial.read()\n";
+// };
+
+// bluetooth
+// bluetooth_serial
+javascript.javascriptGenerator.forBlock["bluetooth_print"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const text =
+    javascript.javascriptGenerator.valueToCode(
+      block,
+      "TEXT",
+      javascript.javascriptGenerator.ORDER_ATOMIC
+    ) || '""';
+  return `kulbot.Rob.send_data(${text})\n`;
+};
+// bluetooth on receive
+javascript.javascriptGenerator.forBlock["on_receive_bluetooth"] = function (
   block
 ) {
-  if (!checkConnectedToStart(block)) return "";
-  return "Serial.available()\n";
+  const statements_do =
+    javascript.javascriptGenerator.statementToCode(block, "DO") || "";
+  let code = "def on_receive(data):\n" + statements_do + "\n";
+  return code;
 };
 
-// read_data_serial
-javascript.javascriptGenerator.forBlock["read_data_serial"] = function (block) {
-  if (!checkConnectedToStart(block)) return "";
-  return "Serial.read()\n";
-};
 // DATA
 
 // data_map

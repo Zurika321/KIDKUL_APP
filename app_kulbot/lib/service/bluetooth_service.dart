@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum _DeviceAvailability { no, maybe, yes }
+// enum _DeviceAvailability { no, maybe, yes }
+enum _DeviceAvailability { maybe, yes }
 
 class _DeviceWithAvailability {
   BluetoothDevice device;

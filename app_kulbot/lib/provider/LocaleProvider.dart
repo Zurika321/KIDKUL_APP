@@ -1,4 +1,4 @@
-import 'package:Kulbot/l10n/l10n.dart';
+import 'package:KulBlock/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 //dữ liệu - data
 import 'package:shared_preferences/shared_preferences.dart';

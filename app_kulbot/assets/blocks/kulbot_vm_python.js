@@ -6,7 +6,12 @@ function checkConnectedToStart(block) {
   let current = block;
 
   while (current) {
-    if (current.type === "event_program_starts") {
+    if (
+      current.type === "event_program_starts" ||
+      current.type === "on_receive_bluetooth" ||
+      current.type === "procedures_defnoreturn" ||
+      current.type === "procedures_defreturn"
+    ) {
       block.setWarningText(null);
       return true;
     }
@@ -349,7 +354,7 @@ python.pythonGenerator.forBlock["ir_sensor"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
   return [
-    `Rob.KULBOT_IR_SENSOR_GET(${port})`,
+    `Rob.KULBOT_GET_IR_SENSOR(${port})`,
     python.pythonGenerator.ORDER_FUNCTION_CALL,
   ];
 };
@@ -606,7 +611,7 @@ python.pythonGenerator.forBlock["posi_encoder"] = function (block) {
 // serial
 
 // print_serial
-python.pythonGenerator.forBlock["print_serial"] = function (block) {
+python.pythonGenerator.forBlock["serial_print"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const text =
     python.pythonGenerator.valueToCode(
@@ -614,12 +619,31 @@ python.pythonGenerator.forBlock["print_serial"] = function (block) {
       "TEXT",
       python.pythonGenerator.ORDER_ATOMIC
     ) || '""';
-  const type = block.getFieldValue("type");
-  if (type === "wrap" || type === "0") {
-    return `Serial.println(${text})\n`;
-  } else {
-    return `Serial.print(${text})\n`;
-  }
+  return `print(${text})\n`;
+};
+// bluetooth_serial
+
+// bluetooth print
+python.pythonGenerator.forBlock["bluetooth_print"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const text =
+    python.pythonGenerator.valueToCode(
+      block,
+      "TEXT",
+      python.pythonGenerator.ORDER_ATOMIC
+    ) || '""';
+  return `kulbot.Rob.send_data(${text})\n`;
+};
+// bluetooth on receive
+python.pythonGenerator.forBlock["on_receive_bluetooth"] = function (block) {
+  const statements_do =
+    python.pythonGenerator.statementToCode(block, "DO") || "";
+  let code =
+    "def on_receive(data):\n" +
+    statements_do +
+    "\n" +
+    "kulbot.Rob.fallback_handler(on_receive)\n";
+  return code;
 };
 
 // data_length_serial
