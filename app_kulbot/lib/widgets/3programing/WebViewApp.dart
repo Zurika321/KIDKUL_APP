@@ -662,7 +662,7 @@ class _WebViewAppState extends State<WebViewApp> {
     'parentWorkspace': null,
   });
 
-  // void onInject(BlocklyData data) {}
+  void onInject(BlocklyData data) {}
 
   void onChange(BlocklyData data) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -686,27 +686,7 @@ class _WebViewAppState extends State<WebViewApp> {
     });
   }
 
-  void onDispose(BlocklyData data) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      var codenew = "";
-      if (data.js != null && data.js!.isNotEmpty && data.python != null) {
-        const importHeader =
-            "import kulbot\nimport time\n\nRob = kulbot.KULBOT()\n\n";
-
-        codenew = importHeader + data.python!;
-      }
-
-      if (codenew.trim() != _generatedCode.trim()) {
-        setState(() {
-          _generatedCode = codenew;
-          work_area[work_area_index].xml =
-              data.xml ??
-              '<xml xmlns="https://developers.google.com/blockly/xml"></xml>';
-        });
-      }
-    });
-  }
+  void onDispose(BlocklyData data) {}
 
   void onError(dynamic err) {
     debugPrint('onError: $err');
@@ -854,7 +834,7 @@ class _WebViewAppState extends State<WebViewApp> {
           if (bluetoothOn) ...[
             SizedBox(width: size.width * 0.04),
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.terminal_rounded, size: 30),
               onPressed: () {
                 if (selectedDevice == null) return;
                 showTerminalBottomSheet(

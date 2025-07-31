@@ -1,0 +1,2 @@
+D:/KIDKUL_APP/app_kulbot/android/app/.cxx/RelWithDebInfo/313y1473/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/KIDKUL_APP/app_kulbot/android/app/.cxx/RelWithDebInfo/313y1473/arm64-v8a/CMakeFiles/rebuild_cache.dir
