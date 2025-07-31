@@ -257,19 +257,19 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
     _initLayout(size, widget.projectName, widget.type);
   }
 
-  Future<void> scanQRcodeNormal() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ScanQRWidget(
-              onScanComplete: (String result) {
-                _bluetoothService.sendMessage(result);
-              },
-            ),
-      ),
-    );
-  }
+  // Future<void> scanQRcodeNormal() async {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder:
+  //           (context) => ScanQRWidget(
+  //             onScanComplete: (String result) {
+  //               _bluetoothService.sendMessage(result);
+  //             },
+  //           ),
+  //     ),
+  //   );
+  // }
 
   @override
   void dispose() {
@@ -576,7 +576,8 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                 Icons.qr_code_scanner_outlined,
                 color: Colors.deepPurpleAccent,
               ),
-              onPressed: scanQRcodeNormal,
+              onPressed: () {},
+              // scanQRcodeNormal,
             ),
           ),
         Showcase(

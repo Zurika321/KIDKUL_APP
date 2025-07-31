@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class TransactionItem {
   final String n; // name
@@ -202,8 +202,8 @@ class _CommandSequenceWidgetState extends State<CommandSequenceWidget> {
             TextButton(
               child: const Text("Add Action By QR"),
               onPressed: () {
-                Navigator.of(context).pop();
-                scanQRcodeOnce(false);
+                // Navigator.of(context).pop();
+                // scanQRcodeOnce(false);
               },
             ),
           ],
@@ -212,63 +212,63 @@ class _CommandSequenceWidgetState extends State<CommandSequenceWidget> {
     );
   }
 
-  Future<void> scanQRcodeOnce(bool addTypeActive) async {
-    String scanData = await FlutterBarcodeScanner.scanBarcode(
-      '#ff6666',
-      'Cancel',
-      true,
-      ScanMode.QR,
-    );
+  // Future<void> scanQRcodeOnce(bool addTypeActive) async {
+  //   String scanData = await FlutterBarcodeScanner.scanBarcode(
+  //     '#ff6666',
+  //     'Cancel',
+  //     true,
+  //     ScanMode.QR,
+  //   );
 
-    if (scanData != '-1') {
-      try {
-        final decoded = jsonDecode(scanData);
+  //   if (scanData != '-1') {
+  //     try {
+  //       final decoded = jsonDecode(scanData);
 
-        if (decoded is List) {
-          final List<TransactionItem> items =
-              decoded.map((e) {
-                if (e is Map<String, dynamic> || e is Map) {
-                  return TransactionItem.fromJson(Map<String, dynamic>.from(e));
-                } else {
-                  throw FormatException('Invalid item type');
-                }
-              }).toList();
+  //       if (decoded is List) {
+  //         final List<TransactionItem> items =
+  //             decoded.map((e) {
+  //               if (e is Map<String, dynamic> || e is Map) {
+  //                 return TransactionItem.fromJson(Map<String, dynamic>.from(e));
+  //               } else {
+  //                 throw FormatException('Invalid item type');
+  //               }
+  //             }).toList();
 
-          if (addTypeActive) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Action added from QR successfully"),
-              ),
-            );
-            actions.addAll(items);
-            final configToSave = {
-              ...widget.config,
-              "actions": actions.map((e) => e.toJson()).toList(),
-            };
-            widget.onSave?.call(configToSave);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Added action type from QR successfully"),
-              ),
-            );
-            transactions.addAll(items);
-            final configToSave = {
-              ...widget.config,
-              "transactions": transactions.map((e) => e.toJson()).toList(),
-            };
-            widget.onSave?.call(configToSave);
-          }
-        } else {
-          throw FormatException('QR is not a valid list');
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Invalid QR")));
-      }
-    }
-  }
+  //         if (addTypeActive) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(
+  //               content: Text("Action added from QR successfully"),
+  //             ),
+  //           );
+  //           actions.addAll(items);
+  //           final configToSave = {
+  //             ...widget.config,
+  //             "actions": actions.map((e) => e.toJson()).toList(),
+  //           };
+  //           widget.onSave?.call(configToSave);
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(
+  //               content: Text("Added action type from QR successfully"),
+  //             ),
+  //           );
+  //           transactions.addAll(items);
+  //           final configToSave = {
+  //             ...widget.config,
+  //             "transactions": transactions.map((e) => e.toJson()).toList(),
+  //           };
+  //           widget.onSave?.call(configToSave);
+  //         }
+  //       } else {
+  //         throw FormatException('QR is not a valid list');
+  //       }
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(
+  //         context,
+  //       ).showSnackBar(const SnackBar(content: Text("Invalid QR")));
+  //     }
+  //   }
+  // }
 
   void showActionsSettingsDialog(BuildContext context) {
     showDialog(
@@ -449,8 +449,8 @@ class _CommandSequenceWidgetState extends State<CommandSequenceWidget> {
                 TextButton(
                   child: const Text("Add Type Action By QR"),
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    scanQRcodeOnce(true);
+                    // Navigator.of(context).pop();
+                    // scanQRcodeOnce(true);
                   },
                 ),
               ],

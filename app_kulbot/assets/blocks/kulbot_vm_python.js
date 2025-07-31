@@ -659,6 +659,27 @@ python.pythonGenerator.forBlock["read_data_serial"] = function (block) {
 };
 // DATA
 
+python.pythonGenerator.forBlock["number_data"] = function (block) {
+  // Lấy giá trị từ input "number"
+  const value_number =
+    python.pythonGenerator.valueToCode(
+      block,
+      "number",
+      python.pythonGenerator.ORDER_ATOMIC
+    ) || "0"; // Giá trị mặc định
+  return [value_number, python.pythonGenerator.ORDER_ATOMIC];
+};
+
+python.pythonGenerator.forBlock["text_data"] = function (block) {
+  // Lấy giá trị từ input "text"
+  const value_text =
+    python.pythonGenerator.valueToCode(
+      block,
+      "text",
+      python.pythonGenerator.ORDER_ATOMIC
+    ) || '""'; // Giá trị mặc định
+  return [value_text, python.pythonGenerator.ORDER_ATOMIC];
+};
 // data_map
 python.pythonGenerator.forBlock["data_map"] = function (block) {
   if (!checkConnectedToStart(block)) return "";

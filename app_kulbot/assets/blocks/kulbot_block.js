@@ -67,6 +67,7 @@ const compare = [
   [">", ">"],
   [">=", ">="],
   ["=", "="],
+  ["==", "=="],
   ["!=", "!="],
 ];
 const formula = [
@@ -178,7 +179,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "number1",
-        check: "Number",
+        check: ["Number", "String"],
       },
       {
         type: "field_dropdown",
@@ -188,7 +189,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "number2",
-        check: "Number",
+        check: ["Number", "String"],
       },
     ],
     output: "Boolean",
@@ -693,8 +694,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "type",
         options: [
-          ["Temp", "Temp"],
-          ["Hum", "Hum"],
+          ["Temp", "0"],
+          ["Hum", "1"],
         ],
       },
       {
@@ -1039,6 +1040,34 @@ Blockly.defineBlocksWithJsonArray([
   },
   //-----------------Data-----------
   {
+    type: "number_data",
+    colour: "C15CC1",
+    output: "Number",
+    inputsInline: true,
+    message0: "Number %1 ",
+    args0: [
+      {
+        type: "input_value",
+        name: "number",
+        check: "Number",
+      },
+    ],
+  },
+  {
+    type: "text_data",
+    colour: "C15CC1",
+    output: "String",
+    inputsInline: true,
+    message0: " %1 ",
+    args0: [
+      {
+        type: "input_value",
+        name: "text",
+        check: "String",
+      },
+    ],
+  },
+  {
     type: "data_map",
     colour: "C15CC1",
     output: "Number",
@@ -1138,7 +1167,7 @@ Blockly.defineBlocksWithJsonArray([
     colour: "C15CC1",
     output: "Number",
     inputsInline: true,
-    message0: "Convert %1 to ASCII number",
+    message0: "Convert %1 to number",
     args0: [
       {
         type: "input_value",

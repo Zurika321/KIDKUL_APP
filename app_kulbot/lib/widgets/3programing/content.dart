@@ -1360,12 +1360,37 @@ const Map<String, dynamic> initialToolboxJson = {
         // {'kind': 'block', 'type': 'read_data_serial'},
       ],
     },
+
     //-------------Data--------
     {
       'kind': 'category',
       'name': 'Data',
       'colour': '#C15CC1',
       'contents': [
+        {
+          'kind': 'block',
+          'type': 'number_data',
+          'inputs': {
+            'number': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {'NUM': 50},
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_data',
+          'inputs': {
+            'text': {
+              'shadow': {
+                'type': 'text',
+                'fields': {'TEXT': 'This is a text data'},
+              },
+            },
+          },
+        },
         {
           'kind': 'block',
           'type': 'data_map',

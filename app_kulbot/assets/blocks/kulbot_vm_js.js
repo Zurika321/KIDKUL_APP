@@ -33,8 +33,8 @@
 // const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
 
 // customBlocks.forEach((blockType) => {
-//   // Python
-//   if (typeof python !== "undefined" && javascript.javascriptGenerator) {
+//   // javascript
+//   if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
 //     javascript.javascriptGenerator.forBlock[blockType] = () => "";
 //   }
 
@@ -668,6 +668,26 @@ javascript.javascriptGenerator.forBlock["on_receive_bluetooth"] = function (
 };
 
 // DATA
+javascript.javascriptGenerator.forBlock["number_data"] = function (block) {
+  // Lấy giá trị từ input "number"
+  var value_number =
+    javascript.javascriptGenerator.valueToCode(
+      block,
+      "number",
+      javascript.javascriptGenerator.ORDER_ATOMIC
+    ) || "50";
+  return [value_number, javascript.javascriptGenerator.ORDER_ATOMIC];
+};
+javascript.javascriptGenerator.forBlock["text_data"] = function (block) {
+  // Lấy giá trị từ input "text"
+  var value_text =
+    javascript.javascriptGenerator.valueToCode(
+      block,
+      "text",
+      javascript.javascriptGenerator.ORDER_ATOMIC
+    ) || '""';
+  return [value_text, javascript.javascriptGenerator.ORDER_ATOMIC];
+};
 
 // data_map
 javascript.javascriptGenerator.forBlock["data_map"] = function (block) {
