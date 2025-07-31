@@ -1,64 +1,56 @@
 let setup = "def setup():\n";
 let loop = "while (1):\n";
 //------
-
 function checkConnectedToStart(block) {
-  let current = block;
-
-  while (current) {
-    if (
-      current.type === "event_program_starts" ||
-      current.type === "on_receive_bluetooth" ||
-      current.type === "procedures_defnoreturn" ||
-      current.type === "procedures_defreturn"
-    ) {
+  let parent = block.getParent();
+  while (parent) {
+    if (parent.type === "event_program_starts") {
       block.setWarningText(null);
       return true;
     }
-    current = current.getSurroundParent(); // CHÍNH XÁC PHẢI DÙNG HÀM NÀY
+    parent = parent.getParent();
   }
-
-  const msg = 'Khối này phải được nối với "when Kulbot starts" để hoạt động.';
-  block.setWarningText(msg);
+  block.setWarningText(
+    'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
+  );
   return false;
 }
 
-// const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
-
-// customBlocks.forEach((blockType) => {
-//   // Lua
-//
-
-// (typeof lua !== "undefined" && lua.luaGenerator) {
-//     lua.luaGenerator.forBlock[blockType] = () => "";
-//   }
-
-//   // Dart
-//   if (typeof dart !== "undefined" && dart.dartGenerator) {
-//     dart.dartGenerator.forBlock[blockType] = () => "";
-//   }
-
-//   // PHP
-//   if (typeof php !== "undefined" && php.phpGenerator) {
-//     php.phpGenerator.forBlock[blockType] = () => "";
-//   }
-
-//   // JavaScript
-//   if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
-//     javascript.javascriptGenerator.forBlock[blockType] = () => "";
-//   }
-// });
 // ----------------event_program_starts----
-
+// --- codetong = python.pythonGenerator.forBlock["event_program_starts"](block)
 python.pythonGenerator.forBlock["event_program_starts"] = function (block) {
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") || "";
+  let foreverCode = "";
+  let otherCode = "";
+  let lines = statements_do.split("\n");
+  let whileLevel = 0;
+  let inForever = false;
+
+  lines.forEach((line) => {
+    if (line.trim().startsWith("while (1):")) {
+      whileLevel++;
+      foreverCode += "\t".repeat(whileLevel) + line.trimStart() + "\n";
+      inForever = true;
+    } else if (
+      inForever &&
+      (line.startsWith("    ") || line.startsWith("\t"))
+    ) {
+      foreverCode += "\t".repeat(whileLevel + 1) + line.trim() + "\n";
+    } else {
+      if (line.trim() !== "") otherCode += "\t" + line.trim() + "\n";
+      inForever = false;
+      whileLevel = 0;
+    }
+  });
+
   let code =
-    "def setup():\n" +
-    // "  Rob.KULBOT_INIT()\n" +
-    "  Rob.KULBOT_SENSOR_INIT()\n" +
-    statements_do +
+    setup +
+    "\tRob.KULBOT_INIT()\n" +
+    "\tRob.KULBOT_SENSOR_INIT()\n" +
+    otherCode +
     "\n";
+  code += foreverCode;
   return code;
 };
 
@@ -78,7 +70,7 @@ python.pythonGenerator.forBlock["delay"] = function (block) {
       "number",
       python.pythonGenerator.ORDER_NONE
     ) || "1";
-  return `time.sleep(${number})\n`;
+  return `delay(${number} * 1000)\n`;
 };
 
 //----------------delay_until-------------------
@@ -113,7 +105,7 @@ python.pythonGenerator.forBlock["loop_until"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "condition",
-      python.pythonGenerator.ORDER_ATOMIC
+      python.pythonGenerator.ORDER_NONE
     ) || "False";
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") ||
@@ -135,7 +127,7 @@ python.pythonGenerator.forBlock["if"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "CONDITION",
-      python.pythonGenerator.ORDER_ATOMIC
+      python.pythonGenerator.ORDER_NONE
     ) || "False";
 
   const statements_do =
@@ -151,7 +143,7 @@ python.pythonGenerator.forBlock["if_else"] = function (block) {
     python.pythonGenerator.valueToCode(
       block,
       "CONDITION",
-      python.pythonGenerator.ORDER_ATOMIC
+      python.pythonGenerator.ORDER_NONE
     ) || "False";
   const statements_do =
     python.pythonGenerator.statementToCode(block, "DO") ||
@@ -334,99 +326,71 @@ python.pythonGenerator.forBlock["init_sensor"] = function (block) {
 // Ultrasonic
 python.pythonGenerator.forBlock["ultrasonic"] = function (block) {
   const port = block.getFieldValue("Ultrasonic");
-  return [
-    `Rob.KULBOT_GET_ULTRASONIC(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_ULTRASONIC_GET(${port})`;
 };
 
 // Line Sensor
 python.pythonGenerator.forBlock["line_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const line = block.getFieldValue("line");
-  return [
-    `Rob.KULBOT_GET_LINE_SENSOR(${port}, ${line})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_LINE_SENSOR_GET(${port}, ${line})`;
 };
+
 // IR Sensor
 python.pythonGenerator.forBlock["ir_sensor"] = function (block) {
-  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_IR_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_IR_SENSOR_GET(${port})`;
 };
+
 // Touch Sensor
 python.pythonGenerator.forBlock["touch_sensor"] = function (block) {
-  if (!checkConnectedToStart(block)) return "";
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_TOUCH_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_TOUCH_SENSOR_GET(${port})`;
 };
 
 // Temp/Hum Sensor
 python.pythonGenerator.forBlock["temp_sensor"] = function (block) {
   const type = block.getFieldValue("type");
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_TEMP_SENSOR(${port}, ${type})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_DHT_SENSOR_GET(${port}, ${type})`;
 };
+
 // Soil Humidity Sensor
 python.pythonGenerator.forBlock["soil_hum_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_SOIL_HUM_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_SOIL_HUM_SENSOR_GET(${port})`;
 };
 
 // Gas Sensor
 python.pythonGenerator.forBlock["gas_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_GAS_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_GAS_SENSOR_GET(${port})`;
 };
+
 // Gryro Sensor
 python.pythonGenerator.forBlock["gryro_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const data = block.getFieldValue("data");
-  return [
-    `Rob.KULBOT_GET_GYRO_SENSOR(${port}, ${data})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_GRYRO_SENSOR_GET(${port}, ${data})`;
 };
+
 // Color Sensor
 python.pythonGenerator.forBlock["color_sensor"] = function (block) {
   const port = block.getFieldValue("port");
   const color = block.getFieldValue("color");
-  return [
-    `Rob.KULBOT_GET_COLOR_SENSOR(${port}, "${color}")`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_COLOR_SENSOR_GET(${port}, "${color}")`;
 };
+
 // Lux Sensor
 python.pythonGenerator.forBlock["lux_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_LUX_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_LUX_SENSOR_GET(${port})`;
 };
+
 // Light Sensor
 python.pythonGenerator.forBlock["light_sensor"] = function (block) {
   const port = block.getFieldValue("port");
-  return [
-    `Rob.KULBOT_GET_LIGHT_SENSOR(${port})`,
-    python.pythonGenerator.ORDER_FUNCTION_CALL,
-  ];
+  return `Rob.KULBOT_LIGHT_SENSOR_GET(${port})`;
 };
 //---------modules----------
 python.pythonGenerator.forBlock["init_module"] = function (block) {
@@ -611,7 +575,7 @@ python.pythonGenerator.forBlock["posi_encoder"] = function (block) {
 // serial
 
 // print_serial
-python.pythonGenerator.forBlock["serial_print"] = function (block) {
+python.pythonGenerator.forBlock["print_serial"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const text =
     python.pythonGenerator.valueToCode(
@@ -619,31 +583,12 @@ python.pythonGenerator.forBlock["serial_print"] = function (block) {
       "TEXT",
       python.pythonGenerator.ORDER_ATOMIC
     ) || '""';
-  return `print(${text})\n`;
-};
-// bluetooth_serial
-
-// bluetooth print
-python.pythonGenerator.forBlock["bluetooth_print"] = function (block) {
-  if (!checkConnectedToStart(block)) return "";
-  const text =
-    python.pythonGenerator.valueToCode(
-      block,
-      "TEXT",
-      python.pythonGenerator.ORDER_ATOMIC
-    ) || '""';
-  return `kulbot.Rob.send_data(${text})\n`;
-};
-// bluetooth on receive
-python.pythonGenerator.forBlock["on_receive_bluetooth"] = function (block) {
-  const statements_do =
-    python.pythonGenerator.statementToCode(block, "DO") || "";
-  let code =
-    "def on_receive(data):\n" +
-    statements_do +
-    "\n" +
-    "kulbot.Rob.fallback_handler(on_receive)\n";
-  return code;
+  const type = block.getFieldValue("type");
+  if (type === "wrap" || type === "0") {
+    return `Serial.println(${text})\n`;
+  } else {
+    return `Serial.print(${text})\n`;
+  }
 };
 
 // data_length_serial

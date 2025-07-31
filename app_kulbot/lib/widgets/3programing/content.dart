@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 const String initialXml =
-    '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="event_program_starts" x="70" y="30" ><field name="TEXT">XML</field></block></xml>';
+    '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="event_program_starts" x="70" y="30" >XML</></block></xml>';
 
 const Map<String, dynamic> initialJson = {
   'blocks': {
@@ -1346,7 +1346,7 @@ const Map<String, dynamic> initialToolboxJson = {
       'contents': [
         {
           'kind': 'block',
-          'type': 'serial_print',
+          'type': 'print_serial',
           'inputs': {
             'TEXT': {
               'shadow': {
@@ -1356,8 +1356,8 @@ const Map<String, dynamic> initialToolboxJson = {
             },
           },
         },
-        // {'kind': 'block', 'type': 'data_length_serial'},
-        // {'kind': 'block', 'type': 'read_data_serial'},
+        {'kind': 'block', 'type': 'data_length_serial'},
+        {'kind': 'block', 'type': 'read_data_serial'},
       ],
     },
 
@@ -1496,7 +1496,7 @@ const Map<String, dynamic> initialToolboxJson = {
       "name": "Bluetooth",
       "colour": "#CC0000",
       "contents": [
-        // {"kind": "block", "type": "bluetooth_initialize"},
+        {"kind": "block", "type": "bluetooth_initialize"},
         {
           "kind": "block",
           "type": "bluetooth_print",
@@ -1509,9 +1509,8 @@ const Map<String, dynamic> initialToolboxJson = {
             },
           },
         },
-        // {"kind": "block", "type": "bluetooth_available"},
-        // {"kind": "block", "type": "bluetooth_read"},
-        {'kind': 'block', 'type': 'on_receive_bluetooth'},
+        {"kind": "block", "type": "bluetooth_available"},
+        {"kind": "block", "type": "bluetooth_read"},
       ],
     },
     //----wifi----

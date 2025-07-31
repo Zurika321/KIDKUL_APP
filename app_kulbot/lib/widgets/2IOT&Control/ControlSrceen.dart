@@ -23,6 +23,8 @@ import 'package:KulBlock/provider/provider.dart'; // lấy dữ liệu từ bi�
 import 'package:KulBlock/l10n/localized_map.dart';
 // import 'package:collection/collection.dart';
 
+import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel _PlacedControlWidget.dart';
+
 class DataBluetooth {
   static final Map<String, dynamic> _data = {};
 
@@ -35,74 +37,6 @@ class DataBluetooth {
 
   static void clear() {
     _data.clear();
-  }
-}
-
-class ControlItem {
-  final String id;
-  String realId;
-  Offset relativePosition;
-  Map<String, dynamic> config;
-  bool lock;
-  bool canMove;
-
-  /// Tọa độ pixel tuyệt đối ban đầu (chỉ sử dụng để convert)
-  double? top;
-  double? bottom;
-  double? left;
-  double? right;
-
-  ControlItem({
-    required this.id,
-    required this.realId,
-    this.relativePosition = Offset.zero,
-    this.top,
-    this.bottom,
-    this.left,
-    this.right,
-    Map<String, dynamic>? config,
-    this.lock = false,
-    this.canMove = true,
-  }) : config = config != null ? Map<String, dynamic>.from(config) : {};
-
-  factory ControlItem.fromJson(Map<String, dynamic> json) {
-    return ControlItem(
-      id: json['id'],
-      realId: json['realId'] ?? json['id'],
-      relativePosition: Offset(
-        (json['x'] as num).toDouble(),
-        (json['y'] as num).toDouble(),
-      ),
-      config: Map<String, dynamic>.from(json['config'] ?? {}),
-      lock: json['lock'] ?? false,
-      canMove:
-          json['canMove'] ?? true, // <- Thêm dòng này để đọc canMove từ JSON
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'realId': realId,
-    'x': relativePosition.dx,
-    'y': relativePosition.dy,
-    'config': config,
-    'lock': lock,
-    'canMove': canMove,
-  };
-
-  ControlItem clone() {
-    return ControlItem(
-      id: id,
-      realId: realId,
-      relativePosition: Offset(relativePosition.dx, relativePosition.dy),
-      config: Map<String, dynamic>.from(config),
-      lock: lock,
-      canMove: canMove,
-      top: top,
-      bottom: bottom,
-      left: left,
-      right: right,
-    );
   }
 }
 
@@ -129,8 +63,9 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   bool showMenu = false;
   final Map<String, Map<String, dynamic>> controlGroups =
       PhanTu_Control.controlGroups;
-  final List<ControlItem> placedControls = [];
+  late List<ControlItem> placedControls = [];
   final BluetoothService _bluetoothService = BluetoothService();
+  bool haveChange = false;
   bool haveSave = false;
   final List<Color> groupColors = [
     Colors.blue.shade100,
@@ -147,6 +82,7 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   final ScrollController _scrollController = ScrollController();
   late BuildContext scrollViewContext;
   bool loadDone = false;
+  late List<ControlModel> placedControlModels = [];
 
   String connectedDeviceName = "";
 
@@ -167,13 +103,16 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
   }
 
   void handleDrop(String id, Offset position, Size screenSize) {
+    if (!haveChange) {
+      haveChange = true;
+    }
     final currentCount = getPlacedCountById(id);
     final maxCount = PhanTu_Control.getMaxById(id);
 
     if (currentCount >= maxCount) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Maximum quantity reached $id')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Maximum quantity reached for "$id"')),
+      );
       return;
     }
 
@@ -189,10 +128,24 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
 
     final newRealId = generateNewRealId(id);
 
+    final newItem = ControlItem(
+      id: id,
+      realId: newRealId,
+      relativePosition: relPos,
+    );
+
+    final newModel = ControlModel(
+      id: id,
+      realId: newRealId,
+      relativePosition: relPos,
+      config: {},
+      lock: false,
+      canMove: true,
+    );
+
     setState(() {
-      placedControls.add(
-        ControlItem(id: id, realId: newRealId, relativePosition: relPos),
-      );
+      placedControls.add(newItem);
+      placedControlModels.add(newModel);
     });
   }
 
@@ -295,9 +248,9 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         } else {
           isProvider = false;
           rawItems.addAll(items);
-          haveSave = true;
         }
       } else if (type != "new") {
+        haveSave = true;
         rawItems.addAll(
           ControlLayoutProvider.getLayout(type, widget.isControl),
         );
@@ -306,16 +259,32 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
       rawItems.addAll(ControlLayoutProvider.getLayout(type, widget.isControl));
     }
 
-    // Normalize xong mới set vào placedControls
     if (rawItems.isNotEmpty) {
-      placedControls.addAll(normalizeLayoutItems(rawItems, size, isProvider));
+      final normalizedItems = normalizeLayoutItems(rawItems, size, isProvider);
+
+      // ✅ Chuyển một lần duy nhất cả data & model
+      placedControls = normalizedItems;
+      placedControlModels =
+          normalizedItems.map((control) {
+            return ControlModel(
+              id: control.id,
+              realId: control.realId,
+              relativePosition: control.relativePosition,
+              config: Map<String, dynamic>.from(control.config),
+              lock: control.lock,
+              canMove: control.canMove,
+            );
+          }).toList();
     }
+
     setState(() {
       loadDone = true;
       isEditingLayout = widget.type == "new";
       // showMenu = isEditingLayout;
     });
+
     await Future.delayed(const Duration(milliseconds: 1000));
+    _bluetoothService.stopDiscovery();
     if (isEditingLayout) {
       setState(() {
         showMenu = isEditingLayout;
@@ -464,9 +433,13 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
           if (widget.isControl) {
             navigator.pop();
           } else {
-            if (haveSave) {
+            if (haveSave && !haveChange) {
               if (navigator.mounted) {
-                navigator.pop(true);
+                navigator.pop(false);
+              }
+            } else if (!haveChange) {
+              if (navigator.mounted) {
+                navigator.pop(false);
               }
             } else {
               if (!kIsWeb) {
@@ -475,9 +448,14 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                   builder:
                       (ctx) => AlertDialog(
                         title: const Text("Layout not saved"),
-                        content: const Text(
-                          "Do you want to save the layout before exiting?",
-                        ),
+                        content:
+                            haveSave
+                                ? const Text(
+                                  "You have made changes in the project, do you want to save?",
+                                )
+                                : const Text(
+                                  "Do you want to save the layout before exiting?",
+                                ),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -492,6 +470,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                               showSaveDialog(
                                 context,
                                 onSaveNew: (String name) async {
+                                  final List<ControlItem> placedControls =
+                                      placedControlModels
+                                          .map((model) => model.toItem())
+                                          .toList();
                                   final savedName =
                                       await IotLayoutProject.saveLayout(
                                         name,
@@ -508,6 +490,10 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                                   );
                                 },
                                 onOverwrite: (String name) async {
+                                  final List<ControlItem> placedControls =
+                                      placedControlModels
+                                          .map((model) => model.toItem())
+                                          .toList();
                                   final success =
                                       await IotLayoutProject.updateLayout(
                                         name,
@@ -625,10 +611,16 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                   showSaveDialog(
                     context,
                     onSaveNew: (String name) async {
+                      final List<ControlItem> placedControls =
+                          placedControlModels
+                              .map((model) => model.toItem())
+                              .toList();
+
                       final savedName = await IotLayoutProject.saveLayout(
                         name,
                         placedControls,
                       );
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -636,13 +628,22 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                           ),
                         ),
                       );
-                      setState(() => haveSave = true);
+
+                      if (!haveSave) {
+                        haveSave = true;
+                      }
                     },
                     onOverwrite: (String name) async {
+                      final List<ControlItem> placedControls =
+                          placedControlModels
+                              .map((model) => model.toItem())
+                              .toList();
+
                       final success = await IotLayoutProject.updateLayout(
                         name,
                         placedControls,
                       );
+
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -651,7 +652,9 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                             ),
                           ),
                         );
-                        setState(() => haveSave = true);
+                        if (!haveSave) {
+                          haveSave = true;
+                        }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -681,204 +684,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
       ],
     );
   }
-
-  // PreferredSizeWidget buildTopBar(BuildContext context, Locale locale) {
-  //   return PreferredSize(
-  //     preferredSize: const Size.fromHeight(56),
-  //     child: SafeArea(
-  //       child: Container(
-  //         padding: const EdgeInsets.only(top: 8, right: 8),
-  //         alignment: Alignment.topRight,
-  //         decoration: const BoxDecoration(
-  //           color: Color.fromARGB(0, 0, 0, 0),
-  //           border: Border(
-  //             bottom: BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2),
-  //           ),
-  //         ),
-  //         child: Row(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             const SizedBox(width: 8),
-  //             Showcase(
-  //               key: ShowKeyManager.createKey("Huongdan"),
-  //               description: LocalizedStringGetter.showkey_get(
-  //                 context,
-  //                 "Huongdan",
-  //               ),
-  //               child: IconButton(
-  //                 icon: const Icon(
-  //                   Icons.question_mark_rounded,
-  //                   color: Color.fromARGB(255, 83, 109, 254),
-  //                 ),
-  //                 onPressed: () {
-  //                   if (!mounted) return;
-  //                   ShowCaseWidget.of(
-  //                     context,
-  //                   ).startShowCase(ShowKeyManager.getAllKeys());
-  //                 },
-  //               ),
-  //             ),
-  //             // Showcase(
-  //             //   key: ShowKeyManager.createKey("LanguageSelector"),
-  //             //   description: LocalizedStringGetter.showkey_get(
-  //             //     context,
-  //             //     "LanguageSelector",
-  //             //   ),
-  //             //   child: DropdownButton(
-  //             //     value: locale,
-  //             //     icon: Container(width: 12),
-  //             //     items:
-  //             //         L10n.all.map((locale) {
-  //             //           final flag = L10n.getflag(locale.languageCode);
-  //             //           return DropdownMenuItem(
-  //             //             child: Center(
-  //             //               child: Text(flag, style: TextStyle(fontSize: 32)),
-  //             //             ),
-  //             //             value: locale,
-  //             //             onTap: () {
-  //             //               final provider = Provider.of<LocaleProvider>(
-  //             //                 context,
-  //             //                 listen: false,
-  //             //               );
-  //             //               provider.setLocale(locale);
-  //             //             },
-  //             //           );
-  //             //         }).toList(),
-  //             //     onChanged: (_) {},
-  //             //   ),
-  //             // ),
-  //             if (!widget.isControl)
-  //               Showcase(
-  //                 key: ShowKeyManager.createKey("ScanQRcode"),
-  //                 description: LocalizedStringGetter.showkey_get(
-  //                   context,
-  //                   "ScanQRcode",
-  //                 ),
-  //                 child: IconButton(
-  //                   icon: const Icon(
-  //                     Icons.qr_code_scanner_outlined,
-  //                     color: Colors.deepPurpleAccent,
-  //                   ),
-  //                   onPressed: scanQRcodeNormal,
-  //                 ),
-  //               ),
-  //             Showcase(
-  //               key: ShowKeyManager.createKey("TongLeBluetooth"),
-  //               description: LocalizedStringGetter.showkey_get(
-  //                 context,
-  //                 "TongLeBluetooth",
-  //               ),
-  //               child: IconButton(
-  //                 icon: Icon(
-  //                   _bluetoothService.bluetoothState.isEnabled
-  //                       ? (isConnected
-  //                           ? Icons.bluetooth_connected
-  //                           : Icons.bluetooth)
-  //                       : Icons.bluetooth_disabled,
-  //                   color:
-  //                       isConnected
-  //                           ? const Color.fromARGB(255, 64, 195, 255)
-  //                           : const Color.fromARGB(255, 255, 82, 82),
-  //                 ),
-  //                 onPressed: () {
-  //                   _bluetoothService.startDiscoveryWithTimeout();
-  //                   isConnected
-  //                       ? _bluetoothService.connection?.dispose()
-  //                       : _bluetoothService.connectBluetoothDialog(context);
-  //                 },
-  //               ),
-  //             ),
-  //             if (!widget.isControl)
-  //               Showcase(
-  //                 key: ShowKeyManager.createKey("SaveProjectIOT"),
-  //                 description: LocalizedStringGetter.showkey_get(
-  //                   context,
-  //                   "SaveProjectIOT",
-  //                 ),
-  //                 child: IconButton(
-  //                   icon: const Icon(Icons.save),
-  //                   color: const Color.fromARGB(255, 105, 240, 175),
-  //                   onPressed: () {
-  //                     if (kIsWeb) {
-  //                       ScaffoldMessenger.of(context).showSnackBar(
-  //                         const SnackBar(
-  //                           content: Text("Cannot save when using web"),
-  //                         ),
-  //                       );
-  //                     }
-  //                     {
-  //                       showSaveDialog(
-  //                         context,
-  //                         onSaveNew: (String name) async {
-  //                           final savedName = await IotLayoutProject.saveLayout(
-  //                             name,
-  //                             placedControls,
-  //                           );
-  //                           ScaffoldMessenger.of(context).showSnackBar(
-  //                             SnackBar(
-  //                               content: Text(
-  //                                 '✅ Layout "$savedName" saved successfully!',
-  //                               ),
-  //                             ),
-  //                           );
-  //                           setState(() {
-  //                             haveSave = true;
-  //                           });
-  //                         },
-  //                         onOverwrite: (String name) async {
-  //                           final success = await IotLayoutProject.updateLayout(
-  //                             name,
-  //                             placedControls,
-  //                           );
-  //                           if (success) {
-  //                             ScaffoldMessenger.of(context).showSnackBar(
-  //                               SnackBar(
-  //                                 content: Text(
-  //                                   '✅ Successfully overwritten layout "$name"!',
-  //                                 ),
-  //                               ),
-  //                             );
-  //                             setState(() {
-  //                               haveSave = true;
-  //                             });
-  //                           } else {
-  //                             ScaffoldMessenger.of(context).showSnackBar(
-  //                               SnackBar(
-  //                                 content: Text(
-  //                                   '❌ Cannot override layout "$name"!',
-  //                                 ),
-  //                               ),
-  //                             );
-  //                           }
-  //                         },
-  //                       );
-  //                     }
-  //                   },
-  //                 ),
-  //               ),
-  //             Showcase(
-  //               key: ShowKeyManager.createKey("EditMode"),
-  //               description: LocalizedStringGetter.showkey_get(
-  //                 context,
-  //                 "EditMode",
-  //               ),
-  //               child: IconButton(
-  //                 icon: Icon(isEditingLayout ? Icons.check : Icons.edit),
-  //                 color: const Color.fromARGB(255, 255, 172, 64),
-  //                 onPressed: () {
-  //                   setState(() {
-  //                     isEditingLayout = !isEditingLayout;
-  //                     showMenu = false;
-  //                   });
-  //                 },
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   void moveMotor(String voicetotext) {
     if (voicetotext.contains('Tiến') ||
@@ -923,406 +728,159 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
         StreamBuilder<Map<String, dynamic>>(
           stream: _bluetoothService.stream,
           builder: (context, snapshot) {
-            // final dynamicData =
-            //     (snapshot.data != null)
-            //         ? Map<String, dynamic>.fromEntries(
-            //           snapshot.data!.entries.map(
-            //             (e) => MapEntry(e.key.toString(), e.value),
-            //           ),
-            //         )
-            //         : <String, dynamic>{};
             final dynamicData =
                 snapshot.data != null
                     ? DataBluetooth.mergeNewData(snapshot.data!)
                     : DataBluetooth.data;
             // debugPrint("Dữ liệu động: $dynamicData");
             // Các nút đã đặt
+            // ví dụ build từng phần tử trong Stack
             return Stack(
-              children: [
-                ...placedControls.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final control = entry.value;
-
-                  final List<double> sizeInfo =
-                      PhanTu_Control.getControlSizeById(control.id);
-
-                  final double xOffset =
-                      control.relativePosition.dx * size.width;
-                  final double yOffset =
-                      control.relativePosition.dy * size.height;
-
-                  final String typeBox = PhanTu_Control.getTypeBoxById(
-                    control.id,
-                  );
-
-                  double width =
-                      control.config["width"] ??
-                      ((typeBox == "height" ? size.height : size.width) *
-                              sizeInfo[4] +
-                          sizeInfo[5]);
-                  double height =
-                      control.config["height"] ??
-                      ((typeBox == "width" ? size.width : size.height) *
-                              sizeInfo[6] +
-                          sizeInfo[7]);
-
-                  width = width.clamp(30.0, size.width);
-                  height = height.clamp(30.0, size.height);
-
-                  final bool canMove = control.canMove && isEditingLayout;
-                  final bool shouldLock =
-                      control.lock || (!isEditingLayout && !control.lock);
-
-                  String? tooltipMessage;
-
-                  if (isEditingLayout && shouldLock && !canMove) {
-                    tooltipMessage = "This element cannot be edited or moved.";
-                  } else if (isEditingLayout && shouldLock) {
-                    tooltipMessage = "This element cannot be edited.";
-                  } else if (isEditingLayout && !canMove) {
-                    tooltipMessage = "This element cannot be moved.";
-                  }
-
-                  final number = int.tryParse(
-                    RegExp(r'\d+$').firstMatch(control.realId)?.group(0) ?? '',
-                  );
-
-                  String? NoteShowKey =
-                      number == 1
-                          ? LocalizedStringGetter.showkey_get(
-                            context,
-                            PhanTu_Control.getNoteShowKey(context, control.id),
-                          )
-                          : null;
-                  // final String title = PhanTu_Control.getTitleById(control.id);
-
-                  final bool havedata = PhanTu_Control.getGetDataById(
-                    control.id,
-                  );
-                  // final bool bluetoothOff =
-                  //     _bluetoothService.bluetoothState ==
-                  //     BluetoothState.STATE_OFF;
-                  // final bool notConnected = !isConnected;
-
-                  Widget childWidget;
-                  if (control.id == "ListBoxTester") {
-                    childWidget = PhanTu_Control.getControlWidget(
-                      id: control.id,
-                      size: Size(
-                        size.width,
-                        size.height - 65.0,
-                      ), //-56 là cái bar ở trên
-                      inMenu: false,
-                      value: {
-                        "valueofid1": valueofid1,
-                        "valueofid2": valueofid2,
-                        "value1": value1,
-                        "value2": value2,
-                        "value3": value3,
-                      },
-                      config: control.config,
-                      NoteshowKey: NoteShowKey,
-                      lock: shouldLock,
-                      onSave: (newConfig) {
-                        setState(() {
-                          valueofid2 = "${control.id} - ${control.realId}";
-                          value3 = newConfig;
-                          placedControls[index].config = newConfig;
-                        });
-                      },
-                      onDelete:
-                          (widget.isControl)
-                              ? null
-                              : () {
-                                setState(() {
-                                  placedControls.removeAt(index);
-                                });
-                              },
+              children:
+                  placedControlModels.map((model) {
+                    final sizeInfo = PhanTu_Control.getControlSizeById(
+                      model.id,
                     );
-                  } else if (control.id == "ListBox") {
-                    childWidget = PhanTu_Control.getControlWidget(
-                      id: control.id,
-                      size: Size(
-                        size.width,
-                        size.height - 65.0,
-                      ), //-56 là cái bar ở trên
-                      inMenu: false,
-                      value: {
-                        "data":
-                            connectedDeviceName.isEmpty
-                                ? "Please turn on bluetooth!"
-                                : connectedDeviceName,
-                      },
-                      config: control.config,
-                      NoteshowKey: NoteShowKey,
-                      lock: shouldLock,
-                      onSave: (newConfig) {
-                        setState(() {
-                          if (placedControls.any(
-                            (item) => item.id == 'ListBoxTester',
-                          )) {
-                            valueofid2 = "${control.id} - ${control.realId}";
-                            value3 = newConfig;
-                          }
-                          placedControls[index].config = newConfig;
-                        });
-                      },
-                      onDelete:
-                          (widget.isControl)
-                              ? null
-                              : () {
-                                setState(() {
-                                  placedControls.removeAt(index);
-                                });
-                              },
-                    );
-                  } else {
-                    childWidget = PhanTu_Control.getControlWidget(
-                      id: control.id,
-                      size: Size(
-                        size.width,
-                        size.height - 65.0,
-                      ), //-56 là cái bar ở trên
-                      inMenu: false,
-                      value:
-                          havedata
-                              ? kIsWeb
-                                  ? mockData
-                                  : dynamicData
-                              : null,
-                      config: control.config,
-                      NoteshowKey: NoteShowKey,
-                      lock: shouldLock,
-                      sendCommand: (msg) async {
-                        if (placedControls.any(
-                          (item) => item.id == 'ListBoxTester',
-                        )) {
-                          setState(() {
-                            valueofid1 = "${control.id} - ${control.realId}";
-                            value1 = msg;
-                          });
-                        }
-                        if (connectedDeviceName != "Not connected to robot") {
-                          _bluetoothService.sendMessage(msg);
-                          await Future.delayed(
-                            const Duration(milliseconds: 100),
-                          );
-                        }
-                      },
-                      onSave: (newConfig) {
-                        setState(() {
-                          if (placedControls.any(
-                            (item) => item.id == 'ListBoxTester',
-                          )) {
-                            valueofid2 = "${control.id} - ${control.realId}";
-                            value3 = newConfig;
-                          }
-                          placedControls[index].config = newConfig;
-                        });
-                      },
-                      VoiceTextToCommand:
-                          control.id == "mic"
-                              ? (String msg) async {
-                                if (msg.isNotEmpty) {
-                                  moveMotor(msg);
-                                } else {
-                                  debugPrint(
-                                    "Lệnh rỗng, không gửi qua bluetooth.",
-                                  );
-                                }
-                                if (placedControls.any(
-                                  (item) => item.id == 'ListBoxTester',
-                                )) {
-                                  setState(() {
-                                    value2 = msg;
-                                  });
-                                }
-                              }
-                              : null,
-                      onDelete:
-                          (widget.isControl)
-                              ? null
-                              : () {
-                                setState(() {
-                                  placedControls.removeAt(index);
-                                });
-                              },
-                    );
-                  }
+                    final typeBox = PhanTu_Control.getTypeBoxById(model.id);
+                    final canMove = model.canMove && isEditingLayout;
+                    final shouldLock =
+                        model.lock || (!isEditingLayout && !model.lock);
 
-                  return DraggableControl(
-                    key: ValueKey(control.realId),
-                    initialPosition: Offset(xOffset, yOffset),
-                    screenSize: Size(size.width, size.height - 65.0),
-                    elementSize: Size(width, height),
-                    isEditing: canMove,
-                    onDrop: (newOffset) {
-                      setState(() {
-                        control.relativePosition = Offset(
-                          newOffset.dx / size.width,
-                          newOffset.dy / size.height,
+                    double width =
+                        model.config["width"] ??
+                        ((typeBox == "height" ? size.height : size.width) *
+                                sizeInfo[4] +
+                            sizeInfo[5]);
+                    double height =
+                        model.config["height"] ??
+                        ((typeBox == "width" ? size.width : size.height) *
+                                sizeInfo[6] +
+                            sizeInfo[7]);
+
+                    width = width.clamp(30.0, size.width);
+                    height = height.clamp(30.0, size.height);
+
+                    final number = int.tryParse(
+                      RegExp(r'\d+$').firstMatch(model.realId)?.group(0) ?? '',
+                    );
+
+                    String? NoteShowKey =
+                        number == 1
+                            ? LocalizedStringGetter.showkey_get(
+                              context,
+                              PhanTu_Control.getNoteShowKey(context, model.id),
+                            )
+                            : null;
+
+                    String? tooltipMessage;
+
+                    if (isEditingLayout && shouldLock && !canMove) {
+                      tooltipMessage =
+                          "This element cannot be edited or moved.";
+                    } else if (isEditingLayout && shouldLock) {
+                      tooltipMessage = "This element cannot be edited.";
+                    } else if (isEditingLayout && !canMove) {
+                      tooltipMessage = "This element cannot be moved.";
+                    }
+
+                    return PlacedControlWidget(
+                      model: model,
+                      screenSize: size,
+                      elementSize: Size(width, height),
+                      isEditing: canMove,
+                      shouldLock: shouldLock,
+                      isEditingLayout: isEditingLayout,
+                      tooltipMessage: tooltipMessage,
+                      onDrop: (newOffset) {
+                        model.updatePosition(newOffset); // không cần setState
+                      },
+                      buildChild: (config, onSave) {
+                        return PhanTu_Control.getControlWidget(
+                          id: model.id,
+                          size: Size(size.width, size.height - 65.0),
+                          inMenu: false,
+                          value:
+                              (model.id != "ListBoxTester")
+                                  ? (model.id != "ListBox")
+                                      ? dynamicData
+                                      : {
+                                        "data":
+                                            connectedDeviceName.isEmpty
+                                                ? "Please turn on bluetooth!"
+                                                : connectedDeviceName,
+                                      }
+                                  : {
+                                    "valueofid1": valueofid1,
+                                    "valueofid2": valueofid2,
+                                    "value1": value1,
+                                    "value2": value2,
+                                    "value3": value3,
+                                  },
+                          config: config,
+                          NoteshowKey: NoteShowKey,
+                          lock: shouldLock,
+                          sendCommand: (msg) async {
+                            if (placedControls.any(
+                              (item) => item.id == 'ListBoxTester',
+                            )) {
+                              setState(() {
+                                valueofid1 = "${model.id} - ${model.realId}";
+                                value1 = msg;
+                              });
+                            }
+                            if (connectedDeviceName !=
+                                "Not connected to robot") {
+                              _bluetoothService.sendMessage(msg);
+                              await Future.delayed(
+                                const Duration(milliseconds: 100),
+                              );
+                            }
+                          },
+                          VoiceTextToCommand:
+                              model.id == "mic"
+                                  ? (String msg) async {
+                                    if (msg.isNotEmpty) {
+                                      moveMotor(msg);
+                                    } else {
+                                      debugPrint(
+                                        "Lệnh rỗng, không gửi qua bluetooth.",
+                                      );
+                                    }
+                                    if (placedControls.any(
+                                      (item) => item.id == 'ListBoxTester',
+                                    )) {
+                                      setState(() {
+                                        value2 = msg;
+                                      });
+                                    }
+                                  }
+                                  : null,
+                          onSave: (newConfig) {
+                            onSave(newConfig);
+                            model.config = newConfig;
+                            if (!haveChange) {
+                              haveChange = true;
+                            }
+                            if (placedControls.any(
+                              (item) => item.id == 'ListBoxTester',
+                            )) {
+                              setState(() {
+                                valueofid2 = "${model.id} - ${model.realId}";
+                                value3 = newConfig;
+                              });
+                            }
+                          },
+                          onDelete:
+                              widget.isControl
+                                  ? null
+                                  : () => placedControlModels.remove(model),
                         );
-                      });
-                    },
-                    // child:
-                    //     tooltipMessage != null
-                    //         ? Tooltip(
-                    //           message: tooltipMessage,
-                    //           preferBelow: false,
-                    //           waitDuration: const Duration(milliseconds: 500),
-                    //           child: childWidget,
-                    //         )
-                    //         : childWidget,
-                    child: Tooltip(
-                      message: tooltipMessage ?? '',
-                      preferBelow: false,
-                      waitDuration: const Duration(milliseconds: 500),
-                      child:
-                          isEditingLayout
-                              ? Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color:
-                                        canMove
-                                            ? const Color.fromARGB(
-                                              190,
-                                              64,
-                                              195,
-                                              255,
-                                            )
-                                            : const Color.fromARGB(
-                                              190,
-                                              255,
-                                              82,
-                                              82,
-                                            ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    8,
-                                  ), // Tuỳ chỉnh nếu widget bo góc
-                                ),
-                                child: childWidget,
-                              )
-                              : childWidget,
-                    ),
-                  );
-                }),
-              ],
+                      },
+                    );
+                  }).toList(),
             );
           },
         ),
-
-        // Positioned(
-        //   top: 8,
-        //   left: 8,
-        //   child: IconButton(
-        //     icon: const Icon(
-        //       Icons.arrow_back,
-        //       color: Color.fromARGB(255, 68, 137, 255),
-        //     ),
-        //     onPressed: () {
-        //       if (widget.isControl) {
-        //         Navigator.of(context).pop();
-        //       } else {
-        //         final _navigator = Navigator.of(context);
-        //         if (haveSave) {
-        //           if (_navigator.mounted) {
-        //             _navigator.pop(true);
-        //           }
-        //         } else {
-        //           if (!kIsWeb) {
-        //             showDialog(
-        //               context: context,
-        //               builder:
-        //                   (ctx) => AlertDialog(
-        //                     title: const Text("Layout not saved"),
-        //                     content: const Text(
-        //                       "Do you want to save the layout before exiting?",
-        //                     ),
-        //                     actions: [
-        //                       TextButton(
-        //                         onPressed: () {
-        //                           Navigator.of(ctx).pop();
-        //                           if (_navigator.mounted) {
-        //                             _navigator.pop(false);
-        //                           }
-        //                         },
-        //                         child: const Text("No"),
-        //                       ),
-        //                       TextButton(
-        //                         onPressed: () {
-        //                           Navigator.of(
-        //                             ctx,
-        //                           ).pop(); // Đóng dialog xác nhận
-        //                           showSaveDialog(
-        //                             context, // Sử dụng context của IconButton thay vì _navigator.context
-        //                             onSaveNew: (String name) async {
-        //                               final savedName =
-        //                                   await IotLayoutProject.saveLayout(
-        //                                     name,
-        //                                     placedControls,
-        //                                   );
-        //                               if (!mounted) return;
-        //                               _navigator.pop(true);
-        //                               ScaffoldMessenger.of(
-        //                                 context,
-        //                               ).showSnackBar(
-        //                                 SnackBar(
-        //                                   content: Text(
-        //                                     '✅ Layout "$savedName" saved successfully!',
-        //                                   ),
-        //                                 ),
-        //                               );
-        //                             },
-        //                             onOverwrite: (String name) async {
-        //                               final success =
-        //                                   await IotLayoutProject.updateLayout(
-        //                                     name,
-        //                                     placedControls,
-        //                                   );
-        //                               if (success) {
-        //                                 if (!mounted) return;
-        //                                 _navigator.pop(true);
-        //                                 ScaffoldMessenger.of(
-        //                                   context,
-        //                                 ).showSnackBar(
-        //                                   SnackBar(
-        //                                     content: Text(
-        //                                       '✅ Successfully overwritten layout "$name"!',
-        //                                     ),
-        //                                   ),
-        //                                 );
-        //                               } else {
-        //                                 ScaffoldMessenger.of(
-        //                                   context,
-        //                                 ).showSnackBar(
-        //                                   SnackBar(
-        //                                     content: Text(
-        //                                       '❌ Cannot override layout "$name"!',
-        //                                     ),
-        //                                   ),
-        //                                 );
-        //                               }
-        //                             },
-        //                           );
-        //                         },
-        //                         child: const Text("Yes"),
-        //                       ),
-        //                     ],
-        //                   ),
-        //             );
-        //           } else {
-        //             _navigator.pop();
-        //           }
-        //         }
-        //       }
-        //     },
-        //     splashColor: const Color.fromARGB(0, 0, 0, 0),
-        //     highlightColor: const Color.fromARGB(0, 0, 0, 0),
-        //   ),
-        // ),
-        // Positioned(top: 0, right: 0, child: buildTopBar(context, locale)),
 
         // Màn che + Menu bên phải
         if (isEditingLayout)
@@ -1558,117 +1116,6 @@ class _RobotControlScreenState extends State<RobotControlScreen> {
                     const SizedBox.expand(),
           ),
       ],
-    );
-  }
-}
-
-class DragController {
-  final ValueNotifier<Offset> currentOffset = ValueNotifier(Offset.zero);
-
-  late Offset startOffset;
-  late Size screenSize;
-  late Size elementSize;
-
-  void startDrag(Offset initialOffset, Size screenSize, Size elementSize) {
-    startOffset = initialOffset;
-    this.screenSize = screenSize;
-    this.elementSize = elementSize;
-    currentOffset.value = initialOffset;
-  }
-
-  void updateDrag(Offset delta) {
-    final newOffset = Offset(
-      (currentOffset.value.dx + delta.dx).clamp(
-        0.0,
-        screenSize.width - elementSize.width,
-      ),
-      (currentOffset.value.dy + delta.dy).clamp(
-        0.0,
-        screenSize.height - elementSize.height,
-      ),
-    );
-    currentOffset.value = newOffset;
-  }
-
-  void endDrag() {
-    // optional logic
-  }
-}
-
-class DraggableControl extends StatefulWidget {
-  final Widget child;
-  final Offset initialPosition;
-  final Size screenSize;
-  final Size elementSize;
-  final Function(Offset) onDrop;
-  final bool isEditing;
-
-  const DraggableControl({
-    super.key,
-    required this.child,
-    required this.initialPosition,
-    required this.screenSize,
-    required this.elementSize,
-    required this.onDrop,
-    required this.isEditing,
-  });
-
-  @override
-  State<DraggableControl> createState() => _DraggableControlState();
-}
-
-class _DraggableControlState extends State<DraggableControl> {
-  final DragController dragController = DragController();
-
-  @override
-  void initState() {
-    super.initState();
-    dragController.startDrag(
-      widget.initialPosition,
-      widget.screenSize,
-      widget.elementSize,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    dragController.screenSize = widget.screenSize;
-    dragController.elementSize = widget.elementSize;
-
-    // Clamp lại vị trí nếu cần
-    final clampedOffset = Offset(
-      dragController.currentOffset.value.dx.clamp(
-        0.0,
-        dragController.screenSize.width - dragController.elementSize.width,
-      ),
-      dragController.currentOffset.value.dy.clamp(
-        0.0,
-        dragController.screenSize.height - dragController.elementSize.height,
-      ),
-    );
-    if (clampedOffset != dragController.currentOffset.value) {
-      dragController.currentOffset.value = clampedOffset; // Cập nhật trực tiếp
-    }
-
-    return ValueListenableBuilder<Offset>(
-      valueListenable: dragController.currentOffset,
-      builder: (context, offset, _) {
-        return Positioned(
-          left: offset.dx,
-          top: offset.dy,
-          child: GestureDetector(
-            onPanUpdate:
-                widget.isEditing
-                    ? (details) => dragController.updateDrag(details.delta)
-                    : null,
-            onPanEnd:
-                widget.isEditing
-                    ? (_) => widget.onDrop(dragController.currentOffset.value)
-                    : null,
-            child: widget.child,
-          ),
-        );
-      },
     );
   }
 }
