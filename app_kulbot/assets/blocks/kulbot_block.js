@@ -1011,6 +1011,20 @@ Blockly.defineBlocksWithJsonArray([
   },
   //--------Serial---------
   {
+    type: "serial_print",
+    colour: "9966FF",
+    previousStatement: null,
+    nextStatement: true,
+    inputsInline: true,
+    message0: "Serial Print %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "TEXT",
+      },
+    ],
+  },
+  {
     type: "print_serial",
     colour: "9966FF",
     previousStatement: null,
@@ -1184,6 +1198,17 @@ Blockly.defineBlocksWithJsonArray([
     ],
   },
   //-------bluetooth--------
+  {
+    type: "on_receive_bluetooth",
+    message0: "when receive bluetooth \n %1",
+    colour: "#CC0000",
+    args0: [
+      {
+        type: "input_statement",
+        name: "DO",
+      },
+    ],
+  },
   {
     type: "bluetooth_initialize",
     message0: "Initialize Bluetooth: Name %1",

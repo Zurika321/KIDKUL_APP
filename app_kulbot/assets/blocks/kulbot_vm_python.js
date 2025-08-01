@@ -575,6 +575,18 @@ python.pythonGenerator.forBlock["posi_encoder"] = function (block) {
 // serial
 
 // print_serial
+python.pythonGenerator.forBlock["serial_print"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const text =
+    python.pythonGenerator.valueToCode(
+      block,
+      "TEXT",
+      python.pythonGenerator.ORDER_ATOMIC
+    ) || '""';
+  return `print(${text})\n`;
+};
+
+// print_serial
 python.pythonGenerator.forBlock["print_serial"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const text =
@@ -589,6 +601,18 @@ python.pythonGenerator.forBlock["print_serial"] = function (block) {
   } else {
     return `Serial.print(${text})\n`;
   }
+};
+
+// bluetooth on receive
+python.pythonGenerator.forBlock["on_receive_bluetooth"] = function (block) {
+  const statements_do =
+    python.pythonGenerator.statementToCode(block, "DO") || "";
+  let code =
+    "def on_receive(data):\n" +
+    statements_do +
+    "\n" +
+    "kulbot.Rob.fallback_handler(on_receive)\n";
+  return code;
 };
 
 // data_length_serial

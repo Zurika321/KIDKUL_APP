@@ -1,18 +1,63 @@
+// function checkConnectedToStart(block) {
+//   let parent = block.getParent();
+//   while (parent) {
+//     if (parent.type === "event_program_starts") {
+//       block.setWarningText(null);
+//       return true;
+//     }
+//     parent = parent.getParent();
+//   }
+//   block.setWarningText(
+//     'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
+//   );
+//   return false;
+// }
+
+// function checkConnectedToStart(block) {
+//   let current = block.getSurroundParent(); // Sử dụng surround thay vì parent
+
+//   while (current) {
+//     if (current.type === "event_program_starts") {
+//       block.setWarningText(null);
+//       return true;
+//     }
+//     current = current.getSurroundParent();
+//   }
+
+//   const msg = 'Khối này phải được nối với "when Kulbot starts" để hoạt động.';
+//   block.setWarningText(msg);
+//   return false;
+// }
+
+// const customBlocks = ["event_program_starts"]; // Thêm block custom khác nếu cần
+
+// customBlocks.forEach((blockType) => {
+//   // javascript
+//   if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
+//     javascript.javascriptGenerator.forBlock[blockType] = () => "";
+//   }
+
+// // Lua
+// if (typeof lua !== "undefined" && lua.luaGenerator) {
+//   lua.luaGenerator.forBlock[blockType] = () => "";
+// }
+
+// // Dart
+// if (typeof dart !== "undefined" && dart.dartGenerator) {
+//   dart.dartGenerator.forBlock[blockType] = () => "";
+// }
+
+// // PHP
+// if (typeof php !== "undefined" && php.phpGenerator) {
+//   php.phpGenerator.forBlock[blockType] = () => "";
+// }
+
+// // JavaScript
+// if (typeof javascript !== "undefined" && javascript.javascriptGenerator) {
+//   javascript.javascriptGenerator.forBlock[blockType] = () => "";
+// }
+// });
 //------
-function checkConnectedToStart(block) {
-  let parent = block.getParent();
-  while (parent) {
-    if (parent.type === "event_program_starts") {
-      block.setWarningText(null);
-      return true;
-    }
-    parent = parent.getParent();
-  }
-  block.setWarningText(
-    'Khối này phải được nối với "when Kulbot starts" để hoạt động.'
-  );
-  return false;
-}
 //----------------INIT----
 javascript.javascriptGenerator.forBlock["initialize"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
@@ -549,6 +594,18 @@ javascript.javascriptGenerator.forBlock["posi_encoder"] = function (block) {
 // serial
 
 // print_serial
+javascript.javascriptGenerator.forBlock["serial_print"] = function (block) {
+  if (!checkConnectedToStart(block)) return "";
+  const text =
+    javascript.javascriptGenerator.valueToCode(
+      block,
+      "TEXT",
+      javascript.javascriptGenerator.ORDER_ATOMIC
+    ) || '""';
+  return `print(${text})\n`;
+};
+
+// print_serial
 javascript.javascriptGenerator.forBlock["print_serial"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   const text =
@@ -577,6 +634,16 @@ javascript.javascriptGenerator.forBlock["read_data_serial"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
   return "Serial.read()\n";
 };
+// bluetooth on receive
+javascript.javascriptGenerator.forBlock["on_receive_bluetooth"] = function (
+  block
+) {
+  const statements_do =
+    javascript.javascriptGenerator.statementToCode(block, "DO") || "";
+  let code = "def on_receive(data):\n" + statements_do + "\n";
+  return code;
+};
+
 // DATA
 
 // data_map

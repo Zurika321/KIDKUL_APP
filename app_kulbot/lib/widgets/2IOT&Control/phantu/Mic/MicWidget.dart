@@ -194,7 +194,9 @@ class _MicShowKeyWidgetState extends State<MicShowKeyWidget> {
                             ? voicetotext
                             : _isListening
                             ? "Listening..."
-                            : "Tap to speak",
+                            : widget.lock
+                            ? "Tap to speak"
+                            : "",
                     child: Icon(
                       _isListening ? Icons.mic : Icons.mic_none,
                       color: const Color.fromARGB(255, 0, 0, 0),

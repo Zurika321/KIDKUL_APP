@@ -1,4 +1,4 @@
-import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel _PlacedControlWidget.dart';
+import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel_PlacedControlWidget.dart';
 import 'package:flutter/material.dart';
 
 class ControlLayoutProvider {
@@ -13,7 +13,7 @@ class ControlLayoutProvider {
         bottom: 25.0,
         right: 25.0,
         config: {"width": 150.0, "height": 150.0, "stop": "SS"},
-        lock: true,
+        lock: false,
         canMove: false,
       ),
       ControlItem(
@@ -44,7 +44,7 @@ class ControlLayoutProvider {
           "height": 50.0,
           "icon": Icons.campaign.toString(),
         },
-        lock: false,
+        lock: true,
         canMove: true,
       ),
       ControlItem(

@@ -1044,35 +1044,10 @@ class _WebViewAppState extends State<WebViewApp> {
   }
 
   Widget _buildBlockly(List<String> addons) {
-    final themeNotifier = Provider.of<ThemeNotifier>(context);
-    // final isDarkMode = themeNotifier.isDarkMode;
     return RepaintBoundary(
       child: BlocklyEditorWidget(
         key: _editorKey,
         workspaceConfiguration: workspaceConfiguration,
-
-        //         style:
-        //             isDarkMode
-        //                 ? '''
-        // .blocklyWorkspace { background-color: #202125 !important; }
-        // .blocklyToolboxDiv { background-color: #888 !important; }
-        // .blocklyFlyoutBackground { background-color: #888 !important; color: #fff !important; }
-        // .blocklyFlyoutBackground * { color: #fff !important; }
-        // .blocklyScrollbarHorizontal, .blocklyScrollbarVertical { background: #444 !important; }
-        // .blocklyScrollbarHandle { background: #888 !important; }
-        // .blocklyScrollbarBackground { background: #333 !important; }
-        // .blocklyScrollbarCorner { background: #eae !important; }
-        // '''
-        //                 : /* tương tự nhưng dùng màu sáng */ '''
-        // .blocklyWorkspace { background-color: #ffffff !important; }
-        // .blocklyToolboxDiv { background-color: #f0f0f0 !important; }
-        // .blocklyFlyoutBackground { background-color: #f0f0f0 !important; color: #000 !important; }
-        // .blocklyFlyoutBackground * { color: #000 !important; }
-        // .blocklyScrollbarHorizontal, .blocklyScrollbarVertical { background: #cccc !important; }
-        // .blocklyScrollbarHandle { background: #fff !important; }
-        // .blocklyScrollbarBackground { background: #fff !important; }
-        // .blocklyScrollbarCorner { background: transparent !important; }
-        // ''',
         initial: _xmlworkspace,
         onChange: onChange,
         onError: onError,

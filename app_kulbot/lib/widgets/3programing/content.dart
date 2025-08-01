@@ -1346,7 +1346,7 @@ const Map<String, dynamic> initialToolboxJson = {
       'contents': [
         {
           'kind': 'block',
-          'type': 'print_serial',
+          'type': 'serial_print',
           'inputs': {
             'TEXT': {
               'shadow': {
@@ -1356,11 +1356,10 @@ const Map<String, dynamic> initialToolboxJson = {
             },
           },
         },
-        {'kind': 'block', 'type': 'data_length_serial'},
-        {'kind': 'block', 'type': 'read_data_serial'},
+        // {'kind': 'block', 'type': 'data_length_serial'},
+        // {'kind': 'block', 'type': 'read_data_serial'},
       ],
     },
-
     //-------------Data--------
     {
       'kind': 'category',
@@ -1496,7 +1495,7 @@ const Map<String, dynamic> initialToolboxJson = {
       "name": "Bluetooth",
       "colour": "#CC0000",
       "contents": [
-        {"kind": "block", "type": "bluetooth_initialize"},
+        // {"kind": "block", "type": "bluetooth_initialize"},
         {
           "kind": "block",
           "type": "bluetooth_print",
@@ -1509,8 +1508,9 @@ const Map<String, dynamic> initialToolboxJson = {
             },
           },
         },
-        {"kind": "block", "type": "bluetooth_available"},
-        {"kind": "block", "type": "bluetooth_read"},
+        // {"kind": "block", "type": "bluetooth_available"},
+        // {"kind": "block", "type": "bluetooth_read"},
+        {'kind': 'block', 'type': 'on_receive_bluetooth'},
       ],
     },
     //----wifi----

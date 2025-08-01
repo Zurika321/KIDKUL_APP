@@ -23,7 +23,7 @@ import 'package:KulBlock/provider/provider.dart'; // lấy dữ liệu từ bi�
 import 'package:KulBlock/l10n/localized_map.dart';
 // import 'package:collection/collection.dart';
 
-import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel _PlacedControlWidget.dart';
+import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel_PlacedControlWidget.dart';
 
 class DataBluetooth {
   static final Map<String, dynamic> _data = {};

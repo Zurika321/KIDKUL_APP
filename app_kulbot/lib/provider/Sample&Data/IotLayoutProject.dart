@@ -1,4 +1,4 @@
-import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel _PlacedControlWidget.dart';
+import 'package:KulBlock/widgets/2IOT&Control/Hieusuat/ControlModel_PlacedControlWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:KulBlock/provider/FileManage.dart';
 import 'dart:convert';
