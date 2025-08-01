@@ -16,8 +16,8 @@ import '../../provider/Sample&Data/SaveProjectPrograming.dart'; //class lưu pro
 
 import 'package:KulBlock/widgets/3programing/content.dart';
 
-import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
-import 'package:KulBlock/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+// import 'package:provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
+// import 'package:KulBlock/provider/provider.dart'; // lấy dữ liệu từ biến trạng thái main.dart
 
 void showSaveDialog(
   BuildContext context, {
@@ -161,7 +161,9 @@ class _WebViewAppState extends State<WebViewApp> {
   bool isSwitched = false; // show code
 
   String _generatedCode = '';
-  String _xmlworkspace = '';
+  String _cachedGeneratedCode = '';
+  String _xmlworkspace = initialXml;
+  String xml = initialXml;
   int work_area_index = 0;
   late List<BlockList> work_area = [];
   Key _editorKey = UniqueKey();
@@ -170,6 +172,8 @@ class _WebViewAppState extends State<WebViewApp> {
   Timer? _debounce;
   late Future<List<String>> _addonsFuture;
   bool haveSave = false;
+  bool haveChange = false;
+  bool loadDone = false;
 
   @override
   void initState() {
@@ -205,7 +209,10 @@ class _WebViewAppState extends State<WebViewApp> {
     }
     setState(() {
       haveSave = name != null;
-      _editorKey = UniqueKey();
+      if (_xmlworkspace != initialXml) {
+        xml = _xmlworkspace;
+        _editorKey = UniqueKey();
+      }
     });
   }
 
@@ -274,6 +281,9 @@ class _WebViewAppState extends State<WebViewApp> {
                                 ),
                                 onPressed: () {
                                   setState(() {
+                                    if (!haveChange) {
+                                      haveChange = true;
+                                    }
                                     work_area.add(
                                       BlockList(
                                         name: "Block ${work_area.length + 1}",
@@ -369,6 +379,9 @@ class _WebViewAppState extends State<WebViewApp> {
                                                 );
                                               } else {
                                                 setState(() {
+                                                  if (!haveChange) {
+                                                    haveChange = true;
+                                                  }
                                                   work_area.add(
                                                     BlockList(
                                                       name: newName,
@@ -428,6 +441,9 @@ class _WebViewAppState extends State<WebViewApp> {
                                                 );
                                               } else {
                                                 setState(() {
+                                                  if (!haveChange) {
+                                                    haveChange = true;
+                                                  }
                                                   work_area[index] = BlockList(
                                                     name: newName,
                                                     xml: area.xml,
@@ -487,6 +503,9 @@ class _WebViewAppState extends State<WebViewApp> {
                                                       TextButton(
                                                         onPressed: () {
                                                           setState(() {
+                                                            if (!haveChange) {
+                                                              haveChange = true;
+                                                            }
                                                             work_area.removeAt(
                                                               index,
                                                             );
@@ -521,11 +540,14 @@ class _WebViewAppState extends State<WebViewApp> {
                                       ),
                                     ],
                                   ),
-                                  onTap: () {
+                                  onTap: () async {
                                     setState(() {
                                       work_area_index = index;
                                       _xmlworkspace = area.xml;
+                                      xml = _xmlworkspace;
                                       _editorKey = UniqueKey();
+                                      loadDone =
+                                          false; // Đặt lại trạng thái tải
                                     });
                                     Navigator.of(context).pop();
                                   },
@@ -663,7 +685,7 @@ class _WebViewAppState extends State<WebViewApp> {
   });
 
   void onInject(BlocklyData data) {}
-
+  bool firstLoadDone = false;
   void onChange(BlocklyData data) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -675,13 +697,23 @@ class _WebViewAppState extends State<WebViewApp> {
         codenew = importHeader + data.python!;
       }
 
+      // debugPrint("onChange: $codenew");
+
       if (codenew.trim() != _generatedCode.trim()) {
-        setState(() {
-          _generatedCode = codenew;
-          work_area[work_area_index].xml =
-              data.xml ??
-              '<xml xmlns="https://developers.google.com/blockly/xml"></xml>';
-        });
+        if (!firstLoadDone) {
+          firstLoadDone = true;
+        } else if (!haveChange && xml != data.xml) {
+          haveChange = true;
+        }
+        _generatedCode = codenew;
+        work_area[work_area_index].xml =
+            data.xml ??
+            '<xml xmlns="https://developers.google.com/blockly/xml"></xml>';
+
+        // chỉ cập nhật UI nếu đang bật hiển thị code
+        // if (isSwitched) {
+        //   setState(() {});
+        // }
       }
     });
   }
@@ -728,9 +760,14 @@ class _WebViewAppState extends State<WebViewApp> {
                 isSwitched = false;
               });
             } else {
-              if (haveSave) {
-                Navigator.of(context).pop(true);
-                // Navigator.of(context).pop();
+              if (haveSave && !haveChange) {
+                if (Navigator.of(context).mounted) {
+                  Navigator.of(context).pop(false);
+                }
+              } else if (!haveChange) {
+                if (Navigator.of(context).mounted) {
+                  Navigator.of(context).pop(false);
+                }
               } else {
                 // Hiện dialog xác nhận lưu
                 showDialog(
@@ -738,9 +775,14 @@ class _WebViewAppState extends State<WebViewApp> {
                   builder:
                       (ctx) => AlertDialog(
                         title: const Text("Layout not saved"),
-                        content: const Text(
-                          "Do you want to save the layout before exiting?",
-                        ),
+                        content:
+                            haveSave
+                                ? const Text(
+                                  "You have made changes in the project, do you want to save?",
+                                )
+                                : const Text(
+                                  "Do you want to save the layout before exiting?",
+                                ),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -813,16 +855,15 @@ class _WebViewAppState extends State<WebViewApp> {
             onChanged: (value) {
               setState(() {
                 isSwitched = value;
+                if (isSwitched) {
+                  _cachedGeneratedCode = _generatedCode; // Tạm lưu lại
+                }
               });
             },
             thumbColor: MaterialStateProperty.all(
               const Color.fromARGB(255, 0, 0, 0),
             ),
-            trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-              return isSwitched
-                  ? const Color.fromARGB(255, 255, 255, 255)
-                  : const Color.fromARGB(255, 255, 255, 255);
-            }),
+            trackColor: MaterialStateProperty.all(Colors.white),
             thumbIcon: MaterialStateProperty.resolveWith<Icon?>((states) {
               return Icon(
                 isSwitched ? Icons.code : Icons.extension,
@@ -945,8 +986,16 @@ class _WebViewAppState extends State<WebViewApp> {
           FutureBuilder<List<String>>(
             future: _addonsFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData &&
+                  !loadDone) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      loadDone = true;
+                    });
+                  }
+                });
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData) {
@@ -961,65 +1010,70 @@ class _WebViewAppState extends State<WebViewApp> {
           // Code viewer (nổi lên trên khi isSwitched = true)
           if (isSwitched)
             Positioned.fill(
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                color: const Color.fromARGB(230, 255, 255, 255),
-                child:
-                    _generatedCode.isNotEmpty
-                        ? Scrollbar(
-                          thumbVisibility: true,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
+              child: RepaintBoundary(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: const Color.fromARGB(230, 255, 255, 255),
+                  child:
+                      _cachedGeneratedCode.isNotEmpty
+                          ? Scrollbar(
+                            thumbVisibility: true,
                             child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: List.generate(
-                                      '\n'.allMatches(_generatedCode).length +
-                                          1,
-                                      (index) => Text(
-                                        '${index + 1}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Monospace',
-                                          fontSize: 14,
-                                          color: Color.fromARGB(
-                                            255,
-                                            158,
-                                            158,
-                                            158,
+                              scrollDirection: Axis.horizontal,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: List.generate(
+                                        '\n'
+                                                .allMatches(
+                                                  _cachedGeneratedCode,
+                                                )
+                                                .length +
+                                            1,
+                                        (index) => Text(
+                                          '${index + 1}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Monospace',
+                                            fontSize: 14,
+                                            color: Color.fromARGB(
+                                              255,
+                                              158,
+                                              158,
+                                              158,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth:
-                                          MediaQuery.of(context).size.width -
-                                          60,
-                                    ),
-                                    // child: SelectableText(
-                                    child: Text(
-                                      _generatedCode,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: 'Monospace',
+                                    const SizedBox(width: 12),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: size.width - 60,
                                       ),
-                                      textAlign: TextAlign.left,
-                                      textWidthBasis:
-                                          TextWidthBasis.longestLine,
+                                      // child: SelectableText(
+                                      child: Text(
+                                        _cachedGeneratedCode,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'Monospace',
+                                        ),
+                                        textAlign: TextAlign.left,
+                                        textWidthBasis:
+                                            TextWidthBasis.longestLine,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                        : const SizedBox.shrink(),
+                          )
+                          : const SizedBox.shrink(),
+                ),
               ),
             ),
           if (isSwitched)
@@ -1028,7 +1082,7 @@ class _WebViewAppState extends State<WebViewApp> {
               right: 20,
               child: FloatingActionButton.extended(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: _generatedCode));
+                  Clipboard.setData(ClipboardData(text: _cachedGeneratedCode));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("✅ Code copied successfully")),
                   );
@@ -1038,6 +1092,27 @@ class _WebViewAppState extends State<WebViewApp> {
                 backgroundColor: const Color.fromARGB(255, 68, 137, 255),
               ),
             ),
+          AnimatedOpacity(
+            opacity: loadDone ? 0 : 1,
+            duration: const Duration(milliseconds: 300),
+            child:
+                loadDone
+                    ? const SizedBox.shrink()
+                    : Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withOpacity(0.4),
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+          ),
+
+          // if (!loadDone)
+          //   Positioned.fill(
+          //     child: Container(
+          //       color: Colors.black.withOpacity(0.4),
+          //       child: const Center(child: CircularProgressIndicator()),
+          //     ),
+          //   ),
         ],
       ),
     );
@@ -1048,7 +1123,7 @@ class _WebViewAppState extends State<WebViewApp> {
       child: BlocklyEditorWidget(
         key: _editorKey,
         workspaceConfiguration: workspaceConfiguration,
-        initial: _xmlworkspace,
+        initial: xml,
         onChange: onChange,
         onError: onError,
         addons: addons,

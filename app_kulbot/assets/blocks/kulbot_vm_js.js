@@ -58,6 +58,24 @@
 // }
 // });
 //------
+function checkConnectedToStart(block) {
+  let current = block;
+  while (current) {
+    if (
+      current.type === "event_program_starts" ||
+      current.type === "on_receive_bluetooth" ||
+      current.type === "procedures_defnoreturn" ||
+      current.type === "procedures_defreturn"
+    ) {
+      block.setWarningText(null);
+      return true;
+    }
+    current = current.getSurroundParent(); // CHÍNH XÁC PHẢI DÙNG HÀM NÀY
+  }
+  const msg = 'Khối này phải được nối với "when Kulbot starts" để hoạt động.';
+  block.setwarningText(msg);
+  return false;
+}
 //----------------INIT----
 javascript.javascriptGenerator.forBlock["initialize"] = function (block) {
   if (!checkConnectedToStart(block)) return "";
