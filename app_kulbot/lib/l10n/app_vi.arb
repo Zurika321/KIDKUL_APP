@@ -8,6 +8,7 @@
   "bascotControl": "điều khiển botcat",
   "humanControl": "điều khiển robot người",
   "dogControl": "điều khiển robot chó",
+  "control": "Bảng điều khiển",
   "commentsetting______________": "Các biến dưới là các chữ trong trang setting",
   "changelanguage": "Thay đổi ngôn ngữ",
   "darkMode": "Chế độ tối",

@@ -8,6 +8,7 @@
   "bascotControl": "Boscat Control",
   "humanControl": "Human Control",
   "dogControl": "Dog Control",
+  "control": "Control",
   "commentsetting______________": "Các biến dưới là các chữ trong trang setting",
   "changelanguage": "Change Language",
   "darkMode": "DarkMode",
